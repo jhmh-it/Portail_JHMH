@@ -14,9 +14,9 @@ export const useToastStore = create<ToastStore>(() => ({
       position: 'bottom-right',
       style: {
         background: 'var(--popover)',
-        color: 'var(--primary)',
-        border: '1px solid var(--border)',
-        boxShadow: '0 2px 8px var(--ring)',
+        color: 'var(--toast-success)',
+        border: '1px solid var(--toast-success-border)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
       },
       description: 'Vous êtes maintenant connecté',
     });
@@ -28,9 +28,9 @@ export const useToastStore = create<ToastStore>(() => ({
       position: 'bottom-right',
       style: {
         background: 'var(--popover)',
-        color: 'var(--destructive)',
-        border: '1px solid var(--border)',
-        boxShadow: '0 4px 12px var(--ring)',
+        color: 'var(--toast-error)',
+        border: '1px solid var(--toast-error-border)',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
       },
     });
   },
