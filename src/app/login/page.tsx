@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
 
 export default function LoginPage() {
-  const { signInWithGoogle, loading, error } = useAuth();
+  const { signInWithGoogle, loading } = useAuth();
   const { data: user } = useUser();
   const router = useRouter();
 
@@ -51,12 +51,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
+          {/* Les erreurs sont maintenant gérées via les toasts */}
 
           {/* Google Sign In Button */}
           <div className="mt-8">

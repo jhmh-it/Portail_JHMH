@@ -37,6 +37,8 @@ Une application Next.js 15 avec authentification Google via Firebase Auth, const
    npm install
    ```
 
+   _Les hooks Git (Husky) seront configurés automatiquement_
+
 3. **Créer le fichier `.env.local`**
 
    ```bash
@@ -45,7 +47,15 @@ Une application Next.js 15 avec authentification Google via Firebase Auth, const
 
 4. **Configurer les variables d'environnement** (voir section Configuration)
 
-5. **Lancer l'application**
+5. **Vérifier la qualité du code**
+
+   ```bash
+   npm run lint        # Vérification ESLint
+   npm run type-check  # Vérification TypeScript
+   npm run format      # Formatage Prettier
+   ```
+
+6. **Lancer l'application**
    ```bash
    npm run dev
    ```
@@ -185,18 +195,56 @@ npm start
 
 ### Scripts disponibles
 
+#### Scripts de développement
+
 ```bash
-npm run dev      # Démarrer en mode développement
-npm run build    # Build de production
-npm run start    # Démarrer en mode production
-npm run lint     # Linter ESLint
+npm run dev              # Démarrer en mode développement
+npm run build            # Build de production
+npm run start            # Démarrer en mode production
 ```
+
+#### Scripts de qualité du code
+
+```bash
+npm run lint             # Vérification ESLint
+npm run lint:fix         # Correction automatique ESLint
+npm run format           # Formatage Prettier sur tous les fichiers
+npm run format:check     # Vérification du formatage
+npm run type-check       # Vérification TypeScript
+npm run pre-commit       # Simulation du hook pre-commit
+```
+
+### 🔧 Outils de qualité du code
+
+#### ESLint + Prettier + Husky
+
+- **Linting automatique** : ESLint 9 avec règles strictes TypeScript
+- **Formatage automatique** : Prettier intégré avec standards
+- **Hooks Git** : Validation automatique avant chaque commit
+- **lint-staged** : Optimisé pour les fichiers modifiés uniquement
+
+#### Workflow automatisé
+
+À chaque commit, automatiquement :
+
+1. **ESLint** : Correction des erreurs de code
+2. **Prettier** : Formatage selon les standards
+3. **Build** : Vérification de compilation
+4. **Commit** : Seulement si tout passe
+
+#### Règles de qualité
+
+- **TypeScript strict** : Aucun `any` autorisé
+- **Imports organisés** : Tri automatique et groupement
+- **Code moderne** : Nullish coalescing (`??`), optional chaining (`?.`)
+- **React optimisé** : Hooks, composants, performance
 
 ### Debugging
 
 - **TanStack Query DevTools** : Activés en développement
 - **Console logs** : Erreurs d'authentification loggées
 - **Types TypeScript** : Validation stricte
+- **ESLint** : Détection proactive des erreurs
 
 ## 🔧 Personnalisation
 

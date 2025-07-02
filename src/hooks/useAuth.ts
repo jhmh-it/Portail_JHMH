@@ -9,13 +9,14 @@ import {
   signInWithGoogle as firebaseSignInWithGoogle,
   signOutUser,
 } from '@/lib/firebase-client';
+import { useToastStore } from '@/stores/toast-store';
 import type { LoginResponse } from '@/types/auth';
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { showAuthSuccess, showAuthError } = useToastStore();
 
   // Mutation pour la connexion
   const loginMutation = useMutation({
@@ -25,6 +26,7 @@ export const useAuth = () => {
     },
     onSuccess: data => {
       if (data.success) {
+        showAuthSuccess('Connexion réussie !');
         // Invalider le cache pour forcer le refetch des données utilisateur
         queryClient.invalidateQueries({ queryKey: ['user'] });
         router.push('/dashboard');
@@ -32,9 +34,11 @@ export const useAuth = () => {
     },
     onError: (error: unknown) => {
       if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.error ?? 'Erreur lors de la connexion');
+        showAuthError(
+          error.response?.data?.error ?? 'Erreur lors de la connexion'
+        );
       } else {
-        setError('Erreur lors de la connexion');
+        showAuthError('Erreur lors de la connexion');
       }
     },
   });
@@ -53,6 +57,7 @@ export const useAuth = () => {
       await signOutUser();
     },
     onSuccess: () => {
+      showAuthSuccess('Déconnexion réussie');
       queryClient.clear();
       router.push('/login');
     },
@@ -67,7 +72,6 @@ export const useAuth = () => {
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      setError(null);
 
       // Connexion avec Firebase
       const result = await firebaseSignInWithGoogle();
@@ -82,14 +86,16 @@ export const useAuth = () => {
       if (typeof error === 'object' && error !== null && 'code' in error) {
         const firebaseError = error as { code: string };
         if (firebaseError.code === 'auth/popup-closed-by-user') {
-          setError("Connexion annulée par l'utilisateur");
+          showAuthError("Connexion annulée par l'utilisateur");
         } else if (firebaseError.code === 'auth/popup-blocked') {
-          setError('Popup bloquée par le navigateur');
+          showAuthError(
+            'Popup bloquée par le navigateur. Veuillez autoriser les popups.'
+          );
         } else {
-          setError('Erreur lors de la connexion avec Google');
+          showAuthError('Erreur lors de la connexion avec Google');
         }
       } else {
-        setError('Erreur lors de la connexion avec Google');
+        showAuthError('Erreur lors de la connexion avec Google');
       }
     } finally {
       setLoading(false);
@@ -107,13 +113,5 @@ export const useAuth = () => {
     signInWithGoogle,
     logout,
     loading: loading || loginMutation.isPending || logoutMutation.isPending,
-    error:
-      error ??
-      (loginMutation.error instanceof Error
-        ? loginMutation.error.message
-        : null) ??
-      (logoutMutation.error instanceof Error
-        ? logoutMutation.error.message
-        : null),
   };
 };
