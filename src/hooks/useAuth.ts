@@ -1,10 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { signInWithGoogle as firebaseSignInWithGoogle, signOutUser } from '@/lib/firebase-client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import {
+  signInWithGoogle as firebaseSignInWithGoogle,
+  signOutUser,
+} from '@/lib/firebase-client';
 import type { LoginResponse } from '@/types/auth';
 
 export const useAuth = () => {
@@ -19,7 +23,7 @@ export const useAuth = () => {
       const response = await axios.post('/api/auth/login', { idToken });
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       if (data.success) {
         // Invalider le cache pour forcer le refetch des données utilisateur
         queryClient.invalidateQueries({ queryKey: ['user'] });
@@ -28,7 +32,7 @@ export const useAuth = () => {
     },
     onError: (error: unknown) => {
       if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.error || 'Erreur lors de la connexion');
+        setError(error.response?.data?.error ?? 'Erreur lors de la connexion');
       } else {
         setError('Erreur lors de la connexion');
       }
@@ -73,12 +77,12 @@ export const useAuth = () => {
       loginMutation.mutate(idToken);
     } catch (error: unknown) {
       console.error('Erreur lors de la connexion:', error);
-      
+
       // Gestion des erreurs spécifiques Firebase
       if (typeof error === 'object' && error !== null && 'code' in error) {
         const firebaseError = error as { code: string };
         if (firebaseError.code === 'auth/popup-closed-by-user') {
-          setError('Connexion annulée par l\'utilisateur');
+          setError("Connexion annulée par l'utilisateur");
         } else if (firebaseError.code === 'auth/popup-blocked') {
           setError('Popup bloquée par le navigateur');
         } else {
@@ -103,6 +107,13 @@ export const useAuth = () => {
     signInWithGoogle,
     logout,
     loading: loading || loginMutation.isPending || logoutMutation.isPending,
-    error: error || (loginMutation.error instanceof Error ? loginMutation.error.message : null) || (logoutMutation.error instanceof Error ? logoutMutation.error.message : null),
+    error:
+      error ??
+      (loginMutation.error instanceof Error
+        ? loginMutation.error.message
+        : null) ??
+      (logoutMutation.error instanceof Error
+        ? logoutMutation.error.message
+        : null),
   };
-}; 
+};

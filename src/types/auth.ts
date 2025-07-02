@@ -20,4 +20,4 @@ export interface LoginResponse {
   success: boolean;
   user?: User;
   error?: string;
-} 
+}

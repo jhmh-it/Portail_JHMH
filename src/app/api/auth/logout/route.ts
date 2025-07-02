@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
 export async function POST() {
   try {
     const cookieStore = await cookies();
-    
+
     // Supprimer le cookie de session avec attributs de sécurité
     cookieStore.set('session', '', {
       httpOnly: true,
@@ -24,4 +24,4 @@ export async function POST() {
       { status: 500 }
     );
   }
-} 
+}

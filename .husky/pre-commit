@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Exécuter lint-staged sur les fichiers modifiés
+npx lint-staged
+
+# Vérifier que le build fonctionne
+npm run build

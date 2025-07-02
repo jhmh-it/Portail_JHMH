@@ -25,17 +25,20 @@ Une application Next.js 15 avec authentification Google via Firebase Auth, const
 ## 🛠️ Installation
 
 1. **Cloner le repository** (si applicable)
+
    ```bash
    git clone <repository-url>
    cd portail_jhmh
    ```
 
 2. **Installer les dépendances**
+
    ```bash
    npm install
    ```
 
 3. **Créer le fichier `.env.local`**
+
    ```bash
    cp .env.local.example .env.local
    ```
@@ -58,6 +61,7 @@ Une application Next.js 15 avec authentification Google via Firebase Auth, const
 ### 2. Obtenir les clés de configuration
 
 Dans les paramètres du projet Firebase :
+
 - Aller dans Project Settings > General
 - Dans "Your apps", ajouter une app web
 - Copier les valeurs de configuration
@@ -158,7 +162,7 @@ Pour ajouter des rôles à un utilisateur :
 // Via Firebase Admin SDK
 await admin.auth().setCustomUserClaims(uid, {
   roles: ['admin', 'editor'],
-  organization: 'JHMH'
+  organization: 'JHMH',
 });
 ```
 
@@ -245,6 +249,7 @@ Modifier `src/lib/firebase-client.ts` pour ajouter d'autres providers (Facebook,
 ## 📞 Support
 
 Pour toute question ou problème, consulter :
+
 - [Documentation Firebase Auth](https://firebase.google.com/docs/auth)
 - [Documentation Next.js](https://nextjs.org/docs)
 - [Documentation TanStack Query](https://tanstack.com/query/latest)

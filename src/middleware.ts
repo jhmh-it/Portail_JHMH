@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 
 // Routes protégées qui nécessitent une authentification
 const protectedRoutes = ['/dashboard'];
@@ -9,7 +8,7 @@ export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('session');
 
   // Vérifier si la route actuelle est protégée
-  const isProtectedRoute = protectedRoutes.some(route => 
+  const isProtectedRoute = protectedRoutes.some(route =>
     pathname.startsWith(route)
   );
 
@@ -50,4 +49,4 @@ export const config = {
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
-}; 
+};

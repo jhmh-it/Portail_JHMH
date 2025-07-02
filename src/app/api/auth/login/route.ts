@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
+import { NextResponse, type NextRequest } from 'next/server';
+
+import { adminAuth } from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,17 +16,17 @@ export async function POST(request: NextRequest) {
 
     // Vérifier le token avec Firebase Admin SDK
     const decodedToken = await adminAuth.verifyIdToken(idToken);
-    
+
     // Récupérer les custom claims (rôles)
     const userRecord = await adminAuth.getUser(decodedToken.uid);
-    
+
     const user = {
       uid: decodedToken.uid,
-      email: decodedToken.email || '',
-      displayName: decodedToken.name || '',
-      photoURL: decodedToken.picture || '',
-      emailVerified: decodedToken.email_verified || false,
-      customClaims: userRecord.customClaims || {},
+      email: decodedToken.email ?? '',
+      displayName: decodedToken.name ?? '',
+      photoURL: decodedToken.picture ?? '',
+      emailVerified: decodedToken.email_verified ?? false,
+      customClaims: userRecord.customClaims ?? {},
     };
 
     // Créer un cookie de session sécurisé
@@ -49,4 +50,4 @@ export async function POST(request: NextRequest) {
       { status: 401 }
     );
   }
-} 
+}

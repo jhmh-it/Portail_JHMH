@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+
+import { adminAuth } from '@/lib/firebase-admin';
 
 export async function GET() {
   try {
@@ -16,17 +17,17 @@ export async function GET() {
 
     // Vérifier le token de session
     const decodedToken = await adminAuth.verifyIdToken(sessionCookie.value);
-    
+
     // Récupérer les informations utilisateur avec les custom claims
     const userRecord = await adminAuth.getUser(decodedToken.uid);
 
     const user = {
       uid: decodedToken.uid,
-      email: decodedToken.email || '',
-      displayName: decodedToken.name || '',
-      photoURL: decodedToken.picture || '',
-      emailVerified: decodedToken.email_verified || false,
-      customClaims: userRecord.customClaims || {},
+      email: decodedToken.email ?? '',
+      displayName: decodedToken.name ?? '',
+      photoURL: decodedToken.picture ?? '',
+      emailVerified: decodedToken.email_verified ?? false,
+      customClaims: userRecord.customClaims ?? {},
     };
 
     return NextResponse.json({
@@ -34,15 +35,15 @@ export async function GET() {
       user,
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération de l\'utilisateur:', error);
-    
+    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+
     // Supprimer le cookie invalide
     const cookieStore = await cookies();
     cookieStore.delete('session');
-    
+
     return NextResponse.json(
       { success: false, error: 'Session expirée' },
       { status: 401 }
     );
   }
-} 
+}

@@ -27,4 +27,4 @@ export default function QueryProvider({
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
-} 
+}
