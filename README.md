@@ -1,303 +1,56 @@
-# 🎯 Portail JHMH - Authentification Google avec Firebase Auth
+# 📚 Documentation du Portail JHMH
 
-Une application Next.js 15 avec authentification Google via Firebase Auth, construite avec TypeScript, TailwindCSS et TanStack Query.
+## Vue d'ensemble
 
-## 🚀 Fonctionnalités
+Cette documentation est conçue pour faciliter la collaboration entre développeurs et agents IA (comme Cursor) en fournissant un contexte complet sur l'architecture, les conventions et les processus du projet.
 
-- ✅ Authentification Google via Firebase Auth
-- ✅ Gestion des sessions côté serveur avec cookies HttpOnly
-- ✅ Protection des routes avec middleware Next.js
-- ✅ Affichage des informations utilisateur et rôles (custom claims)
-- ✅ Interface utilisateur moderne avec TailwindCSS
-- ✅ Gestion d'état avec TanStack Query
-- ✅ Types TypeScript stricts
-- ✅ Gestion d'erreurs complète
+## 📖 Table des matières
 
-## 📦 Tech Stack
+### 🏗️ Architecture et Structure
 
-- **Frontend**: Next.js 15 (App Router), React 19, TypeScript
-- **Styling**: TailwindCSS v4
-- **Authentication**: Firebase Auth + Firebase Admin SDK
-- **State Management**: TanStack Query v5
-- **HTTP Client**: Axios
-- **Cookies**: js-cookie
+- [Architecture du projet](./docs/ARCHITECTURE.md) - Vue d'ensemble de l'architecture technique
+- [Structure des dossiers](./docs/FOLDER_STRUCTURE.md) - Organisation détaillée du code
+- [Flux de données](./docs/DATA_FLOW.md) - Diagrammes et explications des flux
 
-## 🛠️ Installation
+### 💻 Développement
 
-1. **Cloner le repository** (si applicable)
+- [Guide de développement](./docs/DEVELOPMENT.md) - Processus et méthodologie
+- [Guide de style](./docs/STYLE_GUIDE.md) - Conventions de code et formatage
+- [Conventions de commits](./docs/COMMITS.md) - Standards pour les messages de commit
+- [Tests et qualité](./docs/TESTING.md) - Stratégie de tests et assurance qualité
 
-   ```bash
-   git clone <repository-url>
-   cd portail_jhmh
-   ```
-
-2. **Installer les dépendances**
-
-   ```bash
-   npm install
-   ```
+### 🤖 Collaboration IA
 
-   _Les hooks Git (Husky) seront configurés automatiquement_
+- [Guide pour agents IA](./docs/AI_AGENT_GUIDE.md) - Instructions spécifiques pour Cursor et autres LLMs
+- [Contexte du projet](./docs/PROJECT_CONTEXT.md) - Informations essentielles pour comprendre le projet
 
-3. **Créer le fichier `.env.local`**
-
-   ```bash
-   cp .env.local.example .env.local
-   ```
+### 🔧 Configuration
 
-4. **Configurer les variables d'environnement** (voir section Configuration)
+- [Variables d'environnement](./docs/ENVIRONMENT.md) - Configuration requise
+- [Dépendances](./docs/DEPENDENCIES.md) - Packages et leurs rôles
 
-5. **Vérifier la qualité du code**
-
-   ```bash
-   npm run lint        # Vérification ESLint
-   npm run type-check  # Vérification TypeScript
-   npm run format      # Formatage Prettier
-   ```
+### 📋 Processus
 
-6. **Lancer l'application**
-   ```bash
-   npm run dev
-   ```
+- [Workflow Git](./docs/GIT_WORKFLOW.md) - Branches, merge requests, etc.
+- [Déploiement](./docs/DEPLOYMENT.md) - Processus de mise en production
 
-## ⚙️ Configuration Firebase
+## 🚀 Démarrage rapide
 
-### 1. Créer un projet Firebase
+1. **Pour les nouveaux développeurs** : Commencez par [ARCHITECTURE.md](./docs/ARCHITECTURE.md) et [DEVELOPMENT.md](./docs/DEVELOPMENT.md)
+2. **Pour les agents IA** : Lisez d'abord [AI_AGENT_GUIDE.md](./docs/AI_AGENT_GUIDE.md) et [PROJECT_CONTEXT.md](./docs/PROJECT_CONTEXT.md)
+3. **Pour la contribution** : Consultez [STYLE_GUIDE.md](./docs/STYLE_GUIDE.md) et [COMMITS.md](./docs/COMMITS.md)
 
-1. Aller sur [Firebase Console](https://console.firebase.google.com)
-2. Créer un nouveau projet ou utiliser un projet existant
-3. Activer l'authentification : Authentication > Sign-in method > Google
+## 📌 Principes clés
 
-### 2. Obtenir les clés de configuration
+- **Documentation vivante** : Mise à jour à chaque changement significatif
+- **Contexte complet** : Toute information nécessaire pour comprendre et modifier le code
+- **Orientée IA** : Structurée pour être facilement comprise par les LLMs
+- **Pratique** : Exemples concrets et commandes prêtes à l'emploi
 
-Dans les paramètres du projet Firebase :
+## 🔄 Maintenance
 
-- Aller dans Project Settings > General
-- Dans "Your apps", ajouter une app web
-- Copier les valeurs de configuration
+Cette documentation doit être maintenue activement. Lors de tout changement majeur :
 
-### 3. Configurer Firebase Admin SDK
-
-1. Aller dans Project Settings > Service accounts
-2. Cliquer sur "Generate new private key"
-3. Télécharger le fichier JSON
-4. Extraire les valeurs nécessaires pour `.env.local`
-
-### 4. Variables d'environnement
-
-Créer un fichier `.env.local` à la racine du projet :
-
-```env
-# Firebase Configuration (Frontend)
-NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-
-# Firebase Admin SDK (Backend)
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your_project_id.iam.gserviceaccount.com
-FIREBASE_PROJECT_ID=your_project_id
-
-# Session Secret (générer une clé aléatoire)
-SESSION_SECRET=your_random_session_secret_key_here
-```
-
-## 📁 Structure du projet
-
-```
-src/
-├── app/                    # App Router (Next.js 15)
-│   ├── api/auth/          # Routes API d'authentification
-│   │   ├── login/         # POST - Connexion
-│   │   ├── logout/        # POST - Déconnexion
-│   │   └── me/            # GET - Données utilisateur
-│   ├── dashboard/         # Page dashboard (protégée)
-│   ├── login/             # Page de connexion
-│   ├── layout.tsx         # Layout principal avec providers
-│   └── page.tsx           # Page d'accueil (redirections)
-├── hooks/                 # Hooks React personnalisés
-│   ├── useAuth.ts         # Hook d'authentification
-│   └── useUser.ts         # Hook pour données utilisateur
-├── lib/                   # Utilitaires et configurations
-│   ├── firebase-client.ts # Config Firebase côté client
-│   └── firebase-admin.ts  # Config Firebase Admin SDK
-├── providers/             # Providers React
-│   └── query-provider.tsx # Provider TanStack Query
-├── types/                 # Types TypeScript
-│   └── auth.ts            # Types d'authentification
-└── middleware.ts          # Middleware de protection des routes
-```
-
-## 🔐 Gestion de l'authentification
-
-### Flux d'authentification
-
-1. **Connexion** : L'utilisateur clique sur "Se connecter avec Google"
-2. **Popup Google** : Authentification via Firebase Auth
-3. **Token échange** : Le token ID est envoyé au serveur via `/api/auth/login`
-4. **Vérification** : Le serveur vérifie le token avec Firebase Admin SDK
-5. **Session** : Un cookie HttpOnly sécurisé est créé
-6. **Redirection** : L'utilisateur est redirigé vers `/dashboard`
-
-### Sécurité
-
-- **Cookies HttpOnly** : Protection contre les attaques XSS
-- **Middleware** : Protection automatique des routes
-- **Vérification serveur** : Tous les tokens sont vérifiés côté serveur
-- **Types stricts** : TypeScript pour éviter les erreurs
-
-## 🎨 Interface utilisateur
-
-### Design System
-
-- **Couleurs principales** : Indigo/Blue palette
-- **Composants** : Cards, buttons, forms avec design moderne
-- **Responsive** : Design adaptatif mobile-first
-- **Accessibilité** : Support clavier et screen readers
-
-### Pages
-
-- **`/login`** : Page de connexion avec bouton Google
-- **`/dashboard`** : Affichage des infos utilisateur et rôles
-- **`/`** : Redirection automatique selon l'état de connexion
-
-## 🧪 Custom Claims (Rôles)
-
-Pour ajouter des rôles à un utilisateur :
-
-```javascript
-// Via Firebase Admin SDK
-await admin.auth().setCustomUserClaims(uid, {
-  roles: ['admin', 'editor'],
-  organization: 'JHMH',
-});
-```
-
-Les rôles apparaîtront automatiquement dans le dashboard.
-
-## 🚀 Déploiement
-
-### Variables d'environnement en production
-
-Assurez-vous de configurer toutes les variables d'environnement dans votre plateforme de déploiement (Vercel, Netlify, etc.).
-
-### Build de production
-
-```bash
-npm run build
-npm start
-```
-
-## 🛠️ Développement
-
-### Scripts disponibles
-
-#### Scripts de développement
-
-```bash
-npm run dev              # Démarrer en mode développement
-npm run build            # Build de production
-npm run start            # Démarrer en mode production
-```
-
-#### Scripts de qualité du code
-
-```bash
-npm run lint             # Vérification ESLint
-npm run lint:fix         # Correction automatique ESLint
-npm run format           # Formatage Prettier sur tous les fichiers
-npm run format:check     # Vérification du formatage
-npm run type-check       # Vérification TypeScript
-npm run pre-commit       # Simulation du hook pre-commit
-```
-
-### 🔧 Outils de qualité du code
-
-#### ESLint + Prettier + Husky
-
-- **Linting automatique** : ESLint 9 avec règles strictes TypeScript
-- **Formatage automatique** : Prettier intégré avec standards
-- **Hooks Git** : Validation automatique avant chaque commit
-- **lint-staged** : Optimisé pour les fichiers modifiés uniquement
-
-#### Workflow automatisé
-
-À chaque commit, automatiquement :
-
-1. **ESLint** : Correction des erreurs de code
-2. **Prettier** : Formatage selon les standards
-3. **Build** : Vérification de compilation
-4. **Commit** : Seulement si tout passe
-
-#### Règles de qualité
-
-- **TypeScript strict** : Aucun `any` autorisé
-- **Imports organisés** : Tri automatique et groupement
-- **Code moderne** : Nullish coalescing (`??`), optional chaining (`?.`)
-- **React optimisé** : Hooks, composants, performance
-
-### Debugging
-
-- **TanStack Query DevTools** : Activés en développement
-- **Console logs** : Erreurs d'authentification loggées
-- **Types TypeScript** : Validation stricte
-- **ESLint** : Détection proactive des erreurs
-
-## 🔧 Personnalisation
-
-### Ajouter de nouvelles routes protégées
-
-Dans `src/middleware.ts` :
-
-```typescript
-const protectedRoutes = ['/dashboard', '/admin', '/profile'];
-```
-
-### Modifier le design
-
-Les styles sont dans TailwindCSS. Personnaliser les couleurs dans la configuration Tailwind ou directement dans les composants.
-
-### Ajouter des providers d'authentification
-
-Modifier `src/lib/firebase-client.ts` pour ajouter d'autres providers (Facebook, Twitter, etc.).
-
-## 📝 Notes importantes
-
-- **Environnement de développement** : Utiliser `http://localhost:3000`
-- **CORS** : Configurer les domaines autorisés dans Firebase Console
-- **Sécurité** : Ne jamais exposer les clés privées côté client
-- **Sessions** : Les cookies expirent après 7 jours par défaut
-
-## 🐛 Résolution de problèmes
-
-### Erreurs communes
-
-1. **"Firebase options object is not valid"**
-   - Vérifier que toutes les variables d'environnement sont définies
-
-2. **"Popup blocked"**
-   - L'utilisateur doit autoriser les popups pour ce site
-
-3. **"Token expired"**
-   - Les tokens Firebase expirent après 1 heure, la session est automatiquement rafraîchie
-
-4. **Redirection infinie**
-   - Vérifier la configuration du middleware et les routes
-
-### Debug checklist
-
-- [ ] Variables d'environnement correctement définies
-- [ ] Domaine autorisé dans Firebase Console
-- [ ] Cookies activés dans le navigateur
-- [ ] Pas de bloqueur de popup actif
-
-## 📞 Support
-
-Pour toute question ou problème, consulter :
-
-- [Documentation Firebase Auth](https://firebase.google.com/docs/auth)
-- [Documentation Next.js](https://nextjs.org/docs)
-- [Documentation TanStack Query](https://tanstack.com/query/latest)
+1. Mettez à jour les fichiers pertinents
+2. Vérifiez la cohérence avec le code actuel
+3. Ajoutez des exemples si nécessaire
