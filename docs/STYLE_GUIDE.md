@@ -240,6 +240,23 @@ export function useUserData(userId: string): UseUserDataReturn {
 </div>
 ```
 
+### ⚠️ RÈGLE CRITIQUE : Éviter les classes `space-*`
+
+```typescript
+// ❌ INTERDIT : Les classes space-* ne fonctionnent pas correctement
+<div className="space-y-4">
+<div className="space-x-2">
+
+// ✅ UTILISER À LA PLACE : gap pour flexbox/grid
+<div className="flex gap-4">
+<div className="grid gap-6">
+
+// ✅ UTILISER À LA PLACE : margin/padding explicites
+<div className="mb-4">  // margin-bottom
+<div className="mt-2">  // margin-top
+<div className="py-4">  // padding vertical
+```
+
 ### Classes conditionnelles
 
 ```typescript
