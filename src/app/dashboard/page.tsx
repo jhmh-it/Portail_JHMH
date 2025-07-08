@@ -19,7 +19,7 @@ export default function DashboardPage() {
       description: 'Outil de gestion comptable et financière',
       icon: Calculator,
       href: '/dashboard/accounting',
-      available: false, // Pour l'instant pas encore disponible
+      available: true, // Maintenant disponible
     },
     {
       title: 'RM Tool',

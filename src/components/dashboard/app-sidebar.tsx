@@ -6,6 +6,7 @@ import {
   Users,
   Settings,
   ChevronUp,
+  ChevronDown,
   User2,
   LogOut,
 } from 'lucide-react';
@@ -32,9 +33,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
+import { useAccountingTools } from '@/hooks/useAccountingTools';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
 
@@ -72,6 +77,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: user } = useUser();
   const { logout } = useAuth();
   const router = useRouter();
+  const { accountingTools, isLoading: isLoadingAccountingTools } =
+    useAccountingTools();
+  const [expandedAccountingTool, setExpandedAccountingTool] =
+    React.useState(false);
+  const [clickTimeout, setClickTimeout] = React.useState<NodeJS.Timeout | null>(
+    null
+  );
 
   const handleLogout = async () => {
     try {
@@ -84,6 +96,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const handleSettings = () => {
     router.push('/dashboard/settings');
   };
+
+  const handleAccountingToolClick = () => {
+    // Si un timeout existe déjà, c'est un double clic
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      setClickTimeout(null);
+      // Double clic : rediriger vers la page principale
+      router.push('/dashboard/accounting');
+      return;
+    }
+
+    // Premier clic : démarrer le timeout pour détecter un éventuel double clic
+    const timeout = setTimeout(() => {
+      // Simple clic : toggle le dropdown
+      setExpandedAccountingTool(prev => !prev);
+      setClickTimeout(null);
+    }, 250); // Délai de 250ms pour détecter le double clic
+
+    setClickTimeout(timeout);
+  };
+
+  // Nettoyer le timeout au démontage du composant
+  React.useEffect(() => {
+    return () => {
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+      }
+    };
+  }, [clickTimeout]);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -115,7 +156,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {data.navMain.map(item => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton tooltip={item.title} asChild>
-                    <a href={item.url} className="text-navy hover:text-navy/80">
+                    <a
+                      href={item.url}
+                      className="text-navy hover:text-navy/80 cursor-pointer"
+                    >
                       <item.icon />
                       <span>{item.title}</span>
                     </a>
@@ -134,16 +178,56 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.tools.map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton tooltip={item.title} asChild>
-                    <a href={item.url} className="text-navy hover:text-navy/80">
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {/* Accounting Tool avec sous-menus */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Accounting Tool"
+                  onClick={handleAccountingToolClick}
+                  className="text-navy hover:text-navy/80 cursor-pointer"
+                >
+                  <Calculator />
+                  <span>Accounting Tool</span>
+                  {expandedAccountingTool ? (
+                    <ChevronDown className="ml-auto h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="ml-auto h-4 w-4" />
+                  )}
+                </SidebarMenuButton>
+
+                {expandedAccountingTool && !isLoadingAccountingTools && (
+                  <SidebarMenuSub>
+                    {accountingTools.map(tool => (
+                      <SidebarMenuSubItem key={tool.id}>
+                        <SidebarMenuSubButton
+                          asChild
+                          className="text-navy hover:text-navy/80 cursor-pointer"
+                        >
+                          <a href={tool.url}>
+                            <span>{tool.title}</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+
+              {/* Autres outils restent statiques */}
+              {data.tools
+                .filter(tool => tool.title !== 'Accounting Tool')
+                .map(item => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton tooltip={item.title} asChild>
+                      <a
+                        href={item.url}
+                        className="text-navy hover:text-navy/80 cursor-pointer"
+                      >
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -156,7 +240,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {data.navSecondary.map(item => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton tooltip={item.title} asChild>
-                    <a href={item.url} className="text-navy hover:text-navy/80">
+                    <a
+                      href={item.url}
+                      className="text-navy hover:text-navy/80 cursor-pointer"
+                    >
                       <item.icon />
                       <span>{item.title}</span>
                     </a>

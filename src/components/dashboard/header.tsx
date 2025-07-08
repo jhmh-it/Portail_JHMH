@@ -45,8 +45,8 @@ export function Header({ breadcrumbs = [] }: HeaderProps) {
         <>
           <Breadcrumb>
             <BreadcrumbList>
-              {breadcrumbs.map(breadcrumb => (
-                <React.Fragment key={`breadcrumb-${breadcrumb.label}`}>
+              {breadcrumbs.map((breadcrumb, index) => (
+                <React.Fragment key={breadcrumb.label}>
                   <BreadcrumbItem className="hidden md:block">
                     {breadcrumb.href ? (
                       <BreadcrumbLink href={breadcrumb.href}>
@@ -56,7 +56,9 @@ export function Header({ breadcrumbs = [] }: HeaderProps) {
                       <BreadcrumbPage>{breadcrumb.label}</BreadcrumbPage>
                     )}
                   </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
+                  {index < breadcrumbs.length - 1 && (
+                    <BreadcrumbSeparator className="hidden md:block" />
+                  )}
                 </React.Fragment>
               ))}
             </BreadcrumbList>
