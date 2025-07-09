@@ -61,7 +61,6 @@ const eslintConfig = [
       'react/jsx-no-useless-fragment': 'error',
       'react/self-closing-comp': 'error',
       'react/jsx-boolean-value': 'error',
-      'react/no-array-index-key': 'warn',
       'react/jsx-curly-brace-presence': [
         'error',
         { props: 'never', children: 'never' },
