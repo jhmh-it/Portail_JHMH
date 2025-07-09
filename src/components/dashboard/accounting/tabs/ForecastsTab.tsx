@@ -1,6 +1,12 @@
-import { Calendar, TrendingUp, Building2 } from 'lucide-react';
+import {
+  Calendar,
+  TrendingUp,
+  Building2,
+  AlertTriangle,
+  CheckCircle,
+} from 'lucide-react';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -31,15 +37,6 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
     maxOccupancy: getSafeValue(forecast.maximums.maxOccupationPercentage),
     monthIdentifier: forecast.maximums.monthIdentifier,
     year: forecast.maximums.year,
-  };
-
-  const nextMonthData = {
-    revenue: getSafeValue(databaseStatistics.nextMonth.accommodationHT),
-    month: databaseStatistics.nextMonth.monthIdentifier,
-    year: databaseStatistics.nextMonth.year,
-    occupancy: getSafeValue(databaseStatistics.nextMonth.occupancyPercentage),
-    adr: getSafeValue(databaseStatistics.nextMonth.adrHT),
-    cleaning: getSafeValue(databaseStatistics.nextMonth.cleaningHT),
   };
 
   // Données tableau prévisions 2025
@@ -102,23 +99,6 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
       format: 'number' as const,
       subtitle: 'Réservations avec dates futures',
     },
-    {
-      title: 'Taux de conversion',
-      value: calculateAchievementRate(
-        getSafeValue(databaseStatistics.databaseInfo.totalFutureBookings),
-        getSafeValue(databaseStatistics.databaseInfo.totalValidBookings)
-      ),
-      format: 'percentage' as const,
-      subtitle: '% du total des réservations',
-    },
-    {
-      title: 'Performance vs 2024',
-      value: getSafeValue(
-        databaseStatistics.yoy2025vs2024AsOfJune30.percentage
-      ),
-      format: 'percentage' as const,
-      subtitle: 'Croissance année sur année',
-    },
   ];
 
   return (
@@ -134,7 +114,7 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
           Analyse détaillée du potentiel pour le mois de pointe identifié
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 max-w-lg">
           {/* Carte du maximum théorique */}
           <PerformanceCard
             title="Maximum théorique mensuel"
@@ -151,34 +131,6 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
                 value: 0,
                 format: 'number',
                 badgeText: `${peakMonthData.monthIdentifier}/${peakMonthData.year}`,
-              },
-            ]}
-          />
-
-          {/* Carte du mois prochain */}
-          <PerformanceCard
-            title="Prévision mois prochain"
-            icon={Calendar}
-            mainMetric={{
-              label: `Prévision pour ${nextMonthData.month}/${nextMonthData.year}`,
-              value: nextMonthData.revenue,
-              format: 'currency',
-            }}
-            additionalMetrics={[
-              {
-                label: 'Occupation prévue',
-                value: nextMonthData.occupancy,
-                format: 'percentage',
-              },
-              {
-                label: 'ADR prévu',
-                value: nextMonthData.adr,
-                format: 'currency',
-              },
-              {
-                label: 'Nettoyage prévu',
-                value: nextMonthData.cleaning,
-                format: 'currency',
               },
             ]}
           />
@@ -272,7 +224,7 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
           Pipeline de réservations futures
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 max-w-md">
           {pipelineMetrics.map((metric, index) => (
             <MetricCard
               key={`pipeline-${index}`}
@@ -283,6 +235,66 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
               size="md"
             />
           ))}
+        </div>
+      </section>
+
+      {/* 4. Ventes manquées et Opportunités côte à côte */}
+      <section>
+        <h2 className="text-xl font-semibold text-navy mb-4">
+          Opportunités et risques
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-navy flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+                Ventes manquées
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="text-2xl font-bold text-red-600">
+                  {formatCurrency(
+                    getSafeValue(
+                      databaseStatistics.thisMonth.missedSalesTTC?.amount
+                    )
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {getSafeValue(
+                    databaseStatistics.thisMonth.missedSalesTTC?.count
+                  )}{' '}
+                  occasions manquées ce mois
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-navy flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" aria-hidden="true" />
+                Opportunités disponibles
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="text-2xl font-bold text-green-600">
+                  {formatCurrency(
+                    getSafeValue(
+                      databaseStatistics.thisMonth.opportunityTTC?.amount
+                    )
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {getSafeValue(
+                    databaseStatistics.thisMonth.opportunityTTC?.count
+                  )}{' '}
+                  créneaux libres à saisir
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </div>

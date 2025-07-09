@@ -212,20 +212,6 @@ function DashboardTabs({ metrics }: { metrics: DashboardMetrics }) {
             Vue d&apos;ensemble
           </TabsTrigger>
           <TabsTrigger
-            value="forecasts"
-            style={{
-              cursor: 'pointer',
-              border: '1px solid #d1d5db',
-              backgroundColor: 'white',
-              color: '#374151',
-              fontWeight: '500',
-              transition: 'all 0.2s',
-            }}
-            className="hover:bg-gray-50 data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white data-[state=active]:!border-[#0d1b3c]"
-          >
-            Prévisions
-          </TabsTrigger>
-          <TabsTrigger
             value="analysis"
             style={{
               cursor: 'pointer',
@@ -238,6 +224,20 @@ function DashboardTabs({ metrics }: { metrics: DashboardMetrics }) {
             className="hover:bg-gray-50 data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white data-[state=active]:!border-[#0d1b3c]"
           >
             Analyse
+          </TabsTrigger>
+          <TabsTrigger
+            value="forecasts"
+            style={{
+              cursor: 'pointer',
+              border: '1px solid #d1d5db',
+              backgroundColor: 'white',
+              color: '#374151',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+            }}
+            className="hover:bg-gray-50 data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white data-[state=active]:!border-[#0d1b3c]"
+          >
+            Prévisions
           </TabsTrigger>
           <TabsTrigger
             value="history"
@@ -259,12 +259,12 @@ function DashboardTabs({ metrics }: { metrics: DashboardMetrics }) {
           <OverviewTab metrics={metrics} />
         </TabsContent>
 
-        <TabsContent value="forecasts" className="space-y-6">
-          <ForecastsTab metrics={metrics} />
-        </TabsContent>
-
         <TabsContent value="analysis" className="space-y-6">
           <AnalysisTab metrics={metrics} />
+        </TabsContent>
+
+        <TabsContent value="forecasts" className="space-y-6">
+          <ForecastsTab metrics={metrics} />
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">

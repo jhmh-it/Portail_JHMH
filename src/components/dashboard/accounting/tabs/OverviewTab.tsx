@@ -1,12 +1,6 @@
-import {
-  Calendar,
-  BarChart3,
-  ChartBar,
-  AlertTriangle,
-  CheckCircle,
-} from 'lucide-react';
+import { Calendar, BarChart3, ChartBar } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -32,6 +26,16 @@ interface OverviewTabProps {
 
 export function OverviewTab({ metrics }: OverviewTabProps) {
   const { databaseStatistics, monthlyComparison } = metrics;
+
+  // Données pour prévision mois prochain
+  const nextMonthData = {
+    revenue: getSafeValue(databaseStatistics.nextMonth.accommodationHT),
+    month: databaseStatistics.nextMonth.monthIdentifier,
+    year: databaseStatistics.nextMonth.year,
+    occupancy: getSafeValue(databaseStatistics.nextMonth.occupancyPercentage),
+    adr: getSafeValue(databaseStatistics.nextMonth.adrHT),
+    cleaning: getSafeValue(databaseStatistics.nextMonth.cleaningHT),
+  };
 
   // Données pour performance aujourd'hui
   const todayMetrics = [
@@ -140,6 +144,42 @@ export function OverviewTab({ metrics }: OverviewTabProps) {
     },
   ];
 
+  // Données tableau prévisionnel mois prochain
+  const forecastTableData = [
+    {
+      indicator: 'Revenus hébergement prévus',
+      value: nextMonthData.revenue,
+      change: calculateChangePercentage(
+        nextMonthData.revenue,
+        getSafeValue(databaseStatistics.thisMonth.accommodationHT)
+      ),
+    },
+    {
+      indicator: 'Revenus nettoyage prévus',
+      value: nextMonthData.cleaning,
+      change: calculateChangePercentage(
+        nextMonthData.cleaning,
+        getSafeValue(databaseStatistics.thisMonth.cleaningHT)
+      ),
+    },
+    {
+      indicator: "Taux d'occupation prévu",
+      value: nextMonthData.occupancy,
+      change:
+        nextMonthData.occupancy -
+        getSafeValue(databaseStatistics.thisMonth.occupancyRatePercentage),
+      isPercentage: true,
+    },
+    {
+      indicator: 'ADR moyen prévu',
+      value: nextMonthData.adr,
+      change: calculateChangePercentage(
+        nextMonthData.adr,
+        getSafeValue(databaseStatistics.thisMonth.adrHT)
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* 1. Performance aujourd'hui */}
@@ -181,7 +221,43 @@ export function OverviewTab({ metrics }: OverviewTabProps) {
         </div>
       </section>
 
-      {/* 3. Analyse détaillée du mois - Tableau */}
+      {/* 3. Prévision mois prochain */}
+      <section>
+        <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
+          <Calendar className="h-5 w-5" aria-hidden="true" />
+          Prévision mois prochain
+        </h2>
+        <div className="grid grid-cols-1 max-w-lg">
+          <PerformanceCard
+            title="Prévision mois prochain"
+            icon={Calendar}
+            mainMetric={{
+              label: `Prévision pour ${nextMonthData.month}/${nextMonthData.year}`,
+              value: nextMonthData.revenue,
+              format: 'currency',
+            }}
+            additionalMetrics={[
+              {
+                label: 'Occupation prévue',
+                value: nextMonthData.occupancy,
+                format: 'percentage',
+              },
+              {
+                label: 'ADR prévu',
+                value: nextMonthData.adr,
+                format: 'currency',
+              },
+              {
+                label: 'Nettoyage prévu',
+                value: nextMonthData.cleaning,
+                format: 'currency',
+              },
+            ]}
+          />
+        </div>
+      </section>
+
+      {/* 4. Analyse détaillée du mois - Tableau */}
       <section>
         <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
           <ChartBar className="h-5 w-5" aria-hidden="true" />
@@ -231,80 +307,66 @@ export function OverviewTab({ metrics }: OverviewTabProps) {
                     </TableCell>
                   </TableRow>
                 ))}
-                <TableRow>
-                  <TableCell className="font-medium">
-                    Total réservations
-                  </TableCell>
-                  <TableCell className="text-center font-bold">
-                    {getSafeValue(
-                      databaseStatistics.databaseInfo.totalValidBookings
-                    ).toLocaleString('fr-FR')}
-                  </TableCell>
-                  <TableCell className="text-center text-sm text-muted-foreground">
-                    Réservations valides
-                  </TableCell>
-                </TableRow>
               </TableBody>
             </Table>
           </CardContent>
         </Card>
       </section>
 
-      {/* 4. Ventes manquées et Opportunités côte à côte */}
+      {/* 5. Prévision détaillée mois prochain - Tableau */}
       <section>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-navy flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
-                Ventes manquées
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-2xl font-bold text-red-600">
-                  {formatCurrency(
-                    getSafeValue(
-                      databaseStatistics.thisMonth.missedSalesTTC?.amount
-                    )
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {getSafeValue(
-                    databaseStatistics.thisMonth.missedSalesTTC?.count
-                  )}{' '}
-                  occasions manquées ce mois
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
+          <Calendar className="h-5 w-5" aria-hidden="true" />
+          Prévision détaillée mois prochain
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Projections pour {nextMonthData.month}/{nextMonthData.year} vs mois en
+          cours
+        </p>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-navy flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" aria-hidden="true" />
-                Opportunités disponibles
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-2xl font-bold text-green-600">
-                  {formatCurrency(
-                    getSafeValue(
-                      databaseStatistics.thisMonth.opportunityTTC?.amount
-                    )
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {getSafeValue(
-                    databaseStatistics.thisMonth.opportunityTTC?.count
-                  )}{' '}
-                  créneaux libres à saisir
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Indicateur</TableHead>
+                  <TableHead className="text-center">Valeur prévue</TableHead>
+                  <TableHead className="text-center">
+                    Évolution vs mois en cours
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {forecastTableData.map((row, index) => (
+                  <TableRow key={`forecast-${index}`}>
+                    <TableCell className="font-medium">
+                      {row.indicator}
+                    </TableCell>
+                    <TableCell className="text-center font-bold">
+                      {row.isPercentage
+                        ? formatPercentage(row.value)
+                        : formatCurrency(row.value)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span
+                        className={`font-medium ${getPerformanceColorClass(
+                          row.value,
+                          row.value - row.change,
+                          'higher_better'
+                        )}`}
+                      >
+                        {row.change > 0 ? '+' : ''}
+                        {row.isPercentage
+                          ? `${row.change.toFixed(1)}%`
+                          : `${row.change.toFixed(1)}%`}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </section>
     </div>
   );
