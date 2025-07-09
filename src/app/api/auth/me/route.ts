@@ -41,6 +41,26 @@ export async function GET() {
     const cookieStore = await cookies();
     cookieStore.delete('session');
 
+    // Vérifier si c'est une erreur d'expiration de token Firebase
+    const isTokenExpired =
+      (error instanceof Error &&
+        error.message.includes('Firebase ID token has expired')) ||
+      (typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'auth/id-token-expired');
+
+    if (isTokenExpired) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Token expiré',
+          code: 'TOKEN_EXPIRED',
+        },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { success: false, error: 'Session expirée' },
       { status: 401 }
