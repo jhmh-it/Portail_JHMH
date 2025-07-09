@@ -65,7 +65,7 @@ export function PerformanceCard({
           {/* Métrique principale */}
           <div className="text-center">
             <div
-              className="text-3xl font-bold text-navy mb-2"
+              className="text-2xl font-bold text-navy mb-2"
               aria-live="polite"
             >
               {formatValue(mainValue, mainMetric.format)}

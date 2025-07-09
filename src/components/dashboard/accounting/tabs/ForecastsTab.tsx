@@ -140,14 +140,14 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
             title="Maximum théorique mensuel"
             icon={TrendingUp}
             mainMetric={{
-              label: `Revenus possibles avec ${peakMonthData.maxOccupancy}% d'occupation`,
+              label: 'Revenus possibles',
               value: peakMonthData.maxTheoretical,
               format: 'currency',
               badgeText: `${peakMonthData.maxOccupancy}%`,
             }}
             additionalMetrics={[
               {
-                label: 'Mois cible',
+                label: `Avec ${peakMonthData.maxOccupancy}% d'occupation`,
                 value: 0,
                 format: 'number',
                 badgeText: `${peakMonthData.monthIdentifier}/${peakMonthData.year}`,
@@ -280,7 +280,7 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
               value={metric.value}
               format={metric.format}
               subtitle={metric.subtitle}
-              size="sm"
+              size="md"
             />
           ))}
         </div>

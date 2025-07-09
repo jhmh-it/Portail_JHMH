@@ -234,7 +234,7 @@ export function HistoryTab({ metrics }: HistoryTabProps) {
                 value={metric.value}
                 format={metric.format}
                 subtitle={metric.subtitle}
-                size="sm"
+                size="md"
               />
             ))}
           </div>

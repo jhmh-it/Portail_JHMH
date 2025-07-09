@@ -187,7 +187,7 @@ export function AnalysisTab({ metrics }: AnalysisTabProps) {
               value={metric.value}
               format={metric.format}
               subtitle={metric.subtitle}
-              size="sm"
+              size="md"
             />
           ))}
         </div>

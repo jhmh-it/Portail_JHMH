@@ -44,7 +44,7 @@ export function MetricCard({
       role="article"
       aria-labelledby={`metric-${title.replace(/\s+/g, '-').toLowerCase()}`}
     >
-      <CardHeader className="pb-2">
+      <CardHeader>
         <CardTitle
           id={`metric-${title.replace(/\s+/g, '-').toLowerCase()}`}
           className="text-sm font-medium text-muted-foreground flex items-center gap-2"
@@ -53,7 +53,7 @@ export function MetricCard({
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 pl-7">
         <div className="space-y-3">
           <div
             className={`font-bold text-navy ${sizeClasses[size]}`}
