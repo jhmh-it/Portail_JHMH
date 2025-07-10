@@ -1,0 +1,362 @@
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import {
+  ArrowLeft,
+  Calendar,
+  MapPin,
+  Users,
+  Euro,
+  Building2,
+  Hash,
+  Clock,
+} from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
+import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useLoadingStore } from '@/stores/loading-store';
+import type { Reservation } from '@/types/reservation';
+
+// Configuration des statuts avec couleurs
+const STATUS_CONFIG: Record<
+  string,
+  {
+    label: string;
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  }
+> = {
+  CONFIRMED: { label: 'Confirmée', variant: 'default' },
+  PENDING: { label: 'En attente', variant: 'secondary' },
+  CANCELLED: { label: 'Annulée', variant: 'destructive' },
+  'CHECKED-OUT': { label: 'Terminée', variant: 'outline' },
+  'CHECKED-IN': { label: 'En cours', variant: 'default' },
+  'NO-SHOW': { label: 'No show', variant: 'destructive' },
+  FUTURE: { label: 'À venir', variant: 'secondary' },
+};
+
+// Configuration des OTA avec couleurs
+const OTA_CONFIG: Record<string, { label: string; color: string }> = {
+  'Booking.com': { label: 'Booking.com', color: 'text-blue-600' },
+  airbnb2: { label: 'Airbnb', color: 'text-red-600' },
+  'Hotels.com': { label: 'Hotels.com', color: 'text-purple-600' },
+  Expedia: { label: 'Expedia', color: 'text-yellow-600' },
+  manual: { label: 'Manual', color: 'text-navy-600' },
+};
+
+async function fetchReservationDetails(
+  confirmationCode: string
+): Promise<Reservation> {
+  const response = await fetch(`/api/reservations/${confirmationCode}`);
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error('Réservation non trouvée');
+    }
+    throw new Error('Erreur lors du chargement de la réservation');
+  }
+
+  const result = await response.json();
+
+  if (!result.success || !result.data) {
+    throw new Error(result.error ?? 'Erreur inconnue');
+  }
+
+  return result.data;
+}
+
+export default function ReservationDetailsPage() {
+  const params = useParams();
+  const router = useRouter();
+  const confirmationCode = params.confirmationCode as string;
+  const { hideLoading } = useLoadingStore();
+
+  const breadcrumbs = [
+    { label: 'Tableau de bord', href: '/dashboard' },
+    { label: 'Réservations', href: '/dashboard/reservations' },
+    { label: confirmationCode },
+  ];
+
+  // Fermer la modale de loading quand le composant se monte
+  useEffect(() => {
+    hideLoading();
+  }, [hideLoading]);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['reservation', confirmationCode],
+    queryFn: () => fetchReservationDetails(confirmationCode),
+    enabled: !!confirmationCode,
+    retry: (failureCount, err) => {
+      if (err instanceof Error && err.message === 'Réservation non trouvée') {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '-';
+    try {
+      return format(new Date(dateString), 'dd MMMM yyyy', { locale: fr });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const formatCurrency = (
+    amount: number | null | undefined,
+    currency = 'EUR'
+  ) => {
+    if (amount == null) return '-';
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency,
+    }).format(amount);
+  };
+
+  const formatTimestamp = (timestamp: string | null | undefined) => {
+    if (!timestamp) return '-';
+    try {
+      return format(new Date(timestamp), 'dd/MM/yyyy à HH:mm', { locale: fr });
+    } catch {
+      return '-';
+    }
+  };
+
+  if (error) {
+    return (
+      <DashboardLayout breadcrumbs={breadcrumbs}>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+          <h2 className="text-2xl font-semibold">
+            {error instanceof Error &&
+            error.message === 'Réservation non trouvée'
+              ? 'Réservation introuvable'
+              : 'Erreur'}
+          </h2>
+          <p className="text-muted-foreground">
+            {error instanceof Error ? error.message : 'Une erreur est survenue'}
+          </p>
+          <Button onClick={() => router.push('/dashboard/reservations')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour aux réservations
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (isLoading || !data) {
+    return (
+      <DashboardLayout breadcrumbs={breadcrumbs}>
+        <div className="flex flex-col gap-6 py-6">
+          {/* Breadcrumb skeleton */}
+          <Skeleton className="h-6 w-96" />
+
+          {/* Header skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-10 w-64" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-10 w-32" />
+          </div>
+
+          {/* Cards skeleton */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+            <Skeleton className="h-48" />
+            <Skeleton className="h-48" />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const statusConfig = STATUS_CONFIG[data.status] ?? {
+    label: data.status,
+    variant: 'outline' as const,
+  };
+
+  const otaConfig = OTA_CONFIG[data.ota] ?? {
+    label: data.ota,
+    color: 'text-gray-600',
+  };
+
+  return (
+    <DashboardLayout breadcrumbs={breadcrumbs}>
+      <div className="flex flex-col gap-6 py-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+              <Hash className="h-8 w-8 text-primary" />
+              {confirmationCode}
+            </h1>
+            <div className="flex items-center gap-3">
+              <Badge variant={statusConfig.variant} className="text-sm">
+                {statusConfig.label}
+              </Badge>
+              <span className={`font-medium ${otaConfig.color}`}>
+                {otaConfig.label}
+              </span>
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={() => router.push('/dashboard/reservations')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour
+          </Button>
+        </div>
+
+        {/* Details Grid */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Guest Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Informations client
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Nom du client</p>
+                <p className="text-lg font-medium">{data.guest_name ?? '-'}</p>
+              </div>
+
+              {data.number_of_guests && (
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Nombre de personnes
+                  </p>
+                  <p className="text-lg font-medium">
+                    {data.number_of_guests} personne
+                    {data.number_of_guests > 1 ? 's' : ''}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Booking Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Détails du séjour
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Arrivée</p>
+                  <p className="font-medium">{formatDate(data.checkin_date)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Départ</p>
+                  <p className="font-medium">
+                    {formatDate(data.checkout_date)}
+                  </p>
+                </div>
+              </div>
+
+              {data.nights && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Durée</p>
+                  <p className="font-medium">
+                    {data.nights} nuit{data.nights > 1 ? 's' : ''}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Property Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Propriété
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <p className="text-sm text-muted-foreground">Nom du listing</p>
+                <p className="text-lg font-medium">
+                  {data.listing_name ?? '-'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Financial Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Euro className="h-5 w-5" />
+                Informations financières
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Montant total TTC
+                </p>
+                <p className="text-2xl font-bold">
+                  {formatCurrency(data.total_ttc, data.currency)}
+                </p>
+              </div>
+
+              {data.currency && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Devise</p>
+                  <p className="font-medium">{data.currency}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Platform Information */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Informations plateforme
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Plateforme de réservation
+                </p>
+                <p className="font-medium">{otaConfig.label}</p>
+              </div>
+
+              {data.reportGenerationTimestamp && (
+                <div>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    Dernière mise à jour
+                  </p>
+                  <p className="font-medium">
+                    {formatTimestamp(data.reportGenerationTimestamp)}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}

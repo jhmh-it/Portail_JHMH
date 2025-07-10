@@ -1,4 +1,4 @@
-import { Calendar, BarChart3, ChartBar } from 'lucide-react';
+import { Calendar, BarChart3 } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -13,8 +13,7 @@ import {
   formatCurrency,
   formatPercentage,
   getSafeValue,
-  getPerformanceColorClass,
-  calculateChangePercentage,
+  getComparisonColorClass,
 } from '@/lib/dashboard-utils';
 import type { DashboardMetrics } from '@/types/dashboard';
 
@@ -25,17 +24,7 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ metrics }: OverviewTabProps) {
-  const { databaseStatistics, monthlyComparison } = metrics;
-
-  // Données pour prévision mois prochain
-  const nextMonthData = {
-    revenue: getSafeValue(databaseStatistics.nextMonth.accommodationHT),
-    month: databaseStatistics.nextMonth.monthIdentifier,
-    year: databaseStatistics.nextMonth.year,
-    occupancy: getSafeValue(databaseStatistics.nextMonth.occupancyPercentage),
-    adr: getSafeValue(databaseStatistics.nextMonth.adrHT),
-    cleaning: getSafeValue(databaseStatistics.nextMonth.cleaningHT),
-  };
+  const { databaseStatistics } = metrics;
 
   // Données pour performance aujourd'hui
   const todayMetrics = [
@@ -108,78 +97,6 @@ export function OverviewTab({ metrics }: OverviewTabProps) {
     },
   ];
 
-  // Données tableau détaillé du mois
-  const monthlyTableData = [
-    {
-      indicator: 'Revenus hébergement',
-      value: getSafeValue(databaseStatistics.thisMonth.accommodationHT),
-      change: calculateChangePercentage(
-        getSafeValue(databaseStatistics.thisMonth.accommodationHT),
-        getSafeValue(databaseStatistics.lastMonth.accommodationHT)
-      ),
-    },
-    {
-      indicator: 'Revenus nettoyage',
-      value: getSafeValue(databaseStatistics.thisMonth.cleaningHT),
-      change: calculateChangePercentage(
-        getSafeValue(databaseStatistics.thisMonth.cleaningHT),
-        getSafeValue(databaseStatistics.lastMonth.cleaningHT)
-      ),
-    },
-    {
-      indicator: "Taux d'occupation",
-      value: getSafeValue(databaseStatistics.thisMonth.occupancyRatePercentage),
-      change:
-        getSafeValue(databaseStatistics.thisMonth.occupancyRatePercentage) -
-        getSafeValue(databaseStatistics.lastMonth.occupancyRatePercentage),
-      isPercentage: true,
-    },
-    {
-      indicator: 'ADR moyen',
-      value: getSafeValue(databaseStatistics.thisMonth.adrHT),
-      change: calculateChangePercentage(
-        getSafeValue(databaseStatistics.thisMonth.adrHT),
-        getSafeValue(databaseStatistics.lastMonth.adrHT)
-      ),
-    },
-  ];
-
-  // Données tableau prévisionnel mois prochain
-  const forecastTableData = [
-    {
-      indicator: 'Revenus hébergement prévus',
-      value: nextMonthData.revenue,
-      change: calculateChangePercentage(
-        nextMonthData.revenue,
-        getSafeValue(databaseStatistics.thisMonth.accommodationHT)
-      ),
-    },
-    {
-      indicator: 'Revenus nettoyage prévus',
-      value: nextMonthData.cleaning,
-      change: calculateChangePercentage(
-        nextMonthData.cleaning,
-        getSafeValue(databaseStatistics.thisMonth.cleaningHT)
-      ),
-    },
-    {
-      indicator: "Taux d'occupation prévu",
-      value: nextMonthData.occupancy,
-      change:
-        nextMonthData.occupancy -
-        getSafeValue(databaseStatistics.thisMonth.occupancyRatePercentage),
-      isPercentage: true,
-    },
-    {
-      indicator: 'ADR moyen prévu',
-      value: nextMonthData.adr,
-      change: calculateChangePercentage(
-        nextMonthData.adr,
-        getSafeValue(databaseStatistics.thisMonth.adrHT)
-      ),
-    },
-  ];
-
   return (
     <div className="space-y-6">
       {/* 1. Performance aujourd'hui */}
@@ -221,152 +138,146 @@ export function OverviewTab({ metrics }: OverviewTabProps) {
         </div>
       </section>
 
-      {/* 3. Prévision mois prochain */}
+      {/* 3. Comparaison des performances temporelles */}
       <section>
         <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5" aria-hidden="true" />
-          Prévision mois prochain
+          <BarChart3 className="h-5 w-5" aria-hidden="true" />
+          Comparaison des performances temporelles
         </h2>
-        <div className="grid grid-cols-1 max-w-lg">
-          <PerformanceCard
-            title="Prévision mois prochain"
-            icon={Calendar}
-            mainMetric={{
-              label: `Prévision pour ${nextMonthData.month}/${nextMonthData.year}`,
-              value: nextMonthData.revenue,
-              format: 'currency',
-            }}
-            additionalMetrics={[
-              {
-                label: 'Occupation prévue',
-                value: nextMonthData.occupancy,
-                format: 'percentage',
-              },
-              {
-                label: 'ADR prévu',
-                value: nextMonthData.adr,
-                format: 'currency',
-              },
-              {
-                label: 'Nettoyage prévu',
-                value: nextMonthData.cleaning,
-                format: 'currency',
-              },
-            ]}
-          />
+
+        <Card>
+          <CardContent className="pt-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[200px]">Indicateur</TableHead>
+                  <TableHead className="text-center">Même mois 2024</TableHead>
+                  <TableHead className="text-center">Mois précédent</TableHead>
+                  <TableHead className="text-center">Mois actuel</TableHead>
+                  <TableHead className="text-center">
+                    Prévision {databaseStatistics.nextMonth.monthIdentifier}/
+                    {databaseStatistics.nextMonth.year}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[
+                  {
+                    indicator: 'Revenus hébergement',
+                    values: [
+                      getSafeValue(
+                        databaseStatistics.sameMonthLastYear.accommodationHT
+                      ),
+                      getSafeValue(
+                        databaseStatistics.lastMonth.accommodationHT
+                      ),
+                      getSafeValue(
+                        databaseStatistics.thisMonth.accommodationHT
+                      ),
+                      getSafeValue(
+                        databaseStatistics.nextMonth.accommodationHT
+                      ),
+                    ],
+                    format: 'currency' as const,
+                  },
+                  {
+                    indicator: "Taux d'occupation",
+                    values: [
+                      getSafeValue(
+                        databaseStatistics.sameMonthLastYear
+                          .occupancyRatePercentage
+                      ),
+                      getSafeValue(
+                        databaseStatistics.lastMonth.occupancyRatePercentage
+                      ),
+                      getSafeValue(
+                        databaseStatistics.thisMonth.occupancyRatePercentage
+                      ),
+                      getSafeValue(
+                        databaseStatistics.nextMonth.occupancyPercentage
+                      ),
+                    ],
+                    format: 'percentage' as const,
+                  },
+                  {
+                    indicator: 'ADR moyen',
+                    values: [
+                      getSafeValue(databaseStatistics.sameMonthLastYear.adrHT),
+                      getSafeValue(databaseStatistics.lastMonth.adrHT),
+                      getSafeValue(databaseStatistics.thisMonth.adrHT),
+                      getSafeValue(databaseStatistics.nextMonth.adrHT),
+                    ],
+                    format: 'currency' as const,
+                  },
+                  {
+                    indicator: 'Services nettoyage',
+                    values: [
+                      getSafeValue(
+                        databaseStatistics.sameMonthLastYear.cleaningHT
+                      ),
+                      getSafeValue(databaseStatistics.lastMonth.cleaningHT),
+                      getSafeValue(databaseStatistics.thisMonth.cleaningHT),
+                      getSafeValue(databaseStatistics.nextMonth.cleaningHT),
+                    ],
+                    format: 'currency' as const,
+                    invertColors: true, // Pour les coûts, moins c'est mieux
+                  },
+                ].map((row, index) => (
+                  <TableRow key={`temporal-${index}`}>
+                    <TableCell className="font-medium">
+                      {row.indicator}
+                    </TableCell>
+                    {row.values.slice(0, 3).map((value, valueIndex) => (
+                      <TableCell
+                        key={`value-${valueIndex}`}
+                        className="text-center"
+                      >
+                        <div
+                          className={`font-medium ${getComparisonColorClass(
+                            value,
+                            row.values.slice(0, 3),
+                            row.invertColors ? 'lower_better' : 'higher_better'
+                          )}`}
+                        >
+                          {row.format === 'percentage'
+                            ? formatPercentage(value)
+                            : formatCurrency(value)}
+                        </div>
+                      </TableCell>
+                    ))}
+                    <TableCell className="text-center">
+                      <div className="text-blue-800 font-bold">
+                        {row.format === 'percentage'
+                          ? formatPercentage(row.values[3])
+                          : formatCurrency(row.values[3])}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {/* Légende des couleurs */}
+        <div className="mt-4 flex flex-wrap gap-4 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-100 border border-green-200 rounded" />
+            <span>Meilleure performance entre les 3 périodes</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-700 border border-gray-300 rounded" />
+            <span>Performance intermédiaire</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-100 border border-red-200 rounded" />
+            <span>Performance la moins favorable</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-blue-100 border border-blue-200 rounded" />
+            <span>Prévisions (pas de comparaison)</span>
+          </div>
         </div>
-      </section>
-
-      {/* 4. Analyse détaillée du mois - Tableau */}
-      <section>
-        <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
-          <ChartBar className="h-5 w-5" aria-hidden="true" />
-          Analyse détaillée du mois en cours
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Données complètes pour {monthlyComparison.monthIdentifier}/
-          {monthlyComparison.year}
-        </p>
-
-        <Card>
-          <CardContent className="pt-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Indicateur</TableHead>
-                  <TableHead className="text-center">Valeur</TableHead>
-                  <TableHead className="text-center">
-                    Évolution vs mois précédent
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {monthlyTableData.map((row, index) => (
-                  <TableRow key={`monthly-${index}`}>
-                    <TableCell className="font-medium">
-                      {row.indicator}
-                    </TableCell>
-                    <TableCell className="text-center font-bold">
-                      {row.isPercentage
-                        ? formatPercentage(row.value)
-                        : formatCurrency(row.value)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span
-                        className={`font-medium ${getPerformanceColorClass(
-                          row.value,
-                          row.value - row.change,
-                          'higher_better'
-                        )}`}
-                      >
-                        {row.change > 0 ? '+' : ''}
-                        {row.isPercentage
-                          ? `${row.change.toFixed(1)}%`
-                          : `${row.change.toFixed(1)}%`}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* 5. Prévision détaillée mois prochain - Tableau */}
-      <section>
-        <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5" aria-hidden="true" />
-          Prévision détaillée mois prochain
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Projections pour {nextMonthData.month}/{nextMonthData.year} vs mois en
-          cours
-        </p>
-
-        <Card>
-          <CardContent className="pt-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Indicateur</TableHead>
-                  <TableHead className="text-center">Valeur prévue</TableHead>
-                  <TableHead className="text-center">
-                    Évolution vs mois en cours
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {forecastTableData.map((row, index) => (
-                  <TableRow key={`forecast-${index}`}>
-                    <TableCell className="font-medium">
-                      {row.indicator}
-                    </TableCell>
-                    <TableCell className="text-center font-bold">
-                      {row.isPercentage
-                        ? formatPercentage(row.value)
-                        : formatCurrency(row.value)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span
-                        className={`font-medium ${getPerformanceColorClass(
-                          row.value,
-                          row.value - row.change,
-                          'higher_better'
-                        )}`}
-                      >
-                        {row.change > 0 ? '+' : ''}
-                        {row.isPercentage
-                          ? `${row.change.toFixed(1)}%`
-                          : `${row.change.toFixed(1)}%`}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
       </section>
     </div>
   );

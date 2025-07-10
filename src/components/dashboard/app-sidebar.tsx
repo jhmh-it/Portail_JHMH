@@ -9,6 +9,7 @@ import {
   ChevronDown,
   User2,
   LogOut,
+  BookOpen,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -57,6 +58,11 @@ const data = {
       title: 'Accounting Tool',
       url: '/dashboard/accounting',
       icon: Calculator,
+    },
+    {
+      title: 'Réservations',
+      url: '/dashboard/reservations',
+      icon: BookOpen,
     },
     {
       title: 'RM Tool',
@@ -148,7 +154,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent className="overflow-x-hidden">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-navy font-semibold">
+          <SidebarGroupLabel className="text-black font-semibold">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -158,7 +164,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuButton tooltip={item.title} asChild>
                     <a
                       href={item.url}
-                      className="text-navy hover:text-navy/80 cursor-pointer"
+                      className="text-black hover:text-black/80 cursor-pointer"
                     >
                       <item.icon />
                       <span>{item.title}</span>
@@ -173,7 +179,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-navy font-semibold">
+          <SidebarGroupLabel className="text-black font-semibold">
             Outils internes
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -183,7 +189,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuButton
                   tooltip="Accounting Tool"
                   onClick={handleAccountingToolClick}
-                  className="text-navy hover:text-navy/80 cursor-pointer"
+                  className="text-black hover:text-black/80 cursor-pointer"
                 >
                   <Calculator />
                   <span>Accounting Tool</span>
@@ -200,7 +206,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <SidebarMenuSubItem key={tool.id}>
                         <SidebarMenuSubButton
                           asChild
-                          className="text-navy hover:text-navy/80 cursor-pointer"
+                          className="text-black hover:text-black/80 cursor-pointer"
                         >
                           <a href={tool.url}>
                             <span>{tool.title}</span>
@@ -220,7 +226,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuButton tooltip={item.title} asChild>
                       <a
                         href={item.url}
-                        className="text-navy hover:text-navy/80 cursor-pointer"
+                        className="text-black hover:text-black/80 cursor-pointer"
                       >
                         <item.icon />
                         <span>{item.title}</span>
@@ -242,7 +248,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuButton tooltip={item.title} asChild>
                     <a
                       href={item.url}
-                      className="text-navy hover:text-navy/80 cursor-pointer"
+                      className="text-black hover:text-black/80 cursor-pointer"
                     >
                       <item.icon />
                       <span>{item.title}</span>
@@ -278,7 +284,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold text-navy">
+                    <span className="truncate font-semibold text-black">
                       {user?.displayName ?? 'Utilisateur'}
                     </span>
                     <span className="truncate text-xs text-muted-foreground">

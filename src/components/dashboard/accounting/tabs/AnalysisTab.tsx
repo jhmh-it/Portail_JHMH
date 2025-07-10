@@ -1,4 +1,4 @@
-import { Euro, Calendar, BarChart3, TrendingUp } from 'lucide-react';
+import { Euro, Calendar, TrendingUp } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +15,6 @@ import {
   formatCurrency,
   formatPercentage,
   getSafeValue,
-  getComparisonColorClass,
   createComparisonData,
 } from '@/lib/dashboard-utils';
 import type { DashboardMetrics } from '@/types/dashboard';
@@ -29,13 +28,13 @@ interface AnalysisTabProps {
 export function AnalysisTab({ metrics }: AnalysisTabProps) {
   const { databaseStatistics, monthlyComparison } = metrics;
 
-  // Prix au m² - métriques
+  // Prix au m² - métriques (ordre chronologique : année précédente → mois précédent → mois actuel → moyenne)
   const sqmMetrics = [
     {
-      title: 'Moyenne 12 mois',
-      value: getSafeValue(monthlyComparison.sqmPriceHT.last12MonthAvgPerShab),
+      title: monthlyComparison.sqmPriceHT.lastYearSameMonth.label,
+      value: getSafeValue(monthlyComparison.sqmPriceHT.lastYearSameMonth.value),
       format: 'currency' as const,
-      subtitle: 'Prix au m² moyen',
+      subtitle: 'Même mois année précédente',
     },
     {
       title: monthlyComparison.sqmPriceHT.lastMonth.label,
@@ -44,10 +43,16 @@ export function AnalysisTab({ metrics }: AnalysisTabProps) {
       subtitle: 'Mois précédent',
     },
     {
-      title: monthlyComparison.sqmPriceHT.lastYearSameMonth.label,
-      value: getSafeValue(monthlyComparison.sqmPriceHT.lastYearSameMonth.value),
+      title: `${monthlyComparison.monthIdentifier}/${monthlyComparison.year}`,
+      value: getSafeValue(databaseStatistics.lastMonth.euroPerSquareMeterHT),
       format: 'currency' as const,
-      subtitle: 'Même mois année précédente',
+      subtitle: 'Mois actuel',
+    },
+    {
+      title: 'Moyenne 12 mois',
+      value: getSafeValue(monthlyComparison.sqmPriceHT.last12MonthAvgPerShab),
+      format: 'currency' as const,
+      subtitle: 'Prix au m² moyen',
     },
   ];
 
@@ -121,53 +126,6 @@ export function AnalysisTab({ metrics }: AnalysisTabProps) {
       lastYear: getSafeValue(monthlyComparison.adrHT.lastYearSameMonth),
       lastMonth: getSafeValue(monthlyComparison.adrHT.lastMonth),
       evolution: getSafeValue(monthlyComparison.adrHT.changePercentage),
-    },
-  ];
-
-  // Données performances temporelles (tableau complexe avec 3 comparaisons)
-  const temporalPerformanceData = [
-    {
-      indicator: 'Revenus hébergement',
-      values: [
-        getSafeValue(databaseStatistics.sameMonthLastYear.accommodationHT),
-        getSafeValue(databaseStatistics.lastMonth.accommodationHT),
-        getSafeValue(databaseStatistics.thisMonth.accommodationHT),
-        getSafeValue(databaseStatistics.nextMonth.accommodationHT),
-      ],
-      format: 'currency' as const,
-    },
-    {
-      indicator: "Taux d'occupation",
-      values: [
-        getSafeValue(
-          databaseStatistics.sameMonthLastYear.occupancyRatePercentage
-        ),
-        getSafeValue(databaseStatistics.lastMonth.occupancyRatePercentage),
-        getSafeValue(databaseStatistics.thisMonth.occupancyRatePercentage),
-        getSafeValue(databaseStatistics.nextMonth.occupancyPercentage),
-      ],
-      format: 'percentage' as const,
-    },
-    {
-      indicator: 'ADR moyen',
-      values: [
-        getSafeValue(databaseStatistics.sameMonthLastYear.adrHT),
-        getSafeValue(databaseStatistics.lastMonth.adrHT),
-        getSafeValue(databaseStatistics.thisMonth.adrHT),
-        getSafeValue(databaseStatistics.nextMonth.adrHT),
-      ],
-      format: 'currency' as const,
-    },
-    {
-      indicator: 'Services nettoyage',
-      values: [
-        getSafeValue(databaseStatistics.sameMonthLastYear.cleaningHT),
-        getSafeValue(databaseStatistics.lastMonth.cleaningHT),
-        getSafeValue(databaseStatistics.thisMonth.cleaningHT),
-        getSafeValue(databaseStatistics.nextMonth.cleaningHT),
-      ],
-      format: 'currency' as const,
-      invertColors: true, // Pour les coûts, moins c'est mieux
     },
   ];
 
@@ -316,88 +274,7 @@ export function AnalysisTab({ metrics }: AnalysisTabProps) {
         </div>
       </section>
 
-      {/* 4. Comparaison des performances temporelles */}
-      <section>
-        <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
-          <BarChart3 className="h-5 w-5" aria-hidden="true" />
-          Comparaison des performances temporelles
-        </h2>
-
-        <Card>
-          <CardContent className="pt-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[200px]">Indicateur</TableHead>
-                  <TableHead className="text-center">Même mois 2024</TableHead>
-                  <TableHead className="text-center">Mois précédent</TableHead>
-                  <TableHead className="text-center">Mois actuel</TableHead>
-                  <TableHead className="text-center">
-                    Prévision {databaseStatistics.nextMonth.monthIdentifier}/
-                    {databaseStatistics.nextMonth.year}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {temporalPerformanceData.map((row, index) => (
-                  <TableRow key={`temporal-${index}`}>
-                    <TableCell className="font-medium">
-                      {row.indicator}
-                    </TableCell>
-                    {row.values.slice(0, 3).map((value, valueIndex) => (
-                      <TableCell
-                        key={`value-${valueIndex}`}
-                        className="text-center"
-                      >
-                        <div
-                          className={`font-medium ${getComparisonColorClass(
-                            value,
-                            row.values.slice(0, 3),
-                            row.invertColors ? 'lower_better' : 'higher_better'
-                          )}`}
-                        >
-                          {row.format === 'percentage'
-                            ? formatPercentage(value)
-                            : formatCurrency(value)}
-                        </div>
-                      </TableCell>
-                    ))}
-                    <TableCell className="text-center">
-                      <div className="text-blue-800 font-bold">
-                        {row.format === 'percentage'
-                          ? formatPercentage(row.values[3])
-                          : formatCurrency(row.values[3])}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        {/* Légende des couleurs */}
-        <div className="mt-4 flex flex-wrap gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-100 border border-green-200 rounded" />
-            <span>Meilleure performance entre les 3 périodes</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-700 border border-gray-300 rounded" />
-            <span>Performance intermédiaire</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-100 border border-red-200 rounded" />
-            <span>Performance la moins favorable</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-100 border border-blue-200 rounded" />
-            <span>Prévisions (pas de comparaison)</span>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Opportunités et Projections */}
+      {/* 4. Opportunités et Projections */}
       <section>
         <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
           <TrendingUp className="h-5 w-5" aria-hidden="true" />

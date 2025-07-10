@@ -1,0 +1,237 @@
+'use client';
+
+import { AlertCircle, Calendar, MapPin, Users } from 'lucide-react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { useNavigation } from '@/hooks/useNavigation';
+import type {
+  ReservationFilters,
+  ReservationsResponse,
+} from '@/types/reservation';
+
+import { LoadingSkeleton } from './components/LoadingSkeleton';
+import { STATUS_CONFIG, OTA_CONFIG, PAGINATION_CONFIG } from './constants';
+import { formatDate, formatCurrency, generatePaginationItems } from './utils';
+
+interface ReservationsTableProps {
+  data: ReservationsResponse | undefined;
+  isLoading: boolean;
+  error: Error | null;
+  filters: ReservationFilters;
+  onPageChange: (page: number) => void;
+}
+
+export function ReservationsTable({
+  data,
+  isLoading,
+  error,
+  filters,
+  onPageChange,
+}: ReservationsTableProps) {
+  const { navigateWithLoading } = useNavigation();
+
+  const handleReservationClick = async (confirmationCode: string) => {
+    await navigateWithLoading(`/dashboard/reservations/${confirmationCode}`, {
+      loadingTitle: 'Chargement de la réservation',
+      loadingDescription: `Récupération des détails pour ${confirmationCode}...`,
+    });
+  };
+
+  // Pagination calculations
+  const currentPage = filters.page ?? 1;
+  const pageSize = filters.page_size ?? PAGINATION_CONFIG.DEFAULT_PAGE_SIZE;
+  const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
+  const paginationItems = generatePaginationItems(currentPage, totalPages);
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Erreur lors du chargement des réservations : {error.message}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (isLoading) {
+    return <LoadingSkeleton />;
+  }
+
+  if (!data || data.reservations.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Aucune réservation trouvée</p>
+        <p className="text-sm text-muted-foreground mt-2">
+          Essayez de modifier vos critères de recherche
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-md border overflow-visible pb-2">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[140px]">Code</TableHead>
+              <TableHead>Client</TableHead>
+              <TableHead>Listing</TableHead>
+              <TableHead>Check-in</TableHead>
+              <TableHead>Check-out</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead>OTA</TableHead>
+              <TableHead>Infos</TableHead>
+              <TableHead className="text-right">Montant</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="relative">
+            {data.reservations.map(reservation => {
+              const statusConfig = STATUS_CONFIG[reservation.status] ?? {
+                label: reservation.status,
+                variant: 'outline' as const,
+              };
+
+              const otaConfig = OTA_CONFIG[reservation.ota] ?? {
+                label: reservation.ota,
+                color: 'text-gray-600',
+              };
+
+              return (
+                <TableRow
+                  key={reservation.confirmationCode}
+                  className="cursor-pointer relative transition-all duration-200 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/15 hover:border-primary/30 hover:z-10"
+                  onClick={() =>
+                    handleReservationClick(reservation.confirmationCode)
+                  }
+                >
+                  <TableCell className="font-mono text-sm">
+                    {reservation.confirmationCode}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {reservation.guest_name ?? '-'}
+                  </TableCell>
+                  <TableCell className="max-w-[200px] truncate">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3 text-muted-foreground" />
+                      <span title={reservation.listing_name ?? ''}>
+                        {reservation.listing_name ?? '-'}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3 text-muted-foreground" />
+                      {formatDate(reservation.checkin_date)}
+                    </div>
+                  </TableCell>
+                  <TableCell>{formatDate(reservation.checkout_date)}</TableCell>
+                  <TableCell>
+                    <Badge variant={statusConfig.variant}>
+                      {statusConfig.label}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`font-medium ${otaConfig.color}`}>
+                      {otaConfig.label}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1 text-sm">
+                      {reservation.number_of_guests && (
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Users className="h-3 w-3" />
+                          <span>{reservation.number_of_guests} pers.</span>
+                        </div>
+                      )}
+                      {reservation.nights && (
+                        <span className="text-muted-foreground">
+                          {reservation.nights} nuit
+                          {reservation.nights > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="font-medium">
+                      {formatCurrency(
+                        reservation.total_ttc,
+                        reservation.currency
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col gap-4 items-center">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+                className={
+                  currentPage === 1
+                    ? 'pointer-events-none opacity-50'
+                    : 'cursor-pointer'
+                }
+              />
+            </PaginationItem>
+
+            {paginationItems.map((item, index) => (
+              <PaginationItem key={index}>
+                {typeof item === 'number' ? (
+                  <PaginationLink
+                    onClick={() => onPageChange(item)}
+                    isActive={currentPage === item}
+                    className="cursor-pointer"
+                  >
+                    {item}
+                  </PaginationLink>
+                ) : (
+                  <PaginationEllipsis />
+                )}
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  currentPage < totalPages && onPageChange(currentPage + 1)
+                }
+                className={
+                  currentPage === totalPages
+                    ? 'pointer-events-none opacity-50'
+                    : 'cursor-pointer'
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </div>
+  );
+}

@@ -40,6 +40,13 @@ export default function AccountingDashboardPage() {
     error: actifsError,
   } = useActifs();
 
+  // Pré-sélectionner le premier actif lorsque les actifs sont chargés
+  React.useEffect(() => {
+    if (actifs && actifs.length > 0 && !filters.selectedActif) {
+      handleFiltersChange({ selectedActif: actifs[0].id });
+    }
+  }, [actifs, filters.selectedActif, handleFiltersChange]);
+
   const {
     data: metricsData,
     isLoading: isLoadingMetrics,

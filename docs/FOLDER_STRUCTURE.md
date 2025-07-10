@@ -38,10 +38,15 @@ app/
 │   └── dashboard/        # Page dashboard protégée
 │       └── page.tsx
 ├── api/                  # API Routes handlers
-│   └── auth/            # Endpoints authentification
-│       ├── login/       # POST /api/auth/login
-│       ├── logout/      # POST /api/auth/logout
-│       └── me/          # GET /api/auth/me
+│   ├── auth/            # Endpoints authentification
+│   │   ├── login/       # POST /api/auth/login
+│   │   ├── logout/      # POST /api/auth/logout
+│   │   └── me/          # GET /api/auth/me
+│   ├── reservations/    # Endpoints réservations
+│   │   └── [confirmationCode]/ # GET /api/reservations/[code]
+│   ├── actifs/          # GET /api/actifs
+│   └── dashboard/       # Dashboard APIs
+│       └── metrics/     # GET /api/dashboard/metrics
 ├── login/               # Page de connexion publique
 │   └── page.tsx
 ├── favicon.ico          # Icône du site

@@ -6,7 +6,7 @@ import type { FilterState } from '@/types/dashboard';
 export function useDashboardState() {
   const [filters, setFilters] = useState<FilterState>({
     selectedDate: new Date(),
-    selectedActif: 'global',
+    selectedActif: '', // Sera mis à jour avec le premier actif récupéré
   });
 
   const [hasSearched, setHasSearched] = useState(false);

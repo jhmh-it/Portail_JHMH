@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+import { fetchJhmhActifs } from '@/lib/external-api';
+
+// Export du type pour les autres composants
 export interface Actif {
   id: string;
   label: string;
@@ -8,58 +11,47 @@ export interface Actif {
   isActive: boolean;
 }
 
-const mockActifs: Actif[] = [
-  {
-    id: 'global',
-    label: 'Global',
-    description: "Vue d'ensemble de tous les actifs",
-    type: 'global',
-    isActive: true,
-  },
-  {
-    id: '14M',
-    label: '14M - Résidence Montparnasse',
-    description: 'Résidence située à Montparnasse, Paris 14e',
-    type: 'property',
-    isActive: true,
-  },
-  {
-    id: '17C',
-    label: '17C - Complexe Clichy',
-    description: 'Complexe résidentiel à Clichy, Paris 17e',
-    type: 'property',
-    isActive: true,
-  },
-  {
-    id: '23A',
-    label: '23A - Appartements Austerlitz',
-    description: "Appartements premium près de la gare d'Austerlitz",
-    type: 'property',
-    isActive: true,
-  },
-  {
-    id: '45B',
-    label: '45B - Villa Bercy',
-    description: 'Villa de standing dans le quartier de Bercy',
-    type: 'property',
-    isActive: true,
-  },
-  {
-    id: 'Z01',
-    label: 'Zone Centre',
-    description: 'Regroupement des actifs du centre de Paris',
-    type: 'zone',
-    isActive: false,
-  },
-];
-
+/**
+ * GET /api/actifs
+ * Récupère les actifs depuis l'API JHMH externe
+ */
 export async function GET() {
   try {
-    // Simulation d'un délai réseau
-    await new Promise(resolve => setTimeout(resolve, 200));
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[API] Fetching actifs from external JHMH API...');
+    }
+
+    // Appel à l'API externe
+    const response = await fetchJhmhActifs();
+
+    if (!response.success) {
+      console.warn(
+        '[API] External API returned success: false, returning empty data'
+      );
+      return NextResponse.json(
+        {
+          success: false,
+          data: [],
+          error: 'External API error',
+          message: "Impossible de récupérer les actifs depuis l'API externe",
+          meta: {
+            total: 0,
+            generatedAt: new Date().toISOString(),
+            source: 'external-api',
+          },
+        },
+        { status: 503 }
+      ); // Service Unavailable
+    }
 
     // Filtrer seulement les actifs actifs
-    const activeActifs = mockActifs.filter(actif => actif.isActive);
+    const activeActifs = response.data.filter(actif => actif.isActive);
+
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        `[API] Successfully fetched ${activeActifs.length} active actifs`
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -67,16 +59,23 @@ export async function GET() {
       meta: {
         total: activeActifs.length,
         generatedAt: new Date().toISOString(),
+        source: 'external-api',
       },
     });
   } catch (error) {
-    console.error('Error fetching actifs:', error);
+    console.error('[API] Error fetching actifs from external API:', error);
 
+    // En cas d'erreur, on peut soit retourner une erreur, soit un fallback
+    // Ici on retourne l'erreur pour debug, mais on pourrait aussi faire un fallback
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
-        message: 'Erreur lors de la récupération des actifs',
+        error: 'External API error',
+        message:
+          error instanceof Error
+            ? error.message
+            : "Erreur lors de la récupération des actifs depuis l'API externe",
+        details: process.env.NODE_ENV === 'development' ? error : undefined,
       },
       { status: 500 }
     );

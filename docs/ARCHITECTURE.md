@@ -30,6 +30,7 @@ Le Portail JHMH est une application web moderne construite avec Next.js 15, util
 - **Authentication** : Firebase Auth + Admin SDK
 - **API** : Next.js Route Handlers
 - **Session** : Cookies httpOnly (gérés par middleware)
+- **External APIs** : JHMH API pour réservations et actifs
 
 ### Outils de développement
 

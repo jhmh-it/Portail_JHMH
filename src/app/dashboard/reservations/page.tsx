@@ -1,0 +1,409 @@
+'use client';
+
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import {
+  Search,
+  Filter,
+  RefreshCw,
+  BookOpen,
+  X,
+  CalendarIcon,
+} from 'lucide-react';
+import { useState } from 'react';
+
+import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useReservations } from '@/hooks/useReservations';
+import { cn } from '@/lib/utils';
+import type { ReservationFilters } from '@/types/reservation';
+
+import { ReservationsTable } from './ReservationsTable';
+
+const STATUSES: { value: string; label: string }[] = [
+  { value: 'CONFIRMED', label: 'Confirmée' },
+  { value: 'PENDING', label: 'En attente' },
+  { value: 'CANCELLED', label: 'Annulée' },
+  { value: 'CHECKED-OUT', label: 'Terminée' },
+  { value: 'CHECKED-IN', label: 'En cours' },
+  { value: 'NO-SHOW', label: 'No show' },
+];
+
+const OTA_PLATFORMS = [
+  { value: 'Booking.com', label: 'Booking.com' },
+  { value: 'airbnb2', label: 'Airbnb' },
+  { value: 'Hotels.com', label: 'Hotels.com' },
+  { value: 'Expedia', label: 'Expedia' },
+  { value: 'manual', label: 'Direct' },
+];
+
+const PAGE_SIZES = [
+  { value: '10', label: '10 résultats' },
+  { value: '20', label: '20 résultats' },
+  { value: '50', label: '50 résultats' },
+  { value: '100', label: '100 résultats' },
+];
+
+export default function ReservationsPage() {
+  const [filters, setFilters] = useState<ReservationFilters>({
+    page: 1,
+    page_size: 20,
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(true);
+
+  const { data, isLoading, error, refetch, isSuccess } = useReservations({
+    filters,
+  });
+
+  const breadcrumbs = [
+    { label: 'Tableau de bord', href: '/dashboard' },
+    { label: 'Réservations' },
+  ];
+
+  const handleSearch = () => {
+    setFilters(prev => ({
+      ...prev,
+      q: searchQuery || undefined,
+      page: 1, // Reset to first page on new search
+    }));
+  };
+
+  const handleFilterChange = (
+    key: keyof ReservationFilters,
+    value: string | undefined
+  ) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value,
+      page: 1, // Reset to first page on filter change
+    }));
+  };
+
+  const handlePageChange = (page: number) => {
+    setFilters(prev => ({ ...prev, page }));
+  };
+
+  const handlePageSizeChange = (page_size: string) => {
+    setFilters(prev => ({
+      ...prev,
+      page_size: parseInt(page_size),
+      page: 1,
+    }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      page: 1,
+      page_size: 20,
+    });
+    setSearchQuery('');
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters =
+    Boolean(searchQuery) ||
+    Boolean(filters.status) ||
+    Boolean(filters.ota) ||
+    Boolean(filters.checkinDateFrom) ||
+    Boolean(filters.checkinDateTo);
+
+  return (
+    <DashboardLayout breadcrumbs={breadcrumbs}>
+      <div className="flex flex-col gap-6 py-6">
+        {/* Header */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold tracking-tight">Réservations</h1>
+          </div>
+          <p className="text-muted-foreground">
+            Gérez et consultez toutes les réservations en temps réel
+          </p>
+        </div>
+
+        {/* Filters */}
+        <Card className="shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Filtres de recherche
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="text-muted-foreground"
+              >
+                {showFilters ? 'Masquer' : 'Afficher'}
+              </Button>
+            </div>
+          </CardHeader>
+
+          {showFilters && (
+            <CardContent className="pt-0">
+              {/* Search Bar */}
+              <div className="mb-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Rechercher par code de confirmation, nom du client ou listing..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                    className="pl-10 pr-28 h-11 bg-muted/50 border-muted-foreground/20 focus:bg-background"
+                  />
+                  <Button
+                    onClick={handleSearch}
+                    size="sm"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8"
+                  >
+                    Rechercher
+                  </Button>
+                </div>
+              </div>
+
+              {/* Filter Grid */}
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  {/* Status filter */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Statut</Label>
+                    <Select
+                      value={filters.status ?? 'all'}
+                      onValueChange={value =>
+                        handleFilterChange(
+                          'status',
+                          value === 'all' ? undefined : value
+                        )
+                      }
+                    >
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Tous les statuts" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les statuts</SelectItem>
+                        {STATUSES.map(status => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* OTA filter */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Plateforme</Label>
+                    <Select
+                      value={filters.ota ?? 'all'}
+                      onValueChange={value =>
+                        handleFilterChange(
+                          'ota',
+                          value === 'all' ? undefined : value
+                        )
+                      }
+                    >
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Toutes les plateformes" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          Toutes les plateformes
+                        </SelectItem>
+                        {OTA_PLATFORMS.map(platform => (
+                          <SelectItem
+                            key={platform.value}
+                            value={platform.value}
+                          >
+                            {platform.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Date range */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">
+                      Date d&apos;arrivée (depuis)
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full h-10 justify-start text-left font-normal',
+                            !filters.checkinDateFrom && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {filters.checkinDateFrom
+                            ? format(
+                                new Date(filters.checkinDateFrom),
+                                'dd MMMM yyyy',
+                                { locale: fr }
+                              )
+                            : 'Sélectionner une date'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            filters.checkinDateFrom
+                              ? new Date(filters.checkinDateFrom)
+                              : undefined
+                          }
+                          onSelect={date =>
+                            handleFilterChange(
+                              'checkinDateFrom',
+                              date ? format(date, 'yyyy-MM-dd') : undefined
+                            )
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">
+                      Date d&apos;arrivée (jusqu&apos;à)
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full h-10 justify-start text-left font-normal',
+                            !filters.checkinDateTo && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {filters.checkinDateTo
+                            ? format(
+                                new Date(filters.checkinDateTo),
+                                'dd MMMM yyyy',
+                                { locale: fr }
+                              )
+                            : 'Sélectionner une date'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            filters.checkinDateTo
+                              ? new Date(filters.checkinDateTo)
+                              : undefined
+                          }
+                          onSelect={date =>
+                            handleFilterChange(
+                              'checkinDateTo',
+                              date ? format(date, 'yyyy-MM-dd') : undefined
+                            )
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                {/* Second row with page size and actions */}
+                <div className="flex items-end justify-between gap-4 pt-2 border-t">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">
+                      Résultats par page
+                    </Label>
+                    <Select
+                      value={filters.page_size?.toString() ?? '20'}
+                      onValueChange={handlePageSizeChange}
+                    >
+                      <SelectTrigger className="w-[140px] h-10">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAGE_SIZES.map(size => (
+                          <SelectItem key={size.value} value={size.value}>
+                            {size.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    {hasActiveFilters && (
+                      <Button
+                        variant="outline"
+                        onClick={handleClearFilters}
+                        className="h-10"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Réinitialiser
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      onClick={() => refetch()}
+                      disabled={isLoading}
+                      className="h-10"
+                    >
+                      <RefreshCw
+                        className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
+                      />
+                      Actualiser
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+
+        {/* Results */}
+        <Card className="shadow-sm overflow-visible">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-medium">
+              Résultats
+              {isSuccess && data && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  ({data.total} réservation{data.total > 1 ? 's' : ''})
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 px-6 pb-8 overflow-visible">
+            <ReservationsTable
+              data={data}
+              isLoading={isLoading}
+              error={error}
+              filters={filters}
+              onPageChange={handlePageChange}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
+  );
+}

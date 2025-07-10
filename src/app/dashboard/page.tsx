@@ -1,6 +1,6 @@
 'use client';
 
-import { Calculator, Users, ArrowRight } from 'lucide-react';
+import { Calculator, Users, BookOpen, ArrowRight } from 'lucide-react';
 import * as React from 'react';
 
 import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
@@ -19,6 +19,13 @@ export default function DashboardPage() {
       description: 'Outil de gestion comptable et financière',
       icon: Calculator,
       href: '/dashboard/accounting',
+      available: true, // Maintenant disponible
+    },
+    {
+      title: 'Réservations',
+      description: 'Gestion et suivi des réservations en temps réel',
+      icon: BookOpen,
+      href: '/dashboard/reservations',
       available: true, // Maintenant disponible
     },
     {

@@ -92,6 +92,14 @@ NEXT_PUBLIC_SENTRY_DSN=https://xxxxx@sentry.io/xxxxx
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
 
+### 🔗 APIs Externes
+
+```bash
+# API JHMH Externe
+JHMH_API_BASE_URL=https://apijhmhportail-22997865276.europe-west1.run.app
+JHMH_API_KEY=your-api-key-here
+```
+
 ## 🔨 Fichier .env.example
 
 ```bash
@@ -123,6 +131,10 @@ AUTH_SECRET=generate-random-32-char-string
 COOKIE_NAME=__session
 COOKIE_SECURE=false
 COOKIE_MAX_AGE=604800
+
+# External APIs
+JHMH_API_BASE_URL=https://apijhmhportail-22997865276.europe-west1.run.app
+JHMH_API_KEY=your-api-key-here
 ```
 
 ## 🚀 Setup par environnement
