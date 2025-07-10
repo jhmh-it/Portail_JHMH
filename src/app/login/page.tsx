@@ -15,7 +15,7 @@ export default function LoginPage() {
   // Rediriger si déjà connecté
   useEffect(() => {
     if (user) {
-      router.push('/dashboard');
+      router.push('/home');
     }
   }, [user, router]);
 

@@ -43,37 +43,38 @@ import {
 import { useAccountingTools } from '@/hooks/useAccountingTools';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
+import { useLoadingStore } from '@/stores/loading-store';
 
 // Menu items pour la navigation principale
 const data = {
   navMain: [
     {
-      title: 'Tableau de bord',
-      url: '/dashboard',
+      title: 'Accueil',
+      url: '/home',
       icon: Home,
     },
   ],
   tools: [
     {
       title: 'Accounting Tool',
-      url: '/dashboard/accounting',
+      url: '/home/accounting',
       icon: Calculator,
     },
     {
-      title: 'Réservations',
-      url: '/dashboard/reservations',
+      title: 'Exploitation Information',
+      url: '/home/exploitation',
       icon: BookOpen,
     },
     {
       title: 'RM Tool',
-      url: '/dashboard/rm',
+      url: '/home/rm',
       icon: Users,
     },
   ],
   navSecondary: [
     {
       title: 'Paramètres',
-      url: '/dashboard/settings',
+      url: '/home/settings',
       icon: Settings,
     },
   ],
@@ -83,13 +84,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: user } = useUser();
   const { logout } = useAuth();
   const router = useRouter();
+  const { showLoading } = useLoadingStore();
   const { accountingTools, isLoading: isLoadingAccountingTools } =
     useAccountingTools();
   const [expandedAccountingTool, setExpandedAccountingTool] =
     React.useState(false);
+  const [expandedExploitationTool, setExpandedExploitationTool] =
+    React.useState(false);
   const [clickTimeout, setClickTimeout] = React.useState<NodeJS.Timeout | null>(
     null
   );
+  const [exploitationClickTimeout, setExploitationClickTimeout] =
+    React.useState<NodeJS.Timeout | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -100,7 +106,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   const handleSettings = () => {
-    router.push('/dashboard/settings');
+    router.push('/home/settings');
   };
 
   const handleAccountingToolClick = () => {
@@ -109,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       clearTimeout(clickTimeout);
       setClickTimeout(null);
       // Double clic : rediriger vers la page principale
-      router.push('/dashboard/accounting');
+      router.push('/home/accounting');
       return;
     }
 
@@ -123,14 +129,45 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setClickTimeout(timeout);
   };
 
-  // Nettoyer le timeout au démontage du composant
+  const handleExploitationToolClick = () => {
+    // Si un timeout existe déjà, c'est un double clic
+    if (exploitationClickTimeout) {
+      clearTimeout(exploitationClickTimeout);
+      setExploitationClickTimeout(null);
+      // Double clic : rediriger vers la page principale
+      router.push('/home/exploitation');
+      return;
+    }
+
+    // Premier clic : démarrer le timeout pour détecter un éventuel double clic
+    const timeout = setTimeout(() => {
+      // Simple clic : toggle le dropdown
+      setExpandedExploitationTool(prev => !prev);
+      setExploitationClickTimeout(null);
+    }, 250); // Délai de 250ms pour détecter le double clic
+
+    setExploitationClickTimeout(timeout);
+  };
+
+  const handleReservationsClick = () => {
+    showLoading(
+      'Chargement de Réservations...',
+      'Veuillez patienter pendant le chargement des données.'
+    );
+    router.push('/home/exploitation/reservations');
+  };
+
+  // Nettoyer les timeouts au démontage du composant
   React.useEffect(() => {
     return () => {
       if (clickTimeout) {
         clearTimeout(clickTimeout);
       }
+      if (exploitationClickTimeout) {
+        clearTimeout(exploitationClickTimeout);
+      }
     };
-  }, [clickTimeout]);
+  }, [clickTimeout, exploitationClickTimeout]);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -138,7 +175,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/dashboard" className="flex items-center justify-center">
+              <a href="/home" className="flex items-center justify-center">
                 <Image
                   src="/images/logo.webp"
                   alt="Logo JHMH"
@@ -218,9 +255,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 )}
               </SidebarMenuItem>
 
+              {/* Exploitation Information Tool avec sous-menus */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Exploitation Information"
+                  onClick={handleExploitationToolClick}
+                  className="text-black hover:text-black/80 cursor-pointer"
+                >
+                  <BookOpen />
+                  <span>Exploitation Information</span>
+                  {expandedExploitationTool ? (
+                    <ChevronDown className="ml-auto h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="ml-auto h-4 w-4" />
+                  )}
+                </SidebarMenuButton>
+
+                {expandedExploitationTool && (
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={handleReservationsClick}
+                        className="text-black hover:text-black/80 cursor-pointer"
+                      >
+                        <span>Réservations</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+
               {/* Autres outils restent statiques */}
               {data.tools
-                .filter(tool => tool.title !== 'Accounting Tool')
+                .filter(
+                  tool =>
+                    tool.title !== 'Accounting Tool' &&
+                    tool.title !== 'Exploitation Information'
+                )
                 .map(item => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton tooltip={item.title} asChild>

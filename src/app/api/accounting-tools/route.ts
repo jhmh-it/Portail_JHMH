@@ -6,27 +6,11 @@ export async function GET() {
     const accountingTools = [
       {
         id: 'dashboard',
-        name: 'Tableau de bord',
+        name: 'Dashboard',
         description: "Vue d'ensemble des performances financières",
         icon: 'BarChart3',
-        href: '/dashboard/accounting/dashboard',
+        href: '/home/accounting/dashboard',
         category: 'analytics',
-      },
-      {
-        id: 'analytics',
-        name: 'Analytics',
-        description: 'Analyses détaillées et rapports financiers',
-        icon: 'TrendingUp',
-        href: '/dashboard/accounting/analytics',
-        category: 'analytics',
-      },
-      {
-        id: 'booking',
-        name: 'Booking',
-        description: 'Gestion des réservations et calendrier',
-        icon: 'Calendar',
-        href: '/dashboard/accounting/booking',
-        category: 'management',
       },
     ];
 

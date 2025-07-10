@@ -48,7 +48,7 @@ export default function SettingsPage() {
     React.useState<SettingsSection>('general');
 
   const breadcrumbs = [
-    { label: 'Tableau de bord', href: '/dashboard' },
+    { label: 'Accueil', href: '/home' },
     { label: 'Paramètres' },
   ];
 

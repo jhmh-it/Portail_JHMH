@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 // Routes protégées qui nécessitent une authentification
-const protectedRoutes = ['/dashboard'];
+const protectedRoutes = ['/home'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -23,13 +23,13 @@ export function middleware(request: NextRequest) {
 
   // Si l'utilisateur est connecté et essaie d'accéder à la page de login
   if (pathname === '/login' && sessionCookie) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/home', request.url));
   }
 
   // Rediriger la page d'accueil vers le dashboard si connecté, sinon vers login
   if (pathname === '/') {
     if (sessionCookie) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/home', request.url));
     } else {
       return NextResponse.redirect(new URL('/login', request.url));
     }

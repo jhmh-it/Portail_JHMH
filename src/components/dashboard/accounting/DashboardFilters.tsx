@@ -1,4 +1,4 @@
-import { RefreshCw, Search } from 'lucide-react';
+import { RefreshCw, Search, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,20 +81,40 @@ export function DashboardFilters({
                 className="w-full"
                 aria-describedby={actifsError ? 'actif-error' : undefined}
               >
-                <SelectValue placeholder="Choisir un actif" />
+                <div className="flex items-center gap-2 w-full">
+                  {isLoadingActifs && (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  )}
+                  <SelectValue
+                    placeholder={
+                      isLoadingActifs
+                        ? 'Chargement des actifs...'
+                        : 'Choisir un actif'
+                    }
+                  />
+                </div>
               </SelectTrigger>
               <SelectContent>
-                {actifs.map(actif => (
-                  <SelectItem key={actif.id} value={actif.id}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`h-2 w-2 rounded-full ${getActifColor(actif.type)}`}
-                        aria-hidden="true"
-                      />
-                      <span className="font-medium">{actif.label}</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                {isLoadingActifs ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <span className="text-sm text-muted-foreground">
+                      Chargement...
+                    </span>
+                  </div>
+                ) : (
+                  actifs.map(actif => (
+                    <SelectItem key={actif.id} value={actif.id}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`h-2 w-2 rounded-full ${getActifColor(actif.type)}`}
+                          aria-hidden="true"
+                        />
+                        <span className="font-medium">{actif.label}</span>
+                      </div>
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             {actifsError && (

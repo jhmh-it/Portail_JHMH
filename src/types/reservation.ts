@@ -55,6 +55,7 @@ export interface UseReservationsParams {
 export interface UseReservationsReturn {
   data: ReservationsResponse | undefined;
   isLoading: boolean;
+  isFetching: boolean;
   error: Error | null;
   refetch: () => void;
   isSuccess: boolean;

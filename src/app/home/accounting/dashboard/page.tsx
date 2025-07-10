@@ -55,8 +55,8 @@ export default function AccountingDashboardPage() {
   } = useDashboardMetrics(getAPIParams());
 
   const breadcrumbs = [
-    { label: 'Tableau de bord', href: '/dashboard' },
-    { label: 'Accounting Tool', href: '/dashboard/accounting' },
+    { label: 'Accueil', href: '/home' },
+    { label: 'Accounting Tool', href: '/home/accounting' },
     { label: 'Dashboard' },
   ];
 

@@ -5,34 +5,40 @@ import * as React from 'react';
 
 import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useUser } from '@/hooks/useUser';
 
 export default function DashboardPage() {
   const { data: user } = useUser();
 
-  const breadcrumbs = [{ label: 'Tableau de bord' }];
+  const breadcrumbs = [{ label: 'Accueil' }];
 
   const tools = [
     {
       title: 'Accounting Tool',
       description: 'Outil de gestion comptable et financière',
       icon: Calculator,
-      href: '/dashboard/accounting',
+      href: '/home/accounting',
       available: true, // Maintenant disponible
     },
     {
-      title: 'Réservations',
-      description: 'Gestion et suivi des réservations en temps réel',
+      title: 'Exploitation',
+      description: "Outils d'analyse et de gestion de l'exploitation",
       icon: BookOpen,
-      href: '/dashboard/reservations',
+      href: '/home/exploitation',
       available: true, // Maintenant disponible
     },
     {
       title: 'RM Tool',
       description: 'Outil de gestion des relations clients',
       icon: Users,
-      href: '/dashboard/rm',
+      href: '/home/rm',
       available: false, // Pour l'instant pas encore disponible
     },
   ];
@@ -47,7 +53,7 @@ export default function DashboardPage() {
           </h1>
           <p className="text-muted-foreground">
             Accédez aux outils internes de l&apos;entreprise depuis votre
-            tableau de bord.
+            portail d&apos;accueil.
           </p>
         </div>
 
@@ -63,17 +69,17 @@ export default function DashboardPage() {
                 className="relative hover:shadow-md transition-shadow"
               >
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-navy">
+                  <div className="flex items-center gap-1">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-navy/10">
                       <tool.icon className="h-5 w-5 text-navy" />
                     </div>
-                    {tool.title}
-                  </CardTitle>
+                    <CardTitle className="text-navy">{tool.title}</CardTitle>
+                  </div>
+                  <CardDescription className="text-sm">
+                    {tool.description}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {tool.description}
-                  </p>
                   <Button
                     className="w-full bg-navy text-white hover:bg-navy/90"
                     disabled={!tool.available}

@@ -29,7 +29,7 @@ export const useAuth = () => {
         showAuthSuccess('Connexion réussie !');
         // Invalider le cache pour forcer le refetch des données utilisateur
         queryClient.invalidateQueries({ queryKey: ['user'] });
-        router.push('/dashboard');
+        router.push('/home');
       }
     },
     onError: (error: unknown) => {
