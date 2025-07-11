@@ -219,6 +219,7 @@ const generateMockData = (
             accommodationHT: 43617.75,
             occupancyPercentage: 74.44,
             adrHT: 440.26,
+            adrHTIncludingCleaning: 440.26,
           },
           nextWeek: {
             weekIdentifier: '2025-07 W29',

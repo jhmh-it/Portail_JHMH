@@ -6,6 +6,7 @@ import {
   formatPercentage,
   getSafeValue,
 } from '@/lib/dashboard-utils';
+import { cn } from '@/lib/utils';
 import type { DashboardMetrics } from '@/types/dashboard';
 
 import { MetricCard } from '../index';
@@ -108,6 +109,28 @@ export function HistoryTab({ metrics }: HistoryTabProps) {
     percentage: getSafeValue(
       databaseStatistics.yoy2025vs2024AsOfJune30.percentage
     ),
+  };
+
+  // Fonction pour déterminer la couleur de la croissance
+  const getGrowthColorClass = (percentage: number) => {
+    if (percentage > 0) {
+      return 'text-green-600';
+    } else if (percentage < 0) {
+      return 'text-red-600';
+    } else {
+      return 'text-gray-600';
+    }
+  };
+
+  // Fonction pour déterminer le texte de l'évolution
+  const getGrowthText = (percentage: number) => {
+    if (percentage > 0) {
+      return 'croissance';
+    } else if (percentage < 0) {
+      return 'décroissance';
+    } else {
+      return 'stabilité';
+    }
   };
 
   return (
@@ -267,15 +290,24 @@ export function HistoryTab({ metrics }: HistoryTabProps) {
                 <div className="flex-shrink-0 mx-8 text-center">
                   <div className="flex items-center justify-center mb-2">
                     <TrendingUp
-                      className="h-6 w-6 text-navy"
+                      className={cn(
+                        'h-6 w-6',
+                        getGrowthColorClass(yoyComparison.percentage)
+                      )}
                       aria-hidden="true"
                     />
                   </div>
-                  <div className="text-2xl font-bold text-navy">
-                    +{formatPercentage(yoyComparison.percentage)}
+                  <div
+                    className={cn(
+                      'text-2xl font-bold',
+                      getGrowthColorClass(yoyComparison.percentage)
+                    )}
+                  >
+                    {yoyComparison.percentage > 0 ? '+' : ''}
+                    {formatPercentage(yoyComparison.percentage)}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    de croissance
+                    de {getGrowthText(yoyComparison.percentage)}
                   </div>
                 </div>
 

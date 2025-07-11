@@ -82,31 +82,33 @@ export function PerformanceCard({
           {hasComparison && (
             <>
               <Separator />
-              <div
-                className="flex items-center justify-center gap-2"
-                role="status"
-              >
-                <TrendIcon
-                  className={`h-4 w-4 ${getPerformanceColorClass(
-                    mainValue,
-                    comparisonValue,
-                    comparisonMetric.type
-                  )}`}
-                  aria-hidden="true"
-                />
-                <span
-                  className={`font-medium ${getPerformanceColorClass(
-                    mainValue,
-                    comparisonValue,
-                    comparisonMetric.type
-                  )}`}
-                >
-                  {isPositive ? '+' : ''}
-                  {changePercentage.toFixed(1)}%
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {comparisonMetric.label}
-                </span>
+              <div className="flex flex-col items-center gap-2" role="status">
+                <div className="flex items-center gap-2">
+                  <TrendIcon
+                    className={`h-4 w-4 ${getPerformanceColorClass(
+                      mainValue,
+                      comparisonValue,
+                      comparisonMetric.type
+                    )}`}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={`font-medium ${getPerformanceColorClass(
+                      mainValue,
+                      comparisonValue,
+                      comparisonMetric.type
+                    )}`}
+                  >
+                    {isPositive ? '+' : ''}
+                    {changePercentage.toFixed(1)}%
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {comparisonMetric.label}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground text-center">
+                  Référence : {formatValue(comparisonValue, mainMetric.format)}
+                </div>
               </div>
             </>
           )}

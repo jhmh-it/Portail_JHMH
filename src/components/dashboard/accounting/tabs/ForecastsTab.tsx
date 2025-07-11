@@ -1,10 +1,4 @@
-import {
-  Calendar,
-  TrendingUp,
-  Building2,
-  AlertTriangle,
-  CheckCircle,
-} from 'lucide-react';
+import { TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -22,22 +16,12 @@ import {
 } from '@/lib/dashboard-utils';
 import type { DashboardMetrics } from '@/types/dashboard';
 
-import { MetricCard, PerformanceCard } from '../index';
-
 interface ForecastsTabProps {
   metrics: DashboardMetrics;
 }
 
 export function ForecastsTab({ metrics }: ForecastsTabProps) {
   const { databaseStatistics, forecast } = metrics;
-
-  // Données pour le scénario mensuel de pointe
-  const peakMonthData = {
-    maxTheoretical: getSafeValue(forecast.maximums.maxTheoreticalAccommodation),
-    maxOccupancy: getSafeValue(forecast.maximums.maxOccupationPercentage),
-    monthIdentifier: forecast.maximums.monthIdentifier,
-    year: forecast.maximums.year,
-  };
 
   // Données tableau prévisions 2025
   const forecasts2025Data = [
@@ -57,16 +41,6 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
       value: getSafeValue(forecast.realized2025),
       progress: null,
       context: `+${formatCurrency(getSafeValue(forecast.realized2025) - getSafeValue(databaseStatistics.totalRevenues.totalAccommodationServicesHT))} vs 2024 total`,
-    },
-    {
-      indicator: 'Opportunités disponibles',
-      description: 'Potentiel de revenus non encore réalisé',
-      value: getSafeValue(forecast.modifiedOpportunity2025),
-      progress: calculateAchievementRate(
-        getSafeValue(forecast.modifiedOpportunity2025),
-        getSafeValue(forecast.accommodationHT)
-      ),
-      context: 'Reste à convertir',
     },
     {
       indicator: 'Potentiel maximum théorique',
@@ -91,53 +65,69 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
     },
   ];
 
-  // Métriques pipeline
-  const pipelineMetrics = [
-    {
-      title: 'Réservations futures confirmées',
-      value: getSafeValue(databaseStatistics.databaseInfo.totalFutureBookings),
-      format: 'number' as const,
-      subtitle: 'Réservations avec dates futures',
-    },
-  ];
-
   return (
     <div className="space-y-6">
-      {/* 1. Scénarios détaillés pour le mois de pointe */}
+      {/* 1. Opportunités et risques */}
       <section>
-        <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5" aria-hidden="true" />
-          Scénarios pour le mois de {peakMonthData.monthIdentifier}/
-          {peakMonthData.year}
+        <h2 className="text-xl font-semibold text-navy mb-4">
+          Opportunités et risques
         </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Analyse détaillée du potentiel pour le mois de pointe identifié
-        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-navy flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+                Ventes manquées
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="text-2xl font-bold text-red-600">
+                  {formatCurrency(
+                    getSafeValue(
+                      databaseStatistics.thisMonth.missedSalesTTC?.amount
+                    )
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {getSafeValue(
+                    databaseStatistics.thisMonth.missedSalesTTC?.count
+                  )}{' '}
+                  occasions manquées ce mois
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        <div className="grid grid-cols-1 max-w-lg">
-          {/* Carte du maximum théorique */}
-          <PerformanceCard
-            title="Maximum théorique mensuel"
-            icon={TrendingUp}
-            mainMetric={{
-              label: 'Revenus possibles',
-              value: peakMonthData.maxTheoretical,
-              format: 'currency',
-              badgeText: `${peakMonthData.maxOccupancy}%`,
-            }}
-            additionalMetrics={[
-              {
-                label: `Avec ${peakMonthData.maxOccupancy}% d'occupation`,
-                value: 0,
-                format: 'number',
-                badgeText: `${peakMonthData.monthIdentifier}/${peakMonthData.year}`,
-              },
-            ]}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-navy flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" aria-hidden="true" />
+                Opportunités disponibles
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="text-2xl font-bold text-green-600">
+                  {formatCurrency(
+                    getSafeValue(
+                      databaseStatistics.thisMonth.opportunityTTC?.amount
+                    )
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {getSafeValue(
+                    databaseStatistics.thisMonth.opportunityTTC?.count
+                  )}{' '}
+                  créneaux libres à saisir
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
-      {/* 2. Tableau unifié des prévisions 2025 */}
+      {/* 2. Prévisions et Scénarios 2025 */}
       <section>
         <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
           <TrendingUp className="h-5 w-5" aria-hidden="true" />
@@ -215,87 +205,6 @@ export function ForecastsTab({ metrics }: ForecastsTabProps) {
             </Table>
           </CardContent>
         </Card>
-      </section>
-
-      {/* 3. Pipeline de réservations futures */}
-      <section>
-        <h2 className="text-xl font-semibold text-navy mb-4 flex items-center gap-2">
-          <Building2 className="h-5 w-5" aria-hidden="true" />
-          Pipeline de réservations futures
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 max-w-md">
-          {pipelineMetrics.map((metric, index) => (
-            <MetricCard
-              key={`pipeline-${index}`}
-              title={metric.title}
-              value={metric.value}
-              format={metric.format}
-              subtitle={metric.subtitle}
-              size="md"
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Ventes manquées et Opportunités côte à côte */}
-      <section>
-        <h2 className="text-xl font-semibold text-navy mb-4">
-          Opportunités et risques
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-navy flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
-                Ventes manquées
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-2xl font-bold text-red-600">
-                  {formatCurrency(
-                    getSafeValue(
-                      databaseStatistics.thisMonth.missedSalesTTC?.amount
-                    )
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {getSafeValue(
-                    databaseStatistics.thisMonth.missedSalesTTC?.count
-                  )}{' '}
-                  occasions manquées ce mois
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-navy flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" aria-hidden="true" />
-                Opportunités disponibles
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-2xl font-bold text-green-600">
-                  {formatCurrency(
-                    getSafeValue(
-                      databaseStatistics.thisMonth.opportunityTTC?.amount
-                    )
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {getSafeValue(
-                    databaseStatistics.thisMonth.opportunityTTC?.count
-                  )}{' '}
-                  créneaux libres à saisir
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </section>
     </div>
   );
