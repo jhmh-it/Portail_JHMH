@@ -144,3 +144,53 @@ gcloud projects get-iam-policy portail-jhmh
 **📝 Statut** : APIs à activer manuellement (one-time setup)  
 **⏱️ Durée** : 2-3 minutes via console Google Cloud  
 **🔄 Fréquence** : Une seule fois par projet Firebase
+
+## 🔧 Configuration CI/CD
+
+### Problème fréquent : Environnement virtuel Python manquant
+
+**Erreur** :
+
+```
+Error: Failed to find location of Firebase Functions SDK: Missing virtual environment at venv directory.
+```
+
+**Solution** : Les workflows GitHub Actions doivent créer l'environnement virtuel Python :
+
+```yaml
+- name: 🔒 Deploy Cloud Functions
+  run: |
+    # Configuration de l'environnement Python
+    cd functions
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    cd ..
+
+    # Ensuite déployer
+    firebase deploy --only functions --project portail-jhmh
+```
+
+## 🚨 Dépannage
+
+### 1. Erreur "API not enabled"
+
+- Vérifier que toutes les APIs sont activées
+- Attendre 1-2 minutes après activation
+
+### 2. Erreur "Permission denied"
+
+- Vérifier les permissions du service account Firebase
+- Le service account doit avoir le rôle `Firebase Admin`
+
+### 3. Erreur "Quota exceeded"
+
+- Vérifier les quotas Google Cloud Console
+- Passer à un plan payant si nécessaire
+
+## 🔗 Liens utiles
+
+- [Console Google Cloud APIs](https://console.cloud.google.com/apis/dashboard?project=portail-jhmh)
+- [Documentation Firebase Functions](https://firebase.google.com/docs/functions)
+- [Troubleshooting Firebase CLI](https://firebase.google.com/docs/cli#troubleshooting)
