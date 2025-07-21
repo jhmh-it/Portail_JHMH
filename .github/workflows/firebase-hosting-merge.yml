@@ -230,21 +230,22 @@ jobs:
           # Installation de Firebase CLI
           npm install -g firebase-tools
 
-          # Configuration de l'environnement Python pour les Cloud Functions
-          cd functions
-          echo "🐍 Configuration de l'environnement Python..."
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          cd ..
-
           # Authentification avec service account
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
 
-          # Déploiement des functions avec gestion d'erreur améliorée
-          if ! firebase deploy --only functions --project portail-jhmh; then
+          # Configuration de l'environnement Python et déploiement
+          cd functions && \
+          echo "🐍 Configuration de l'environnement Python..." && \
+          python3 -m venv venv && \
+          source venv/bin/activate && \
+          pip install --upgrade pip && \
+          pip install -r requirements.txt && \
+          cd .. && \
+          firebase deploy --only functions --project portail-jhmh
+
+          # Vérification du succès
+          if [ $? -ne 0 ]; then
             echo "❌ Échec du déploiement des Cloud Functions"
             echo ""
             echo "🔍 Causes possibles :"

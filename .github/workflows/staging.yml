@@ -246,15 +246,14 @@ jobs:
         run: |
           echo "🔒 Déploiement Functions vers staging..."
 
-          # Configuration de l'environnement Python pour les Cloud Functions
-          cd functions
-          echo "🐍 Configuration de l'environnement Python..."
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          cd ..
-
+          # Configuration de l'environnement Python et déploiement
+          cd functions && \
+          echo "🐍 Configuration de l'environnement Python..." && \
+          python3 -m venv venv && \
+          source venv/bin/activate && \
+          pip install --upgrade pip && \
+          pip install -r requirements.txt && \
+          cd .. && \
           firebase deploy --only functions --project ${{ env.FIREBASE_PROJECT_STAGING }}
 
       - name: 🧹 Cleanup Firebase Auth

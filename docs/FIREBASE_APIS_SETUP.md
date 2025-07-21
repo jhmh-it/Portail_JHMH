@@ -155,22 +155,29 @@ gcloud projects get-iam-policy portail-jhmh
 Error: Failed to find location of Firebase Functions SDK: Missing virtual environment at venv directory.
 ```
 
-**Solution** : Les workflows GitHub Actions doivent créer l'environnement virtuel Python :
+**Cause** : Firebase CLI recherche l'environnement virtuel Python activé pour déployer les Cloud Functions Python.
+
+**Solution** : Les workflows GitHub Actions doivent créer ET garder activé l'environnement virtuel Python pendant le déploiement :
 
 ```yaml
 - name: 🔒 Deploy Cloud Functions
   run: |
-    # Configuration de l'environnement Python
-    cd functions
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install --upgrade pip
-    pip install -r requirements.txt
-    cd ..
-
-    # Ensuite déployer
-    firebase deploy --only functions --project portail-jhmh
+    # Configuration de l'environnement Python et déploiement en une seule chaîne
+    cd functions && \
+    echo "🐍 Configuration de l'environnement Python..." && \
+    python3 -m venv venv && \
+    source venv/bin/activate && \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt && \
+    cd .. && \
+    firebase deploy --only functions --project your-project-id
 ```
+
+**⚠️ Points importants** :
+
+- Utiliser `&&` pour chaîner les commandes et garder l'environnement virtuel activé
+- Ne pas séparer les commandes en plusieurs lignes sans `&&`
+- L'environnement virtuel doit être activé au moment du `firebase deploy`
 
 ## 🚨 Dépannage
 
