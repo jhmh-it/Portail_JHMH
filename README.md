@@ -39,7 +39,7 @@ firebase deploy --only functions
 - [Guide de développement](./docs/DEVELOPMENT.md) - Processus et méthodologie
 - [Guide de style](./docs/STYLE_GUIDE.md) - Conventions de code et formatage
 - [Conventions de commits](./docs/COMMITS.md) - Standards pour les messages de commit
-- [Tests et qualité](./docs/TESTING.md) - Stratégie de tests et assurance qualité
+- [Guide de Tests](./docs/TESTING_SETUP.md) - Configuration et stratégie de tests
 
 ### 🤖 Collaboration IA
 

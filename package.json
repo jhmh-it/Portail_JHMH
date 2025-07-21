@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "npm run lint && npm run type-check && echo '✅ Basic quality checks passed - add unit tests here later'",
+    "test:ci": "npm run test && npm run build",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
