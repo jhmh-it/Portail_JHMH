@@ -18,7 +18,17 @@ export function isEmailAllowed(email: string): boolean {
   if (!email) return false;
 
   const normalizedEmail = email.toLowerCase().trim();
-  const domain = normalizedEmail.split('@')[1] ?? '';
+
+  // Vérifier qu'il n'y a pas juste un @ au début
+  if (normalizedEmail.startsWith('@')) return false;
+
+  const parts = normalizedEmail.split('@');
+  if (parts.length !== 2) return false;
+
+  const [localPart, domain] = parts;
+
+  // Vérifier que la partie locale n'est pas vide
+  if (!localPart || localPart.length === 0) return false;
 
   return domain === 'jhmh.com';
 }
@@ -31,7 +41,8 @@ export const beforeUserSignedInRestrictToJhmhDomain = beforeUserSignedIn(
   {
     region: 'europe-west1',
   },
-  async event => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async (event: any) => {
     const email = event.data?.email;
 
     if (!email) {
@@ -56,7 +67,8 @@ export const healthCheck = onRequest(
   {
     region: 'europe-west1',
   },
-  async (req, res) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async (req: any, res: any) => {
     try {
       const allowedEmail = 'test@jhmh.com';
       const blockedEmail = 'test@gmail.com';

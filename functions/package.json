@@ -11,7 +11,7 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "node lib/test.js",
+    "test": "npm run build && node lib/test.js",
     "lint": "echo '✅ Functions linting - à configurer avec ESLint plus tard'"
   },
   "engines": {
