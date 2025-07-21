@@ -12,7 +12,7 @@ on:
       deploy_functions:
         description: 'Déployer aussi les Cloud Functions?'
         required: true
-        default: 'true'
+        default: true
         type: boolean
 
 env:
@@ -126,11 +126,22 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install autopep8
 
       - name: 🧪 Validate Functions
         working-directory: functions
         run: |
           echo "🧪 Validation des Cloud Functions..."
+
+          # Formatage Python
+          echo "🎨 Formatage automatique du code Python..."
+          autopep8 --in-place --max-line-length=100 --aggressive main.py
+
+          # Linting Python
+          echo "🔍 Linting Python avec flake8..."
+          flake8 main.py --max-line-length=100 --ignore=E203,W503
+
+          # Compilation Python
           python -m py_compile main.py
 
           # Lancer les tests de validation si disponibles

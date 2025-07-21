@@ -73,6 +73,19 @@ if git diff --cached --name-only | grep -q "^functions/"; then
     if [ -f "functions/main.py" ]; then
         cd functions
         
+        # Installer autopep8 si nécessaire
+        if ! python3 -c "import autopep8" 2>/dev/null; then
+            print_step "Installation d'autopep8..."
+            pip3 install autopep8 > /dev/null 2>&1
+        fi
+        
+        # Formater le code Python automatiquement
+        if python3 -c "import autopep8" 2>/dev/null; then
+            print_step "Formatage automatique Python..."
+            python3 -m autopep8 --in-place --max-line-length=100 --aggressive main.py
+            print_success "Code Python formaté"
+        fi
+        
         # Vérifier la compilation Python
         if python3 -m py_compile main.py 2>/dev/null; then
             print_success "Cloud Functions: compilation OK"
@@ -80,6 +93,15 @@ if git diff --cached --name-only | grep -q "^functions/"; then
             print_error "Cloud Functions: erreur de compilation"
             cd ..
             exit 1
+        fi
+        
+        # Linting avec flake8 si disponible
+        if python3 -c "import flake8" 2>/dev/null; then
+            if python3 -m flake8 main.py --max-line-length=100 --ignore=E203,W503 > /dev/null 2>&1; then
+                print_success "Cloud Functions: linting OK"
+            else
+                print_warning "Cloud Functions: avertissements de style"
+            fi
         fi
         
         # Lancer les tests de validation si disponibles

@@ -118,6 +118,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install autopep8
+
+      - name: 🎨 Format Python Code
+        working-directory: functions
+        run: |
+          echo "🎨 Formatage automatique du code Python..."
+          autopep8 --in-place --max-line-length=100 --aggressive main.py
 
       - name: 🧪 Validate Functions
         working-directory: functions
@@ -130,7 +137,7 @@ jobs:
       - name: 🔍 Python Linting (flake8)
         working-directory: functions
         run: |
-          pip install flake8
+          echo "🔍 Linting Python avec flake8..."
           flake8 main.py --max-line-length=100 --ignore=E203,W503
 
   # 🔐 Audit de Sécurité
