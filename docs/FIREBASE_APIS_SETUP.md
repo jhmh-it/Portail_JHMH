@@ -155,29 +155,90 @@ gcloud projects get-iam-policy portail-jhmh
 Error: Failed to find location of Firebase Functions SDK: Missing virtual environment at venv directory.
 ```
 
-**Cause** : Firebase CLI recherche l'environnement virtuel Python activé pour déployer les Cloud Functions Python.
+**Cause** : Firebase CLI recherche l'environnement virtuel Python activé et les variables d'environnement appropriées pour déployer les Cloud Functions Python.
 
-**Solution** : Les workflows GitHub Actions doivent créer ET garder activé l'environnement virtuel Python pendant le déploiement :
+**Solution ROBUSTE** : Configuration complète de l'environnement Python avec variables d'environnement explicites :
 
 ```yaml
 - name: 🔒 Deploy Cloud Functions
   run: |
-    # Configuration de l'environnement Python et déploiement en une seule chaîne
-    cd functions && \
-    echo "🐍 Configuration de l'environnement Python..." && \
-    python3 -m venv venv && \
-    source venv/bin/activate && \
-    pip install --upgrade pip && \
-    pip install -r requirements.txt && \
-    cd .. && \
+    # Configuration robuste de l'environnement Python
+    echo "🐍 Configuration de l'environnement Python..."
+    cd functions
+
+    # Créer l'environnement virtuel
+    python3 -m venv venv
+
+    # Définir les variables d'environnement pour Firebase CLI
+    export VIRTUAL_ENV="$(pwd)/venv"
+    export PATH="$VIRTUAL_ENV/bin:$PATH"
+    export PYTHONPATH="$VIRTUAL_ENV/lib/python3.10/site-packages:$PYTHONPATH"
+
+    # Activer l'environnement virtuel
+    source venv/bin/activate
+
+    # Vérifier l'environnement
+    echo "Python path: $(which python)"
+    echo "Pip path: $(which pip)"
+    echo "Virtual env: $VIRTUAL_ENV"
+
+    # Installer les dépendances
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    pip show functions-framework || pip install functions-framework
+
+    # Retourner au répertoire racine
+    cd ..
+
+    # Déployer avec les variables d'environnement définies
+    VIRTUAL_ENV="$(pwd)/functions/venv" \
+    PATH="$(pwd)/functions/venv/bin:$PATH" \
     firebase deploy --only functions --project your-project-id
 ```
 
-**⚠️ Points importants** :
+### 🧪 Test local
 
-- Utiliser `&&` pour chaîner les commandes et garder l'environnement virtuel activé
-- Ne pas séparer les commandes en plusieurs lignes sans `&&`
-- L'environnement virtuel doit être activé au moment du `firebase deploy`
+Pour tester la configuration localement, utilisez le script fourni :
+
+```bash
+# Exécuter le script de test
+./functions/test_deploy.sh
+
+# Ou manuellement :
+cd functions
+chmod +x test_deploy.sh
+./test_deploy.sh
+```
+
+**⚠️ Points critiques** :
+
+1. **Variables d'environnement explicites** : `VIRTUAL_ENV`, `PATH`, `PYTHONPATH`
+2. **Firebase Functions Framework** : Doit être installé via pip
+3. **Activation persistante** : L'environnement virtuel doit rester activé
+4. **Chemin absolu** : Utiliser `$(pwd)/functions/venv` pour le chemin complet
+
+### 🔧 Alternative: Configuration système
+
+Si l'approche ci-dessus ne fonctionne pas, utiliser la configuration système :
+
+```yaml
+- name: Set up Python
+  uses: actions/setup-python@v5
+  with:
+    python-version: '3.10'
+
+- name: Install Python dependencies globally
+  run: |
+    pip install --upgrade pip
+    pip install functions-framework
+    cd functions
+    pip install -r requirements.txt
+    cd ..
+
+- name: Deploy without venv
+  run: |
+    firebase deploy --only functions --project your-project-id
+```
 
 ## 🚨 Dépannage
 

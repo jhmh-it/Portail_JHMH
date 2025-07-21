@@ -234,19 +234,52 @@ jobs:
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
 
-          # Configuration de l'environnement Python et déploiement
-          cd functions && \
-          echo "🐍 Configuration de l'environnement Python..." && \
-          python3 -m venv venv && \
-          source venv/bin/activate && \
-          pip install --upgrade pip && \
-          pip install -r requirements.txt && \
-          cd .. && \
+          # Configuration robuste de l'environnement Python
+          echo "🐍 Configuration de l'environnement Python..."
+          cd functions
+
+          # Créer l'environnement virtuel
+          python3 -m venv venv
+
+          # Définir les variables d'environnement pour Firebase CLI
+          export VIRTUAL_ENV="$(pwd)/venv"
+          export PATH="$VIRTUAL_ENV/bin:$PATH"
+          export PYTHONPATH="$VIRTUAL_ENV/lib/python3.10/site-packages:$PYTHONPATH"
+
+          # Activer l'environnement virtuel
+          source venv/bin/activate
+
+          # Vérifier que l'environnement est correctement configuré
+          echo "Python path: $(which python)"
+          echo "Pip path: $(which pip)"
+          echo "Virtual env: $VIRTUAL_ENV"
+
+          # Installer les dépendances
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+          # Vérifier l'installation de Firebase Functions Framework
+          pip show functions-framework || pip install functions-framework
+
+          # Retourner au répertoire racine
+          cd ..
+
+          # Déployer avec les variables d'environnement définies
+          echo "🚀 Déploiement Firebase Functions..."
+          VIRTUAL_ENV="$(pwd)/functions/venv" \
+          PATH="$(pwd)/functions/venv/bin:$PATH" \
           firebase deploy --only functions --project portail-jhmh
 
           # Vérification du succès
           if [ $? -ne 0 ]; then
             echo "❌ Échec du déploiement des Cloud Functions"
+            echo ""
+            echo "🔍 Diagnostic de l'environnement Python :"
+            echo "Working directory: $(pwd)"
+            echo "Python executable: $(which python3)"
+            echo "Pip executable: $(which pip3)"
+            echo "Functions venv exists: $(test -d functions/venv && echo 'YES' || echo 'NO')"
+            echo "Functions venv/bin exists: $(test -d functions/venv/bin && echo 'YES' || echo 'NO')"
             echo ""
             echo "🔍 Causes possibles :"
             echo "1. APIs Google Cloud manquantes (cloudbuild.googleapis.com, artifactregistry.googleapis.com)"

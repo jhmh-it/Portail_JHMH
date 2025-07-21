@@ -1,0 +1,93 @@
+name: 🔒 Firebase Functions Deployment (Backup)
+
+# Workflow de backup pour déployer les Cloud Functions sans environnement virtuel
+# À utiliser si le workflow principal échoue
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy-functions:
+    name: 🔒 Deploy Functions (Backup Method)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: 🔧 Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install Global Python Dependencies
+        run: |
+          echo "📦 Installation des dépendances Python globales..."
+          pip install --upgrade pip
+          pip install functions-framework firebase-admin
+
+      - name: 📦 Install Functions Dependencies
+        run: |
+          echo "📦 Installation des dépendances Functions..."
+          cd functions
+          pip install -r requirements.txt
+          cd ..
+
+      - name: 🧪 Test Functions
+        run: |
+          echo "🧪 Test des Cloud Functions..."
+          cd functions
+          python3 test_validation.py
+          cd ..
+
+      - name: 📦 Install Firebase CLI
+        run: |
+          echo "🔧 Installation Firebase CLI..."
+          npm install -g firebase-tools
+
+      - name: 🔐 Setup Firebase Authentication
+        run: |
+          echo "🔐 Configuration de l'authentification Firebase..."
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_PORTAIL_JHMH }}" > /tmp/service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
+
+      - name: 🚀 Deploy to Production
+        if: github.event.inputs.environment == 'production'
+        run: |
+          echo "🚀 Déploiement vers production (backup method)..."
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
+          firebase deploy --only functions --project portail-jhmh
+
+      - name: 🚀 Deploy to Staging
+        if: github.event.inputs.environment == 'staging'
+        run: |
+          echo "🚀 Déploiement vers staging (backup method)..."
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
+          firebase deploy --only functions --project portail-jhmh-staging
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          rm -f /tmp/service-account.json
+
+      - name: ✅ Deployment Success
+        run: |
+          echo "✅ Déploiement réussi avec la méthode de backup !"
+          echo "🔍 Les Cloud Functions ont été déployées sans environnement virtuel"
