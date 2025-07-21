@@ -226,10 +226,21 @@ jobs:
         if: github.event.inputs.deploy_functions != 'false'
         run: |
           echo "🔒 Déploiement des Cloud Functions..."
+
+          # Installation de Firebase CLI
           npm install -g firebase-tools
-          firebase deploy --only functions --project portail-jhmh --token "$FIREBASE_TOKEN"
+
+          # Authentification avec service account
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
+
+          # Déploiement des functions
+          firebase deploy --only functions --project portail-jhmh
+
+          # Nettoyage
+          rm -f /tmp/service-account.json
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PORTAIL_JHMH }}
 
   # 🧪 Tests Post-Déploiement
   post-deployment-tests:

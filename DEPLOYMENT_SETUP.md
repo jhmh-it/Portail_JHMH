@@ -4,7 +4,7 @@
 
 ### 1. **GitHub Secrets & Variables**
 
-⚠️ **IMPORTANT** : Les workflows nécessitent maintenant **9 secrets Firebase** pour fonctionner.
+⚠️ **IMPORTANT** : Les workflows nécessitent maintenant **8 secrets Firebase** pour fonctionner.
 
 📖 **Guide complet** : [Configuration des Secrets GitHub Actions](./docs/GITHUB_SECRETS_CONFIG.md)
 
@@ -13,7 +13,6 @@
 ```bash
 # 🔥 Firebase Admin (déploiement)
 FIREBASE_SERVICE_ACCOUNT_PORTAIL_JHMH   # JSON du service account Firebase
-FIREBASE_TOKEN                          # Token Firebase CLI
 
 # 🌐 Firebase Client (publiques)
 NEXT_PUBLIC_FIREBASE_API_KEY
@@ -32,13 +31,10 @@ FIREBASE_PRIVATE_KEY
 **Configuration rapide** :
 
 ```bash
-# 1. Token CLI
-firebase login:ci
-
-# 2. Service Account JSON
+# 1. Service Account JSON (pour déploiements)
 # Console Firebase > Project Settings > Service Accounts > Generate new private key
 
-# 3. Config Client/Server
+# 2. Config Client/Server (pour build)
 # Console Firebase > Project Settings > General > Your apps
 ```
 

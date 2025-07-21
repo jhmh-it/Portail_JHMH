@@ -13,11 +13,7 @@ Ce document liste tous les secrets GitHub Actions nécessaires pour que les work
 FIREBASE_SERVICE_ACCOUNT_PORTAIL_JHMH
 # Contenu : JSON complet du service account Firebase
 # Source : Console Firebase > Project Settings > Service Accounts > Generate new private key
-
-# 🎯 Firebase CLI Token (pour déploiement)
-FIREBASE_TOKEN
-# Commande pour obtenir : firebase login:ci
-# Utilisation : Authentification Firebase CLI dans GitHub Actions
+# Utilisation : Authentification Firebase CLI et déploiements (hosting + functions)
 ```
 
 ### **Firebase Configuration (Client)**
@@ -64,13 +60,12 @@ FIREBASE_PRIVATE_KEY         # Clé privée du service account (avec \n préserv
 # 4. Copier TOUT le contenu JSON dans le secret GitHub
 ```
 
-#### **B. Firebase CLI Token (FIREBASE_TOKEN)**
+#### **B. Configuration du Service Account**
 
 ```bash
-# Dans votre terminal :
-firebase login:ci
-
-# Copier le token généré dans le secret GitHub
+# Le service account remplace le token CLI et offre une sécurité renforcée
+# Il permet l'authentification pour hosting ET functions
+# Plus stable et recommandé pour la production
 ```
 
 #### **C. Configuration Client (NEXT*PUBLIC*\*)**
@@ -131,11 +126,11 @@ Après configuration, vérifiez que les secrets sont bien définis :
 # ✅ Solution : Garder les sauts de ligne comme dans le JSON original
 ```
 
-### **3. "Firebase token expired"**
+### **3. "Failed to authenticate, have you run firebase login?"**
 
 ```bash
-# ❌ Cause : FIREBASE_TOKEN expiré
-# ✅ Solution : Régénérer avec firebase login:ci
+# ❌ Cause : Service account mal configuré ou invalide
+# ✅ Solution : Vérifier FIREBASE_SERVICE_ACCOUNT_PORTAIL_JHMH dans GitHub Secrets
 ```
 
 ### **4. "Service account not found"**
@@ -186,7 +181,6 @@ Après configuration, vérifiez que les secrets sont bien définis :
 ## ✅ Checklist de Validation
 
 - [ ] **FIREBASE_SERVICE_ACCOUNT_PORTAIL_JHMH** : JSON complet copié
-- [ ] **FIREBASE_TOKEN** : Token CLI généré et fonctionnel
 - [ ] **NEXT*PUBLIC*\*** : 6 variables publiques définies
 - [ ] **FIREBASE\_\*** : 3 variables privées définies
 - [ ] **Build test** : `npm run build` fonctionne localement
