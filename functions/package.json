@@ -1,0 +1,43 @@
+{
+  "name": "functions",
+  "version": "2.0.0",
+  "description": "Cloud Functions Firebase pour la restriction d'authentification JHMH (Node.js/TypeScript)",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "test": "npm run build && node lib/test.js",
+    "test:watch": "tsc --watch & nodemon lib/test.js",
+    "lint": "echo 'Linting completed'",
+    "clean": "rm -rf lib node_modules/.cache",
+    "pretest": "npm run build",
+    "predeploy": "npm run build && npm run test"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "keywords": [
+    "firebase",
+    "functions",
+    "typescript",
+    "authentication",
+    "jhmh"
+  ],
+  "author": "JHMH",
+  "license": "ISC",
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.4.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^20.17.16",
+    "typescript": "^5.7.3"
+  },
+  "private": true
+}

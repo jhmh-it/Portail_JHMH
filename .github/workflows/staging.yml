@@ -244,42 +244,24 @@ jobs:
 
       - name: 🔒 Deploy Functions to Staging
         run: |
-          echo "🔒 Déploiement Functions vers staging..."
+          echo "🔒 Déploiement Functions Node.js vers staging..."
 
-          # Configuration robuste de l'environnement Python
-          echo "🐍 Configuration de l'environnement Python..."
+          # Installation et build des Cloud Functions
+          echo "📦 Installation des dépendances Functions..."
           cd functions
+          npm ci
 
-          # Créer l'environnement virtuel
-          python3 -m venv venv
+          echo "🔨 Build des Cloud Functions..."
+          npm run build
 
-          # Définir les variables d'environnement pour Firebase CLI
-          export VIRTUAL_ENV="$(pwd)/venv"
-          export PATH="$VIRTUAL_ENV/bin:$PATH"
-          export PYTHONPATH="$VIRTUAL_ENV/lib/python3.10/site-packages:$PYTHONPATH"
+          echo "🧪 Tests des Cloud Functions..."
+          npm run test
 
-          # Activer l'environnement virtuel
-          source venv/bin/activate
-
-          # Vérifier que l'environnement est correctement configuré
-          echo "Python path: $(which python)"
-          echo "Pip path: $(which pip)"
-          echo "Virtual env: $VIRTUAL_ENV"
-
-          # Installer les dépendances
-          pip install --upgrade pip
-          pip install -r requirements.txt
-
-          # Vérifier l'installation de Firebase Functions Framework
-          pip show functions-framework || pip install functions-framework
-
-          # Retourner au répertoire racine
+          # Retour au répertoire racine
           cd ..
 
-          # Déployer avec les variables d'environnement définies
+          # Déploiement vers staging
           echo "🚀 Déploiement Firebase Functions vers staging..."
-          VIRTUAL_ENV="$(pwd)/functions/venv" \
-          PATH="$(pwd)/functions/venv/bin:$PATH" \
           firebase deploy --only functions --project ${{ env.FIREBASE_PROJECT_STAGING }}
 
       - name: 🧹 Cleanup Firebase Auth

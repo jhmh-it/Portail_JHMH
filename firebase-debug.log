@@ -1,0 +1,21 @@
+[debug] [2025-07-21T17:56:39.643Z] ----------------------------------------------------------------------
+[debug] [2025-07-21T17:56:39.646Z] Command:       /home/renejhmh/.nvm/versions/node/v22.17.0/bin/node /home/renejhmh/.nvm/versions/node/v22.17.0/bin/firebase functions:list
+[debug] [2025-07-21T17:56:39.646Z] CLI Version:   14.11.0
+[debug] [2025-07-21T17:56:39.646Z] Platform:      linux
+[debug] [2025-07-21T17:56:39.647Z] Node Version:  v22.17.0
+[debug] [2025-07-21T17:56:39.647Z] Time:          Mon Jul 21 2025 19:56:39 GMT+0200 (Central European Summer Time)
+[debug] [2025-07-21T17:56:39.647Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-21T17:56:39.905Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-21T17:56:39.905Z] > authorizing via signed-in user (rene@jhmh.com)
+[debug] [2025-07-21T17:56:39.906Z] [iam] checking project portail-jhmh for permissions ["cloudfunctions.functions.list","firebase.projects.get"]
+[debug] [2025-07-21T17:56:39.907Z] Checked if tokens are valid: false, expires at: 1753112553593
+[debug] [2025-07-21T17:56:39.907Z] Checked if tokens are valid: false, expires at: 1753112553593
+[debug] [2025-07-21T17:56:39.907Z] > refreshing access token with scopes: []
+[debug] [2025-07-21T17:56:39.910Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-07-21T17:56:39.910Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-07-21T17:56:40.106Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-07-21T17:56:40.107Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-07-21T17:56:40.128Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/portail-jhmh:testIamPermissions [none]
+[debug] [2025-07-21T17:56:40.128Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/portail-jhmh:testIamPermissions x-goog-quota-user=projects/portail-jhmh
+[debug] [2025-07-21T17:56:40.128Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/portail-jhmh:testIamPermissions {"permissions":["cloudfunctions.functions.list","firebase.projects.get"]}
