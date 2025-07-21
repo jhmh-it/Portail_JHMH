@@ -12,7 +12,6 @@ on:
 
 env:
   NODE_VERSION: '20'
-  PYTHON_VERSION: '3.11'
 
 jobs:
   # 🔍 Analyse statique et qualité du code
@@ -103,7 +102,7 @@ jobs:
             out
           key: ${{ runner.os }}-build-${{ github.sha }}
 
-  # 🔒 Validation des Cloud Functions
+  # 🔒 Validation des Cloud Functions Node.js
   functions-validation:
     name: 🔒 Cloud Functions Validation
     runs-on: ubuntu-latest
@@ -113,37 +112,35 @@ jobs:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       - name: 📦 Install Functions Dependencies
         working-directory: functions
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install autopep8
+          echo "📦 Installation des dépendances Node.js Functions..."
+          npm ci
 
-      - name: 🎨 Format Python Code
+      - name: 🔨 Build Functions
         working-directory: functions
         run: |
-          echo "🎨 Formatage automatique du code Python..."
-          autopep8 --in-place --max-line-length=100 --aggressive main.py
+          echo "🔨 Build des Cloud Functions TypeScript..."
+          npm run build
 
-      - name: 🧪 Validate Functions
+      - name: 🧪 Test Functions
         working-directory: functions
         run: |
-          python -m py_compile main.py
-          if [ -f "test_validation.py" ]; then
-            python test_validation.py
-          fi
+          echo "🧪 Tests des Cloud Functions..."
+          npm run test
 
-      - name: 🔍 Python Linting (flake8)
+      - name: 🔍 Functions Linting
         working-directory: functions
         run: |
-          echo "🔍 Linting Python avec flake8..."
-          flake8 main.py --max-line-length=100 --ignore=E203,W503
+          echo "🔍 Linting des Cloud Functions..."
+          npm run lint
 
   # 🔐 Audit de Sécurité
   security-audit:

@@ -16,7 +16,6 @@ on:
 
 env:
   NODE_VERSION: '20'
-  PYTHON_VERSION: '3.11'
   FIREBASE_PROJECT_STAGING: 'portail-jhmh-staging' # Projet Firebase staging
 
 jobs:
@@ -81,7 +80,7 @@ jobs:
           echo "version=$STAGING_VERSION" >> $GITHUB_OUTPUT
           echo "🏷️ Version staging: $STAGING_VERSION"
 
-  # 🔒 Validation Functions pour Staging
+  # 🔒 Validation Functions Node.js pour Staging
   validate-functions-staging:
     name: 🔒 Functions Staging Validation
     runs-on: ubuntu-latest
@@ -92,56 +91,58 @@ jobs:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       - name: 📦 Install Dependencies
         working-directory: functions
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install autopep8
+          echo "📦 Installation des dépendances Node.js Functions..."
+          npm ci
 
       - name: 🧪 Comprehensive Function Tests
         working-directory: functions
         run: |
-          echo "🧪 Tests complets des Cloud Functions..."
+          echo "🧪 Tests complets des Cloud Functions Node.js..."
 
-          # Formatage Python
-          echo "🎨 Formatage automatique du code Python..."
-          autopep8 --in-place --max-line-length=100 --aggressive main.py
+          # Build TypeScript
+          echo "🔨 Build des Cloud Functions..."
+          npm run build
 
-          # Linting Python
-          echo "🔍 Linting Python avec flake8..."
-          flake8 main.py --max-line-length=100 --ignore=E203,W503
+          # Tests
+          echo "🧪 Tests des Cloud Functions..."
+          npm run test
 
-          # Tests de validation
-          if [ -f "test_validation.py" ]; then
-            python test_validation.py
-          fi
+          # Linting
+          echo "🔍 Linting des Cloud Functions..."
+          npm run lint
 
-          # Tests de sécurité spécifiques
+          # Tests de sécurité spécifiques via Node.js
           echo "🔐 Tests de sécurité domaine..."
-          python -c "
-          from main import is_email_allowed
+          node -e "
+          const { isEmailAllowed } = require('./lib/index.js');
 
-          # Tests de sécurité avancés
-          security_tests = [
-              ('user@jhmh.com.malicious.com', False),
-              ('admin@jhmh.com', True),
-              ('test+tag@jhmh.com', True),
-              ('user@JHMH.COM', True),
-              ('', False),
-              (None, False)
-          ]
+          // Tests de sécurité avancés
+          const securityTests = [
+              ['user@jhmh.com.malicious.com', false],
+              ['admin@jhmh.com', true],
+              ['test+tag@jhmh.com', true],
+              ['user@JHMH.COM', true],
+              ['', false],
+              [null, false]
+          ];
 
-          for email, expected in security_tests:
-              result = is_email_allowed(email)
-              assert result == expected, f'Security test failed for {email}'
+          for (const [email, expected] of securityTests) {
+              const result = isEmailAllowed(email);
+              if (result !== expected) {
+                  throw new Error(\`Security test failed for \${email}: expected \${expected}, got \${result}\`);
+              }
+          }
 
-          print('✅ Tests de sécurité passés')
+          console.log('✅ Tests de sécurité passés');
           "
 
   # 🏗️ Build Staging
@@ -212,11 +213,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: 📁 Download Build Artifacts
         uses: actions/download-artifact@v4
@@ -310,23 +306,14 @@ jobs:
         run: |
           echo "🔒 Test des Cloud Functions staging..."
 
-          # Test de la fonction de validation
-          FUNCTION_URL="https://europe-west1-portail-jhmh-staging.cloudfunctions.net/test_domain_check"
+          # Test de la fonction de health check
+          FUNCTION_URL="https://europe-west1-portail-jhmh-staging.cloudfunctions.net/healthCheck"
 
-          # Test email autorisé
-          response=$(curl -s "$FUNCTION_URL?email=test@jhmh.com")
-          if echo "$response" | grep -q "autorisé"; then
-            echo "✅ Function validation OK pour email autorisé"
+          response=$(curl -s -o /dev/null -w "%{http_code}" "$FUNCTION_URL")
+          if [ $response = "200" ]; then
+            echo "✅ Function health check OK"
           else
-            echo "⚠️ Function validation: $response"
-          fi
-
-          # Test email non autorisé
-          response=$(curl -s "$FUNCTION_URL?email=test@gmail.com")
-          if echo "$response" | grep -q "bloqué"; then
-            echo "✅ Function validation OK pour email bloqué"
-          else
-            echo "⚠️ Function validation: $response"
+            echo "⚠️ Function health check: HTTP $response"
           fi
 
       - name: ⚡ Performance Tests

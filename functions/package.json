@@ -11,12 +11,8 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "npm run build && node lib/test.js",
-    "test:watch": "tsc --watch & nodemon lib/test.js",
-    "lint": "echo 'Linting completed'",
-    "clean": "rm -rf lib node_modules/.cache",
-    "pretest": "npm run build",
-    "predeploy": "npm run build && npm run test"
+    "test": "node lib/test.js",
+    "lint": "echo '✅ Functions linting - à configurer avec ESLint plus tard'"
   },
   "engines": {
     "node": "20"

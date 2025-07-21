@@ -14,7 +14,6 @@ permissions:
 
 env:
   NODE_VERSION: '20'
-  PYTHON_VERSION: '3.11'
 
 jobs:
   # 🔍 Validation rapide pour feedback immédiat
@@ -100,7 +99,7 @@ jobs:
             public
           key: ${{ runner.os }}-pr-build-${{ github.event.pull_request.head.sha }}
 
-  # 🔒 Validation Functions
+  # 🔒 Validation Functions Node.js
   validate-functions:
     name: 🔒 Cloud Functions Validation
     runs-on: ubuntu-latest
@@ -114,42 +113,38 @@ jobs:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       - name: 📦 Install Functions Dependencies
         working-directory: functions
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install autopep8
+          echo "📦 Installation des dépendances Node.js Functions..."
+          npm ci
 
       - name: 🧪 Validate Functions
         id: validate
         working-directory: functions
         run: |
-          echo "🧪 Validation des Cloud Functions..."
+          echo "🧪 Validation des Cloud Functions Node.js..."
 
-          # Formatage Python
-          echo "🎨 Formatage automatique du code Python..."
-          autopep8 --in-place --max-line-length=100 --aggressive main.py
+          # Build TypeScript
+          echo "🔨 Build des Cloud Functions..."
+          npm run build
 
-          # Compilation Python
-          python -m py_compile main.py
+          # Tests
+          echo "🧪 Tests des Cloud Functions..."
+          npm run test
 
-          # Tests de validation si disponibles
-          if [ -f "test_validation.py" ]; then
-            python test_validation.py
-          fi
-
-          # Linting Python
-          echo "🔍 Linting Python avec flake8..."
-          flake8 main.py --max-line-length=100 --ignore=E203,W503 || echo "⚠️ Avertissements de style Python"
+          # Linting
+          echo "🔍 Linting des Cloud Functions..."
+          npm run lint
 
           echo "valid=true" >> $GITHUB_OUTPUT
-          echo "✅ Cloud Functions validées"
+          echo "✅ Cloud Functions Node.js validées"
 
   # 🌐 Déploiement Preview
   deploy-preview:
@@ -326,7 +321,7 @@ jobs:
 
             body += `### ✅ Checks\n`;
             body += `- ${buildSuccess ? '✅' : '❌'} Build & TypeScript\n`;
-            body += `- ${functionsValid ? '✅' : '❌'} Cloud Functions Validation\n`;
+            body += `- ${functionsValid ? '✅' : '❌'} Cloud Functions Node.js Validation\n`;
             body += `- ${e2eSuccess ? '✅' : '❌'} E2E Tests\n\n`;
 
             if (previewUrl) {
