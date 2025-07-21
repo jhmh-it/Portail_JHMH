@@ -234,8 +234,24 @@ jobs:
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
 
-          # Déploiement des functions
-          firebase deploy --only functions --project portail-jhmh
+          # Déploiement des functions avec gestion d'erreur améliorée
+          if ! firebase deploy --only functions --project portail-jhmh; then
+            echo "❌ Échec du déploiement des Cloud Functions"
+            echo ""
+            echo "🔍 Causes possibles :"
+            echo "1. APIs Google Cloud manquantes (cloudbuild.googleapis.com, artifactregistry.googleapis.com)"
+            echo "2. Permissions insuffisantes du service account"
+            echo "3. Quota Google Cloud dépassé"
+            echo ""
+            echo "📖 Guide de résolution :"
+            echo "   → Voir docs/FIREBASE_APIS_SETUP.md"
+            echo "   → Console Google Cloud : https://console.cloud.google.com/apis/dashboard?project=portail-jhmh"
+            echo ""
+            echo "🚀 Actions recommandées :"
+            echo "   1. Activer Cloud Build API : https://console.cloud.google.com/apis/library/cloudbuild.googleapis.com?project=portail-jhmh"
+            echo "   2. Activer Artifact Registry API : https://console.cloud.google.com/apis/library/artifactregistry.googleapis.com?project=portail-jhmh"
+            exit 1
+          fi
 
           # Nettoyage
           rm -f /tmp/service-account.json

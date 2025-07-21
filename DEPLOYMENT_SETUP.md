@@ -40,27 +40,47 @@ FIREBASE_PRIVATE_KEY
 
 ### 2. **Firebase Projects Setup**
 
-Créez les projets Firebase :
+Configurez les projets Firebase dans la console :
 
 ```bash
-# 🏗️ Créer les projets
-firebase projects:create portail-jhmh-staging
-firebase projects:create portail-jhmh  # ou utiliser existant
+# 🎯 Projets requis
+portail-jhmh          # Production
+portail-jhmh-staging  # Staging (optionnel)
 
-# 🔧 Activer les services
-firebase use portail-jhmh-staging
-firebase hosting:enable
-firebase functions:enable
-
-firebase use portail-jhmh
-firebase hosting:enable
-firebase functions:enable
-
-# 🔒 Activer Identity Platform (OBLIGATOIRE pour auth restriction)
-# Console Firebase > Authentication > Settings > Advanced > Upgrade to Identity Platform
+# 🔧 Configuration requise par projet :
+# - Authentication > Providers > Google
+# - Firestore Database
+# - Cloud Functions (si utilisé)
 ```
 
-### 3. **Scripts Setup**
+### 3. **🔌 APIs Google Cloud (Obligatoire pour Functions)**
+
+⚠️ **CRITIQUE** : Si vous déployez des Cloud Functions, activez ces APIs :
+
+📖 **Guide complet** : [Configuration APIs Firebase](./docs/FIREBASE_APIS_SETUP.md)
+
+**APIs requises** :
+
+```bash
+✅ cloudfunctions.googleapis.com     # (généralement pré-activé)
+❌ cloudbuild.googleapis.com         # Google Cloud Build
+❌ artifactregistry.googleapis.com   # Artifact Registry
+```
+
+**Activation rapide** :
+
+```bash
+# Option 1: URLs directes (recommandé)
+https://console.cloud.google.com/apis/library/cloudbuild.googleapis.com?project=portail-jhmh
+https://console.cloud.google.com/apis/library/artifactregistry.googleapis.com?project=portail-jhmh
+
+# Option 2: gcloud CLI
+gcloud services enable cloudbuild.googleapis.com artifactregistry.googleapis.com --project=portail-jhmh
+```
+
+### 4. **Domain Restriction avec Cloud Functions**
+
+### 5. **Scripts Setup**
 
 ```bash
 # 📁 Créer le dossier scripts
@@ -73,7 +93,7 @@ chmod +x scripts/deploy.sh
 npm run setup:hooks
 ```
 
-### 4. **Environment Files**
+### 6. **Environment Files**
 
 Créez `.env.local` :
 
@@ -91,7 +111,7 @@ FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE K
 FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-xyz@portail-jhmh.iam.gserviceaccount.com
 ```
 
-### 5. **Branch Protection Rules**
+### 7. **Branch Protection Rules**
 
 Dans **Settings** > **Branches**, protégez `main` :
 

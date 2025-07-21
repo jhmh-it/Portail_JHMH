@@ -50,6 +50,7 @@ firebase deploy --only functions
 
 - [Variables d'environnement](./docs/ENVIRONMENT.md) - Configuration requise
 - [Secrets GitHub Actions](./docs/GITHUB_SECRETS_CONFIG.md) - Configuration Firebase CI/CD
+- [Configuration APIs Firebase](./docs/FIREBASE_APIS_SETUP.md) - Activation des APIs Google Cloud
 - [Dépendances](./docs/DEPENDENCIES.md) - Packages et leurs rôles
 
 ### 📋 Processus

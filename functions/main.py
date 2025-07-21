@@ -50,7 +50,7 @@ def is_email_allowed(email: str) -> bool:
         return False
 
 
-@identity_fn.before_user_signed_in()
+@identity_fn.before_user_signed_in(region="europe-west1")
 def before_user_signed_in(
     event: identity_fn.AuthBlockingEvent
 ) -> identity_fn.BeforeSignInResponse:
@@ -106,7 +106,7 @@ def before_user_signed_in(
         )
 
 
-@https_fn.on_request()
+@https_fn.on_request(region="europe-west1")
 def test_domain_check(req: https_fn.Request) -> https_fn.Response:
     """
     Fonction de test pour vérifier la validation des domaines
