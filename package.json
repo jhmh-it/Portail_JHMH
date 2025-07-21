@@ -12,7 +12,34 @@
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
     "pre-commit": "lint-staged",
-    "prepare": "husky"
+    "prepare": "husky",
+    "deploy:functions": "cd functions && firebase deploy --only functions",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:all": "firebase deploy",
+    "deploy:staging": "firebase use portail-jhmh-staging && npm run deploy:all && firebase use portail-jhmh",
+    "deploy:production": "firebase use portail-jhmh && npm run deploy:all",
+    "test:functions": "cd functions && python3 test_validation.py",
+    "test:functions:watch": "cd functions && python3 -c \"import time; import subprocess; print('🔍 Watching functions...'); subprocess.run(['python3', 'test_validation.py'])\"",
+    "test:build": "npm run build && echo '✅ Build test successful'",
+    "test:all": "npm run lint && npm run type-check && npm run test:build && npm run test:functions",
+    "validate:pre-deploy": "npm run test:all && echo '🎉 Ready for deployment!'",
+    "validate:security": "npm audit --audit-level=moderate",
+    "validate:functions": "npm run test:functions",
+    "clean": "rm -rf .next out node_modules/.cache",
+    "clean:all": "npm run clean && rm -rf node_modules && npm install",
+    "clean:functions": "cd functions && rm -rf __pycache__ .pyc",
+    "setup:dev": "npm install && cd functions && pip install -r requirements.txt",
+    "setup:hooks": "husky install && chmod +x .husky/pre-commit",
+    "setup:firebase": "firebase login && firebase projects:list",
+    "logs:functions": "firebase functions:log --only before_user_signed_in",
+    "logs:hosting": "firebase hosting:channel:list",
+    "logs:all": "npm run logs:functions && npm run logs:hosting",
+    "status": "echo '📊 Project Status:' && npm run lint --silent && npm run type-check --silent && echo '✅ All checks passed'",
+    "health": "curl -s https://portail-jhmh.web.app > /dev/null && echo '✅ Production is healthy' || echo '❌ Production issues detected'",
+    "health:staging": "curl -s https://portail-jhmh-staging.web.app > /dev/null && echo '✅ Staging is healthy' || echo '❌ Staging issues detected'",
+    "workflow:pr": "npm run lint:fix && npm run format && npm run type-check && npm run build",
+    "workflow:deploy": "npm run validate:pre-deploy && echo '🚀 Ready to deploy to staging'",
+    "workflow:hotfix": "npm run lint:fix && npm run type-check && npm run build && echo '🔥 Hotfix ready'"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -73,5 +100,21 @@
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ],
+    "functions/*.py": [
+      "python3 -m py_compile"
+    ]
   }
 }

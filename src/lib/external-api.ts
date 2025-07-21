@@ -15,21 +15,34 @@ const ERROR_MESSAGES = {
 } as const;
 
 /**
+ * Builds API headers with authentication
+ */
+function getApiHeaders(): Record<string, string> {
+  return {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    'x-api-key': JHMH_API_KEY,
+  };
+}
+
+/**
  * Creates and configures an Axios instance for JHMH API
  */
 function createApiClient(): AxiosInstance {
   const client = axios.create({
     baseURL: JHMH_API_BASE_URL,
     timeout: API_TIMEOUT,
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
+    headers: getApiHeaders(),
   });
 
   // Request interceptor for logging and auth
   client.interceptors.request.use(
     config => {
+      // Ensure x-api-key is always present
+      if (config.headers) {
+        config.headers['x-api-key'] = JHMH_API_KEY;
+      }
+
       if (process.env.NODE_ENV === 'development') {
         console.warn(
           `[JHMH API] ${config.method?.toUpperCase()} ${config.url}`
@@ -149,20 +162,13 @@ export interface ExternalReservationsResponse {
 }
 
 /**
- * Builds API headers with authentication
- */
-function getApiHeaders(): Record<string, string> {
-  return {
-    'x-api-key': JHMH_API_KEY,
-  };
-}
-
-/**
  * Service pour récupérer les actifs depuis l'API JHMH
  */
 export async function fetchJhmhActifs(): Promise<JhmhActifsResponse> {
   try {
-    const response = await jhmhApiClient.get<ExternalActifsResponse>('/actifs');
+    // Using the correct endpoint from swagger: /api/assets/actifs
+    const response =
+      await jhmhApiClient.get<ExternalActifsResponse>('/api/assets/actifs');
 
     // Validate response format
     if (!Array.isArray(response.data)) {
@@ -256,12 +262,10 @@ export async function fetchJhmhReservations(params?: {
   try {
     const queryParams = buildReservationQueryParams(params);
     const queryString = queryParams.toString();
-    const url = `/reservations${queryString ? `?${queryString}` : ''}`;
+    // Adding /api/ prefix to the URL
+    const url = `/api/reservations${queryString ? `?${queryString}` : ''}`;
 
-    const response = await jhmhApiClient.get<ExternalReservationsResponse>(
-      url,
-      { headers: getApiHeaders() }
-    );
+    const response = await jhmhApiClient.get<ExternalReservationsResponse>(url);
 
     return {
       success: true,
@@ -291,9 +295,9 @@ export async function fetchJhmhReservationByCode(
   error?: string;
 }> {
   try {
+    // Adding /api/ prefix to the URL
     const response = await jhmhApiClient.get<ExternalReservation>(
-      `/reservations/${confirmationCode}`,
-      { headers: getApiHeaders() }
+      `/api/reservations/${confirmationCode}`
     );
 
     return {

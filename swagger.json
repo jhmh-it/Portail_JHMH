@@ -1,5 +1,53 @@
 {
-  "definitions": {},
+  "basePath": "/",
+  "definitions": {
+    "Reservation": {
+      "properties": {
+        "checkin_date": {
+          "format": "date",
+          "type": "string"
+        },
+        "checkout_date": {
+          "format": "date",
+          "type": "string"
+        },
+        "confirmationCode": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "guest_name": {
+          "type": "string"
+        },
+        "listing_name": {
+          "type": "string"
+        },
+        "nights": {
+          "type": "integer"
+        },
+        "number_of_guests": {
+          "type": "integer"
+        },
+        "ota": {
+          "type": "string"
+        },
+        "reportGenerationTimestamp": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "total_ttc": {
+          "format": "float",
+          "type": "number"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "host": "apijhmhportail-akcc2f0.ew.gateway.dev",
   "info": {
     "description": "powered by Flasgger",
     "termsOfService": "/tos",
@@ -19,11 +67,156 @@
             }
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Page d'accueil HTML de l'API",
         "tags": ["Accueil"]
       }
     },
-    "/actifs": {
+    "/api/accounting/test-connection": {
+      "get": {
+        "operationId": "test_accounting_connection",
+        "responses": {
+          "200": {
+            "description": "Confirme que la connexion au projet a réussi."
+          },
+          "500": {
+            "description": "Erreur lors de la tentative de connexion."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Endpoint d'exemple pour tester la connexion au projet 'ql-accounting-tools-sql'.",
+        "tags": ["Comptabilité"]
+      }
+    },
+    "/api/administration/database-info": {
+      "post": {
+        "operationId": "admin_get_database_info",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "properties": {
+                "actif": {
+                  "description": "Le profil actif (obligatoire)",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informations de base de données pour le profil",
+            "schema": {
+              "properties": {
+                "databaseInfo": {
+                  "properties": {
+                    "includingNoShows": {
+                      "type": "string"
+                    },
+                    "lastUpdate": {
+                      "type": "string"
+                    },
+                    "totalActiveCheckedIns": {
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "outOf": {
+                          "type": "integer"
+                        },
+                        "percentage": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "totalFutureBookings": {
+                      "type": "integer"
+                    },
+                    "totalInvoicedBookings": {
+                      "type": "integer"
+                    },
+                    "totalValidBookings": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Récupérer les informations de base de données pour un profil actif donné.",
+        "tags": ["Rapports"]
+      }
+    },
+    "/api/administration/global-requete/double-call": {
+      "post": {
+        "operationId": "admin_double_call",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "properties": {
+                "actif": {
+                  "description": "Le profil actif (obligatoire)",
+                  "type": "string"
+                },
+                "date": {
+                  "description": "Date au format YYYY-MM-DD (obligatoire)",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réponse combinée",
+            "schema": {
+              "properties": {
+                "databaseInfo": {
+                  "type": "object"
+                },
+                "todayBusiness": {
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Appelle /count-checkin-checkout/ et /database-info/ et retourne les deux réponses dans un seul JSON.",
+        "tags": ["Rapports"]
+      }
+    },
+    "/api/assets/actifs": {
       "get": {
         "operationId": "list_assets",
         "responses": {
@@ -57,22 +250,7 @@
         "tags": ["Actifs"]
       }
     },
-    "/compta/test-connection": {
-      "get": {
-        "operationId": "test_accounting_connection",
-        "responses": {
-          "200": {
-            "description": "Confirme que la connexion au projet a réussi."
-          },
-          "500": {
-            "description": "Erreur lors de la tentative de connexion."
-          }
-        },
-        "summary": "Endpoint d'exemple pour tester la connexion au projet 'ql-accounting-tools-sql'.",
-        "tags": ["Comptabilité"]
-      }
-    },
-    "/count-checkin-checkout": {
+    "/api/assets/count-checkin-checkout": {
       "post": {
         "operationId": "count_checkin_checkout",
         "parameters": [
@@ -148,7 +326,7 @@
         "tags": ["Rapports"]
       }
     },
-    "/count-checkin-checkout/database-info": {
+    "/api/assets/count-checkin-checkout/database-info": {
       "post": {
         "operationId": "assets_get_database_info",
         "parameters": [
@@ -191,13 +369,563 @@
             }
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupérer les informations de base de données pour un profil actif donné.",
         "tags": ["Rapports"]
       }
     },
-    "/database-info": {
+    "/api/assets/listings-actifs": {
+      "get": {
+        "operationId": "list_listings_assets",
+        "parameters": [
+          {
+            "description": "Filtrer par code de site (ex: 14M, 15C)",
+            "in": "query",
+            "name": "code_site",
+            "type": "string"
+          },
+          {
+            "description": "Filtrer par type de logement (ex: STUDIO, T2)",
+            "in": "query",
+            "name": "type_logement",
+            "type": "string"
+          },
+          {
+            "description": "Nombre maximum de résultats à retourner",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "description": "Nombre d'éléments à ignorer pour la pagination",
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          },
+          {
+            "description": "Colonne pour le tri (listing_complet, date_ouverture, superficie_m2, code_site)",
+            "enum": [
+              "listing_complet",
+              "date_ouverture",
+              "superficie_m2",
+              "code_site"
+            ],
+            "in": "query",
+            "name": "order_by",
+            "type": "string"
+          },
+          {
+            "description": "Direction du tri (ASC ou DESC)",
+            "enum": ["ASC", "DESC"],
+            "in": "query",
+            "name": "order_direction",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des listings actifs avec leurs informations détaillées",
+            "schema": {
+              "items": {
+                "properties": {
+                  "code_site": {
+                    "description": "Le code du site, ex: 14M, 17C",
+                    "type": "string"
+                  },
+                  "date_ouverture": {
+                    "description": "La date d'ouverture",
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "id_opening": {
+                    "description": "L'identifiant unique d'ouverture",
+                    "type": "string"
+                  },
+                  "listing_complet": {
+                    "description": "Le nom complet du listing, ex: (14M) STUDIO (601)",
+                    "type": "string"
+                  },
+                  "numero_mairie": {
+                    "description": "Le numéro d'identification de la mairie",
+                    "type": "string"
+                  },
+                  "superficie_m2": {
+                    "description": "La superficie en mètres carrés",
+                    "type": "number"
+                  },
+                  "type_logement": {
+                    "description": "Le type de logement simplifié, ex: STUDIO",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "500": {
+            "description": "Erreur interne",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Obtenir la liste détaillée des listings actifs",
+        "tags": ["Actifs"]
+      }
+    },
+    "/api/comparison/reservation/{confirmation_code}": {
+      "get": {
+        "description": "les différentes sources de données, avec recherche automatique du dataset comptable.\u003Cbr/\u003E",
+        "operationId": "get_reservation_comparison",
+        "parameters": [
+          {
+            "description": "Le code de confirmation de la réservation (ex: CONF-QL-12345).",
+            "in": "path",
+            "name": "confirmation_code",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Données de comparaison pour la réservation.",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur lors du traitement."
+          }
+        },
+        "summary": "Endpoint principal pour comparer les données d'une réservation à travers",
+        "tags": ["Comparaison"]
+      }
+    },
+    "/api/diff/reservation/{confirmation_code}": {
+      "get": {
+        "description": "Récupère une réservation depuis toutes les tables comptables PROD2 et le dernier rapport \nde `act2_reports`, puis retourne une comparaison détaillée champ par champ.\n",
+        "operationId": "get_reservation_diff",
+        "parameters": [
+          {
+            "description": "Le code de confirmation à comparer.",
+            "in": "path",
+            "name": "confirmation_code",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rapport de comparaison généré avec succès."
+          },
+          "500": {
+            "description": "Erreur lors de la comparaison."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Compare les données d'une réservation entre la compta et ACT2.",
+        "tags": ["Diff"]
+      }
+    },
+    "/api/format/anomalies": {
+      "get": {
+        "operationId": "get_anomalies",
+        "parameters": [
+          {
+            "description": "Niveaux de gravité à inclure, séparés par des virgules (high,medium,low). Par défaut: tous",
+            "in": "query",
+            "name": "severity",
+            "type": "string"
+          },
+          {
+            "description": "Catégories de champs à analyser, séparées par des virgules (dates,financials,numerics,texts). Par défaut: toutes",
+            "in": "query",
+            "name": "field_category",
+            "type": "string"
+          },
+          {
+            "description": "Type de champ à analyser : 'value' (champs _value), 'trace' (champs _trace), 'both' (les deux). Par défaut: 'value'",
+            "enum": ["value", "trace", "both"],
+            "in": "query",
+            "name": "field_variant",
+            "type": "string"
+          },
+          {
+            "description": "Limite de résultats (par défaut: 500, max: 1000)",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Anomalies détectées avec succès",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "anomalies": {
+                      "items": {
+                        "properties": {
+                          "affected_records": {
+                            "type": "integer"
+                          },
+                          "anomaly_type": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "field": {
+                            "type": "string"
+                          },
+                          "sample_values": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "severity": {
+                            "enum": ["high", "medium", "low"],
+                            "type": "string"
+                          },
+                          "suggested_correction": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "summary": {
+                      "properties": {
+                        "field_variant": {
+                          "description": "Type de champ analysé (value/trace/both)",
+                          "type": "string"
+                        },
+                        "high_severity": {
+                          "type": "integer"
+                        },
+                        "low_severity": {
+                          "type": "integer"
+                        },
+                        "medium_severity": {
+                          "type": "integer"
+                        },
+                        "total_anomalies": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Erreur de validation des paramètres",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Identifie les anomalies de données et propose des corrections",
+        "tags": ["Format"]
+      }
+    },
+    "/api/format/format-analysis": {
+      "get": {
+        "operationId": "get_format_analysis",
+        "parameters": [
+          {
+            "description": "Type de champ à analyser (date, numeric, text). Si omis, analyse tous les types",
+            "enum": ["date", "numeric", "text"],
+            "in": "query",
+            "name": "field_type",
+            "type": "string"
+          },
+          {
+            "description": "Type de champ à analyser : 'value' (champs _value), 'trace' (champs _trace), 'both' (les deux). Par défaut: 'value'",
+            "enum": ["value", "trace", "both"],
+            "in": "query",
+            "name": "field_variant",
+            "type": "string"
+          },
+          {
+            "description": "Seulement les rapports avec le timestamp de génération le plus récent par confirmationCode (par défaut: true)",
+            "in": "query",
+            "name": "only_latest",
+            "type": "boolean"
+          },
+          {
+            "description": "Détecter les anomalies de format (par défaut: true)",
+            "in": "query",
+            "name": "detect_anomalies",
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analyse des formats générée avec succès",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "format_analysis": {
+                      "properties": {
+                        "date_fields": {
+                          "additionalProperties": {
+                            "properties": {
+                              "conversion_needed": {
+                                "type": "integer"
+                              },
+                              "detected_formats": {
+                                "items": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "integer"
+                                    },
+                                    "format": {
+                                      "type": "string"
+                                    },
+                                    "pattern": {
+                                      "type": "string"
+                                    },
+                                    "percentage": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "recommended_format": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "object"
+                        },
+                        "numeric_fields": {
+                          "additionalProperties": {
+                            "properties": {
+                              "conversion_needed": {
+                                "type": "integer"
+                              },
+                              "detected_formats": {
+                                "items": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "integer"
+                                    },
+                                    "format": {
+                                      "type": "string"
+                                    },
+                                    "pattern": {
+                                      "type": "string"
+                                    },
+                                    "percentage": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "recommended_format": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "object"
+                        },
+                        "text_fields": {
+                          "additionalProperties": {
+                            "properties": {
+                              "conversion_needed": {
+                                "type": "integer"
+                              },
+                              "detected_formats": {
+                                "items": {
+                                  "properties": {
+                                    "count": {
+                                      "type": "integer"
+                                    },
+                                    "format": {
+                                      "type": "string"
+                                    },
+                                    "percentage": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "recommended_format": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "summary": {
+                      "properties": {
+                        "anomalies_detected": {
+                          "type": "integer"
+                        },
+                        "date_fields_count": {
+                          "type": "integer"
+                        },
+                        "field_variant": {
+                          "description": "Type de champ analysé (value/trace/both)",
+                          "type": "string"
+                        },
+                        "numeric_fields_count": {
+                          "type": "integer"
+                        },
+                        "text_fields_count": {
+                          "type": "integer"
+                        },
+                        "total_fields_analyzed": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Erreur de validation des paramètres",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Analyse les formats de données pour identifier les incohérences et variations",
+        "tags": ["Format"]
+      }
+    },
+    "/api/format/rollback": {
       "post": {
-        "operationId": "admin_get_database_info",
+        "operationId": "rollback_standardization",
         "parameters": [
           {
             "in": "body",
@@ -205,66 +933,174 @@
             "required": true,
             "schema": {
               "properties": {
-                "actif": {
-                  "description": "Le profil actif (obligatoire)",
+                "backup_id": {
+                  "description": "ID de la sauvegarde à restaurer",
+                  "example": "backup_20240115_143022_format",
                   "type": "string"
+                },
+                "field_variant": {
+                  "description": "Type de champ à restaurer : 'value' (champs _value), 'trace' (champs _trace), 'both' (les deux)",
+                  "enum": ["value", "trace", "both"],
+                  "example": "value",
+                  "type": "string"
+                },
+                "target_fields": {
+                  "description": "Champs spécifiques à restaurer (noms de base sans suffixe _value/_trace). Si omis, restaure tous les champs",
+                  "example": ["DTE_CREATE", "DTE_CI", "TOTAL_TTC"],
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "user_confirmation": {
+                  "description": "Confirmation explicite de l'utilisateur",
+                  "example": true,
+                  "type": "boolean"
+                },
+                "verify_backup": {
+                  "description": "Vérifier l'intégrité de la sauvegarde avant restauration",
+                  "example": true,
+                  "type": "boolean"
                 }
               },
+              "required": ["backup_id", "user_confirmation"],
               "type": "object"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Informations de base de données pour le profil",
+            "description": "Rollback exécuté avec succès",
             "schema": {
               "properties": {
-                "databaseInfo": {
+                "data": {
                   "properties": {
-                    "includingNoShows": {
-                      "type": "string"
+                    "field_results": {
+                      "additionalProperties": {
+                        "properties": {
+                          "errors": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "records_restored": {
+                            "type": "integer"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "object"
                     },
-                    "lastUpdate": {
-                      "type": "string"
-                    },
-                    "totalActiveCheckedIns": {
+                    "rollback_summary": {
                       "properties": {
-                        "count": {
+                        "backup_id": {
+                          "type": "string"
+                        },
+                        "field_variant": {
+                          "description": "Type de champ restauré (value/trace/both)",
+                          "type": "string"
+                        },
+                        "fields_restored": {
                           "type": "integer"
                         },
-                        "outOf": {
+                        "rollback_duration_seconds": {
                           "type": "integer"
                         },
-                        "percentage": {
+                        "success": {
+                          "type": "boolean"
+                        },
+                        "total_records_restored": {
                           "type": "integer"
                         }
                       },
                       "type": "object"
                     },
-                    "totalFutureBookings": {
-                      "type": "integer"
-                    },
-                    "totalInvoicedBookings": {
-                      "type": "integer"
-                    },
-                    "totalValidBookings": {
-                      "type": "integer"
+                    "verification_info": {
+                      "properties": {
+                        "backup_integrity": {
+                          "enum": ["valid", "invalid", "warning"],
+                          "type": "string"
+                        },
+                        "backup_size": {
+                          "type": "integer"
+                        },
+                        "backup_timestamp": {
+                          "type": "string"
+                        },
+                        "data_consistency": {
+                          "enum": ["consistent", "inconsistent", "unknown"],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
                     }
                   },
                   "type": "object"
+                },
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Erreur de validation des paramètres",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
                 }
               },
               "type": "object"
             }
           }
         },
-        "summary": "Récupérer les informations de base de données pour un profil actif donné.",
-        "tags": ["Rapports"]
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Annule les changements de formatage en restaurant les valeurs précédentes",
+        "tags": ["Format"]
       }
     },
-    "/global-requete/double-call": {
+    "/api/format/standardize/execute": {
       "post": {
-        "operationId": "admin_double_call",
+        "operationId": "execute_standardization",
         "parameters": [
           {
             "in": "body",
@@ -272,40 +1108,808 @@
             "required": true,
             "schema": {
               "properties": {
-                "actif": {
-                  "description": "Le profil actif (obligatoire)",
+                "field_variant": {
+                  "description": "Type de champ à standardiser : 'value' (champs _value), 'trace' (champs _trace), 'both' (les deux)",
+                  "enum": ["value", "trace", "both"],
+                  "example": "value",
                   "type": "string"
                 },
-                "date": {
-                  "description": "Date au format YYYY-MM-DD (obligatoire)",
-                  "type": "string"
+                "filters": {
+                  "description": "Filtres à appliquer",
+                  "properties": {
+                    "confirmation_codes": {
+                      "description": "Codes de confirmation spécifiques",
+                      "example": ["CONF-QL-12345", "CONF-QL-67890"],
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "only_latest": {
+                      "description": "Seulement les rapports avec le timestamp de génération le plus récent par confirmationCode",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                },
+                "standardization_rules": {
+                  "description": "Règles de standardisation à appliquer",
+                  "properties": {
+                    "date_format": {
+                      "description": "Format cible pour les dates",
+                      "example": "ISO_8601",
+                      "type": "string"
+                    },
+                    "null_handling": {
+                      "description": "Gestion des valeurs NULL",
+                      "example": "keep_as_null",
+                      "type": "string"
+                    },
+                    "numeric_precision": {
+                      "description": "Précision pour les nombres",
+                      "example": 2,
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "target_fields": {
+                  "description": "Liste des champs à standardiser (noms de base sans suffixe _value/_trace)",
+                  "example": ["DTE_CREATE", "DTE_CI", "TOTAL_TTC"],
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "user_confirmation": {
+                  "description": "Confirmation explicite de l'utilisateur",
+                  "example": true,
+                  "type": "boolean"
                 }
               },
+              "required": ["target_fields", "user_confirmation"],
               "type": "object"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Réponse combinée",
+            "description": "Standardisation exécutée avec succès",
             "schema": {
               "properties": {
-                "databaseInfo": {
+                "data": {
+                  "properties": {
+                    "backup_info": {
+                      "properties": {
+                        "backup_id": {
+                          "type": "string"
+                        },
+                        "backup_size": {
+                          "type": "integer"
+                        },
+                        "backup_timestamp": {
+                          "type": "string"
+                        },
+                        "restore_available": {
+                          "type": "boolean"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "execution_summary": {
+                      "properties": {
+                        "execution_duration_seconds": {
+                          "type": "integer"
+                        },
+                        "field_variant": {
+                          "description": "Type de champ standardisé (value/trace/both)",
+                          "type": "string"
+                        },
+                        "fields_updated": {
+                          "type": "integer"
+                        },
+                        "records_modified": {
+                          "type": "integer"
+                        },
+                        "success": {
+                          "type": "boolean"
+                        },
+                        "total_records_processed": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "field_results": {
+                      "additionalProperties": {
+                        "properties": {
+                          "errors": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "records_updated": {
+                            "type": "integer"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "transformation_applied": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "object"
+                    }
+                  },
                   "type": "object"
                 },
-                "todayBusiness": {
-                  "type": "object"
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Erreur de validation des paramètres",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
                 }
               },
               "type": "object"
             }
           }
         },
-        "summary": "Appelle /count-checkin-checkout/ et /database-info/ et retourne les deux réponses dans un seul JSON.",
-        "tags": ["Rapports"]
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Exécute les changements de formatage après validation",
+        "tags": ["Format"]
       }
     },
-    "/greg/categories": {
+    "/api/format/standardize/preview": {
+      "post": {
+        "operationId": "preview_standardization",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "properties": {
+                "field_variant": {
+                  "description": "Type de champ à standardiser : 'value' (champs _value), 'trace' (champs _trace), 'both' (les deux)",
+                  "enum": ["value", "trace", "both"],
+                  "example": "value",
+                  "type": "string"
+                },
+                "filters": {
+                  "description": "Filtres à appliquer",
+                  "properties": {
+                    "confirmation_codes": {
+                      "description": "Codes de confirmation spécifiques",
+                      "example": ["CONF-QL-12345", "CONF-QL-67890"],
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "only_latest": {
+                      "description": "Seulement les rapports avec le timestamp de génération le plus récent par confirmationCode",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                },
+                "standardization_rules": {
+                  "description": "Règles de standardisation à appliquer",
+                  "properties": {
+                    "date_format": {
+                      "description": "Format cible pour les dates",
+                      "example": "ISO_8601",
+                      "type": "string"
+                    },
+                    "null_handling": {
+                      "description": "Gestion des valeurs NULL",
+                      "example": "keep_as_null",
+                      "type": "string"
+                    },
+                    "numeric_precision": {
+                      "description": "Précision pour les nombres",
+                      "example": 2,
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "target_fields": {
+                  "description": "Liste des champs à standardiser (noms de base sans suffixe _value/_trace)",
+                  "example": ["DTE_CREATE", "DTE_CI", "TOTAL_TTC"],
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": ["target_fields"],
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prévisualisation générée avec succès",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "field_transformations": {
+                      "additionalProperties": {
+                        "properties": {
+                          "from_formats": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "records_to_update": {
+                            "type": "integer"
+                          },
+                          "sample_transformations": {
+                            "items": {
+                              "properties": {
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "to_format": {
+                            "type": "string"
+                          },
+                          "transformation_type": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "object"
+                    },
+                    "preview_summary": {
+                      "properties": {
+                        "estimated_duration_seconds": {
+                          "type": "integer"
+                        },
+                        "field_variant": {
+                          "description": "Type de champ standardisé (value/trace/both)",
+                          "type": "string"
+                        },
+                        "fields_to_be_updated": {
+                          "type": "integer"
+                        },
+                        "records_to_be_modified": {
+                          "type": "integer"
+                        },
+                        "total_records_analyzed": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "risks_and_warnings": {
+                      "items": {
+                        "properties": {
+                          "affected_field": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "enum": ["high", "medium", "low"],
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "suggestion": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Erreur de validation des paramètres",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Prévisualise les changements de formatage sans modifier les données",
+        "tags": ["Format"]
+      }
+    },
+    "/api/format/unique-values": {
+      "get": {
+        "operationId": "get_unique_values",
+        "parameters": [
+          {
+            "collectionFormat": "multi",
+            "description": "Champs spécifiques à analyser. Sélectionnez un ou plusieurs champs dans la liste déroulante",
+            "in": "query",
+            "items": {
+              "enum": [
+                "REF",
+                "DTE_CREATE",
+                "DTE_MOD",
+                "DTE_CONFIRM",
+                "DTE_CANCELED",
+                "DTE_CI",
+                "DTE_CO",
+                "STATE",
+                "PLATFORM",
+                "LISTING_NAME",
+                "GUEST_NAME",
+                "GUEST_EMAIL",
+                "NUMBER_OF_GUESTS",
+                "NUMBER_GUEST_ADULT",
+                "NUMBER_GUEST_CHILD",
+                "NUMBER_GUEST_INFANT",
+                "NUMBER_OF_NIGHTS",
+                "CITY_TAX",
+                "ACCOMODATION_HT",
+                "ACCOMODATION_VAT",
+                "ACCOMODATION_TTC",
+                "GROWTH_ACCOMODATION_HT",
+                "GROWTH_ACCOMODATION_VAT",
+                "GROWTH_ACCOMODATION_TTC",
+                "DISCOUNT_HT",
+                "DISCOUNT_VAT",
+                "DISCOUNT_TTC",
+                "MANDATORY_CLEANING_HT",
+                "MANDATORY_CLEANING_VAT",
+                "MANDATORY_CLEANING_TTC",
+                "OTA_FEE",
+                "EXTRA_CLEANING_HT",
+                "EXTRA_CLEANING_VAT",
+                "EXTRA_CLEANING_TTC",
+                "ADD_CHARGE_ROOM_UPDATE_HT",
+                "ADD_CHARGE_ROOM_UPDATE_VAT",
+                "ADD_CHARGE_ROOM_UPDATE_TTC",
+                "EARLY_CI_HT",
+                "EARLY_CI_VAT",
+                "EARLY_CI_TTC",
+                "LATE_CO_HT",
+                "LATE_CO_VAT",
+                "LATE_CO_TTC",
+                "LAUNDRY_HT",
+                "LAUNDRY_VAT",
+                "LAUNDRY_TTC",
+                "FOOD_HT",
+                "FOOD_VAT",
+                "FOOD_TTC",
+                "DEPOSIT_WITHDRAW",
+                "ACCOMODATION_AND_CLEANING_HT",
+                "ACCOMODATION_AND_CLEANING_VAT",
+                "ACCOMODATION_AND_CLEANING_TTC",
+                "GROWTH_ACCOMODATION_AND_CLEANING_HT",
+                "GROWTH_ACCOMODATION_AND_CLEANING_VAT",
+                "GROWTH_ACCOMODATION_AND_CLEANING_TTC",
+                "TOTAL_HT",
+                "TOTAL_VAT",
+                "TOTAL_TTC"
+              ],
+              "type": "string"
+            },
+            "name": "fields",
+            "required": true,
+            "type": "array"
+          },
+          {
+            "description": "Type de champ à analyser : 'value' (champs _value), 'trace' (champs _trace), 'both' (les deux). Par défaut: 'value'",
+            "enum": ["value", "trace", "both"],
+            "in": "query",
+            "name": "field_variant",
+            "type": "string"
+          },
+          {
+            "description": "Limite de valeurs par champ (par défaut: 100, max: 1000)",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "description": "Inclure les valeurs NULL dans l'analyse (par défaut: false)",
+            "in": "query",
+            "name": "include_nulls",
+            "type": "boolean"
+          },
+          {
+            "description": "Seulement les rapports avec le timestamp de génération le plus récent par confirmationCode (par défaut: true)",
+            "in": "query",
+            "name": "only_latest",
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analyse des valeurs uniques générée avec succès",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "field_analysis": {
+                      "additionalProperties": {
+                        "properties": {
+                          "null_count": {
+                            "type": "integer"
+                          },
+                          "total_records": {
+                            "type": "integer"
+                          },
+                          "total_unique_values": {
+                            "type": "integer"
+                          },
+                          "values": {
+                            "items": {
+                              "properties": {
+                                "count": {
+                                  "type": "integer"
+                                },
+                                "percentage": {
+                                  "type": "number"
+                                },
+                                "value": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "object"
+                    },
+                    "summary": {
+                      "properties": {
+                        "field_variant": {
+                          "description": "Type de champ analysé (value/trace/both)",
+                          "type": "string"
+                        },
+                        "fields_analyzed": {
+                          "type": "integer"
+                        },
+                        "generation_timestamp": {
+                          "type": "string"
+                        },
+                        "total_reports_analyzed": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Erreur de validation des paramètres",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Retourne les valeurs uniques pour tous les champs ou pour des champs spécifiques",
+        "tags": ["Format"]
+      }
+    },
+    "/api/format/validate": {
+      "get": {
+        "operationId": "validate_data",
+        "parameters": [
+          {
+            "description": "Types de validation à effectuer, séparés par des virgules (format,business_rules,referential). Par défaut: tous",
+            "in": "query",
+            "name": "validation_type",
+            "type": "string"
+          },
+          {
+            "description": "Champs à valider, séparés par des virgules (ex: PLATFORM,STATE). Peut inclure ou non les suffixes _value/_trace. Par défaut: tous les champs",
+            "in": "query",
+            "name": "fields",
+            "type": "string"
+          },
+          {
+            "description": "Type de champ à analyser : 'value' (champs _value), 'trace' (champs _trace), 'both' (les deux). Par défaut: 'value'",
+            "enum": ["value", "trace", "both"],
+            "in": "query",
+            "name": "field_variant",
+            "type": "string"
+          },
+          {
+            "description": "Taille de l'échantillon à valider (par défaut: 1000, max: 10000)",
+            "in": "query",
+            "name": "sample_size",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation effectuée avec succès",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "validation_results": {
+                      "properties": {
+                        "business_rules_validation": {
+                          "properties": {
+                            "details": {
+                              "type": "string"
+                            },
+                            "issues_found": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "enum": ["passed", "warning", "failed", "error"],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "format_validation": {
+                          "properties": {
+                            "details": {
+                              "type": "string"
+                            },
+                            "issues_found": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "enum": ["passed", "warning", "failed", "error"],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "referential_integrity": {
+                          "properties": {
+                            "details": {
+                              "type": "string"
+                            },
+                            "issues_found": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "enum": ["passed", "warning", "failed", "error"],
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "validation_summary": {
+                      "properties": {
+                        "field_variant": {
+                          "description": "Type de champ analysé (value/trace/both)",
+                          "type": "string"
+                        },
+                        "total_records_validated": {
+                          "type": "integer"
+                        },
+                        "validation_failed": {
+                          "type": "integer"
+                        },
+                        "validation_passed": {
+                          "type": "integer"
+                        },
+                        "validation_warnings": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Erreur de validation des paramètres",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Valide la cohérence des données après standardisation",
+        "tags": ["Format"]
+      }
+    },
+    "/api/greg/categories": {
       "get": {
         "description": "Retourne un tableau de toutes les catégories existantes avec leur nom et description.",
         "operationId": "greg_list_categories",
@@ -315,10 +1919,21 @@
             "schema": {
               "items": {
                 "properties": {
+                  "created_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
                   "description": {
                     "type": "string"
                   },
+                  "id": {
+                    "type": "string"
+                  },
                   "name": {
+                    "type": "string"
+                  },
+                  "updated_at": {
+                    "format": "date-time",
                     "type": "string"
                   }
                 },
@@ -331,11 +1946,16 @@
             "description": "Erreur lors de la récupération des catégories"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère la liste de toutes les catégories.",
         "tags": ["Categories"]
       },
       "post": {
-        "description": "Crée une nouvelle catégorie en fournissant un nom et une définition. Retourne la catégorie créée si succès.",
+        "description": "Crée une nouvelle catégorie en fournissant un nom et une description. Retourne la catégorie créée si succès.",
         "operationId": "greg_create_category",
         "parameters": [
           {
@@ -345,16 +1965,16 @@
             "required": true,
             "schema": {
               "properties": {
-                "category_name": {
-                  "description": "Nom de la catégorie",
+                "description": {
+                  "description": "Description de la catégorie",
                   "type": "string"
                 },
-                "definition": {
-                  "description": "Définition de la catégorie",
+                "name": {
+                  "description": "Nom de la catégorie",
                   "type": "string"
                 }
               },
-              "required": ["category_name", "definition"],
+              "required": ["name", "description"],
               "type": "object"
             }
           }
@@ -370,19 +1990,24 @@
             "description": "Erreur lors de la création de la catégorie"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Crée une nouvelle catégorie.",
         "tags": ["Categories"]
       }
     },
-    "/greg/categories/{category_name}": {
+    "/api/greg/categories/{category_id}": {
       "delete": {
         "description": "Supprime la catégorie spécifiée. Retourne une confirmation si succès, ou une erreur si la catégorie n'existe pas.",
         "operationId": "greg_delete_category",
         "parameters": [
           {
-            "description": "Nom de la catégorie à supprimer",
+            "description": "ID de la catégorie à supprimer",
             "in": "path",
-            "name": "category_name",
+            "name": "category_id",
             "required": true,
             "type": "string"
           }
@@ -398,11 +2023,16 @@
             "description": "Erreur lors de la suppression de la catégorie"
           }
         },
-        "summary": "Supprime une catégorie par son nom.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Supprime une catégorie par son ID.",
         "tags": ["Categories"]
       }
     },
-    "/greg/documents": {
+    "/api/greg/documents": {
       "get": {
         "description": "Retourne un tableau de tous les documents existants avec leurs champs principaux.",
         "operationId": "greg_list_documents",
@@ -437,6 +2067,11 @@
             "description": "Erreur lors de la récupération des documents"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère la liste de tous les documents.",
         "tags": ["Documents"]
       },
@@ -488,11 +2123,16 @@
             "description": "Erreur lors de la création du document"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Crée un nouveau document.",
         "tags": ["Documents"]
       }
     },
-    "/greg/documents/pending": {
+    "/api/greg/documents/pending": {
       "get": {
         "operationId": "greg_get_pending_documents",
         "responses": {
@@ -529,11 +2169,16 @@
             "description": "Erreur lors de la récupération des documents en attente"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère la liste des documents en attente.",
         "tags": ["Documents"]
       }
     },
-    "/greg/documents/{document_id}": {
+    "/api/greg/documents/{document_id}": {
       "delete": {
         "operationId": "greg_delete_document",
         "parameters": [
@@ -556,6 +2201,11 @@
             "description": "Erreur lors de la suppression du document"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Supprime un document par son ID.",
         "tags": ["Documents"]
       },
@@ -605,6 +2255,11 @@
             "description": "Erreur lors de la récupération du document"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère un document par son ID.",
         "tags": ["Documents"]
       },
@@ -663,11 +2318,16 @@
             "description": "Erreur lors de la mise à jour du document"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Met à jour un document existant.",
         "tags": ["Documents"]
       }
     },
-    "/greg/documents/{document_id}/assign-spaces": {
+    "/api/greg/documents/{document_id}/assign-spaces": {
       "post": {
         "operationId": "greg_assign_spaces_to_document",
         "parameters": [
@@ -708,11 +2368,16 @@
             "description": "Erreur lors de l'assignation des espaces"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Assigne des espaces à un document.",
         "tags": ["Documents"]
       }
     },
-    "/greg/health": {
+    "/api/greg/health": {
       "get": {
         "operationId": "greg_health_check",
         "responses": {
@@ -738,25 +2403,30 @@
             }
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Vérifie la santé de l'API Greg.",
         "tags": ["System"]
       }
     },
-    "/greg/reminders": {
+    "/api/greg/reminders": {
       "get": {
         "operationId": "list_reminders",
         "parameters": [
           {
-            "description": "Type de rappel pour filtrer",
+            "description": "Statut du rappel pour filtrer",
             "in": "query",
-            "name": "type",
+            "name": "status",
             "required": false,
             "type": "string"
           },
           {
-            "description": "Statut du rappel pour filtrer",
+            "description": "ID de l'utilisateur pour filtrer",
             "in": "query",
-            "name": "status",
+            "name": "user_id",
             "required": false,
             "type": "string"
           }
@@ -771,23 +2441,30 @@
                     "format": "date-time",
                     "type": "string"
                   },
-                  "description": {
+                  "id": {
                     "type": "string"
                   },
-                  "due_date": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "remind_at": {
                     "format": "date-time",
                     "type": "string"
                   },
-                  "reminder_id": {
+                  "source_space_id": {
                     "type": "string"
                   },
                   "status": {
                     "type": "string"
                   },
-                  "title": {
+                  "target_space_id": {
                     "type": "string"
                   },
-                  "type": {
+                  "updated_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "user_id": {
                     "type": "string"
                   }
                 },
@@ -800,7 +2477,12 @@
             "description": "Erreur lors de la récupération des rappels"
           }
         },
-        "summary": "Récupère la liste de tous les rappels avec filtrage optionnel par type et statut.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Récupère la liste de tous les rappels avec filtrage optionnel par statut.",
         "tags": ["Reminders"]
       },
       "post": {
@@ -812,37 +2494,39 @@
             "required": true,
             "schema": {
               "properties": {
-                "assigned_to": {
-                  "description": "Personne assignée au rappel",
+                "message": {
+                  "description": "Message du rappel",
                   "type": "string"
                 },
-                "description": {
-                  "description": "Description du rappel",
-                  "type": "string"
-                },
-                "due_date": {
-                  "description": "Date d'échéance du rappel",
+                "remind_at": {
+                  "description": "Date et heure du rappel",
                   "format": "date-time",
                   "type": "string"
                 },
-                "notes": {
-                  "description": "Notes additionnelles",
+                "source_space_id": {
+                  "description": "ID de l'espace source (optionnel)",
                   "type": "string"
                 },
-                "priority": {
-                  "description": "Priorité du rappel (low, medium, high)",
+                "status": {
+                  "description": "Statut du rappel",
                   "type": "string"
                 },
-                "title": {
-                  "description": "Titre du rappel",
+                "target_space_id": {
+                  "description": "ID de l'espace cible",
                   "type": "string"
                 },
-                "type": {
-                  "description": "Type du rappel",
+                "user_id": {
+                  "description": "ID de l'utilisateur",
                   "type": "string"
                 }
               },
-              "required": ["title", "type", "due_date"],
+              "required": [
+                "message",
+                "user_id",
+                "target_space_id",
+                "status",
+                "remind_at"
+              ],
               "type": "object"
             }
           }
@@ -858,11 +2542,16 @@
             "description": "Erreur lors de la création du rappel"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Crée un nouveau rappel.",
         "tags": ["Reminders"]
       }
     },
-    "/greg/reminders/{reminder_id}": {
+    "/api/greg/reminders/{reminder_id}": {
       "delete": {
         "operationId": "delete_reminder",
         "parameters": [
@@ -885,6 +2574,11 @@
             "description": "Erreur lors de la suppression du rappel"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Supprime un rappel.",
         "tags": ["Reminders"]
       },
@@ -951,6 +2645,11 @@
             "description": "Erreur lors de la récupération du rappel"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère les détails d'un rappel spécifique par son ID.",
         "tags": ["Reminders"]
       },
@@ -1022,25 +2721,23 @@
             "description": "Erreur lors de la mise à jour du rappel"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Met à jour un rappel existant.",
         "tags": ["Reminders"]
       }
     },
-    "/greg/shifts": {
+    "/api/greg/shifts": {
       "get": {
         "operationId": "list_shifts",
         "parameters": [
           {
-            "description": "Localisation pour filtrer les équipes",
+            "description": "ID de l'espace pour filtrer les équipes",
             "in": "query",
-            "name": "location",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "description": "Statut pour filtrer les équipes",
-            "in": "query",
-            "name": "status",
+            "name": "space_id",
             "required": false,
             "type": "string"
           }
@@ -1051,20 +2748,21 @@
             "schema": {
               "items": {
                 "properties": {
-                  "created_at": {
+                  "content": {
+                    "type": "string"
+                  },
+                  "end_time": {
                     "format": "date-time",
                     "type": "string"
                   },
-                  "location": {
+                  "id": {
                     "type": "string"
                   },
-                  "name": {
+                  "space_id": {
                     "type": "string"
                   },
-                  "shift_id": {
-                    "type": "string"
-                  },
-                  "status": {
+                  "start_time": {
+                    "format": "date-time",
                     "type": "string"
                   }
                 },
@@ -1077,7 +2775,12 @@
             "description": "Erreur lors de la récupération des équipes"
           }
         },
-        "summary": "Récupère la liste de toutes les équipes avec filtrage optionnel par location et statut.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Récupère la liste de toutes les équipes avec filtrage optionnel par space_id.",
         "tags": ["Shifts"]
       },
       "post": {
@@ -1089,36 +2792,25 @@
             "required": true,
             "schema": {
               "properties": {
-                "capacity": {
-                  "description": "Capacité de l'équipe",
-                  "type": "integer"
+                "content": {
+                  "description": "Contenu de l'équipe",
+                  "type": "string"
                 },
                 "end_time": {
                   "description": "Heure de fin",
+                  "format": "date-time",
                   "type": "string"
                 },
-                "location": {
-                  "description": "Localisation de l'équipe",
-                  "type": "string"
-                },
-                "name": {
-                  "description": "Nom de l'équipe",
-                  "type": "string"
-                },
-                "shift_type": {
-                  "description": "Type d'équipe",
+                "space_id": {
+                  "description": "ID de l'espace",
                   "type": "string"
                 },
                 "start_time": {
                   "description": "Heure de début",
-                  "type": "string"
-                },
-                "status": {
-                  "description": "Statut de l'équipe (default active)",
+                  "format": "date-time",
                   "type": "string"
                 }
               },
-              "required": ["name", "location", "shift_type"],
               "type": "object"
             }
           }
@@ -1134,11 +2826,16 @@
             "description": "Erreur lors de la création de l'équipe"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Crée une nouvelle équipe.",
         "tags": ["Shifts"]
       }
     },
-    "/greg/shifts/{shift_id}": {
+    "/api/greg/shifts/{shift_id}": {
       "delete": {
         "operationId": "delete_shift",
         "parameters": [
@@ -1161,6 +2858,11 @@
             "description": "Erreur lors de la suppression de l'équipe"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Supprime une équipe.",
         "tags": ["Shifts"]
       },
@@ -1219,6 +2921,11 @@
             "description": "Erreur lors de la récupération de l'équipe"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère les détails d'une équipe spécifique par son ID.",
         "tags": ["Shifts"]
       },
@@ -1285,11 +2992,16 @@
             "description": "Erreur lors de la mise à jour de l'équipe"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Met à jour une équipe existante.",
         "tags": ["Shifts"]
       }
     },
-    "/greg/space-document-access": {
+    "/api/greg/space-document-access": {
       "delete": {
         "operationId": "delete_space_document_access",
         "parameters": [
@@ -1414,7 +3126,7 @@
         "tags": ["Access"]
       }
     },
-    "/greg/space-document-access/document/{document_id}": {
+    "/api/greg/space-document-access/document/{document_id}": {
       "get": {
         "operationId": "get_spaces_for_document",
         "parameters": [
@@ -1461,7 +3173,7 @@
         "tags": ["Access"]
       }
     },
-    "/greg/space-document-access/space/{space_id}": {
+    "/api/greg/space-document-access/space/{space_id}": {
       "get": {
         "operationId": "get_documents_for_space",
         "parameters": [
@@ -1508,7 +3220,7 @@
         "tags": ["Access"]
       }
     },
-    "/greg/space-history-access": {
+    "/api/greg/space-history-access": {
       "delete": {
         "operationId": "delete_space_history_access",
         "parameters": [
@@ -1663,7 +3375,11 @@
               },
               "required": ["space_id", "space_target_id"],
               "type": "object"
-            }
+            },
+            "security": null
+          },
+          {
+            "ApiKeyAuth": []
           }
         ],
         "responses": {
@@ -1684,7 +3400,7 @@
         "tags": ["Access"]
       }
     },
-    "/greg/space-history-access/{space_id}": {
+    "/api/greg/space-history-access/{space_id}": {
       "get": {
         "operationId": "get_space_history_access_by_space",
         "parameters": [
@@ -1734,7 +3450,7 @@
         "tags": ["Access"]
       }
     },
-    "/greg/spaces": {
+    "/api/greg/spaces": {
       "get": {
         "operationId": "list_spaces",
         "parameters": [
@@ -1833,7 +3549,7 @@
         "tags": ["Spaces"]
       }
     },
-    "/greg/spaces/{space_id}": {
+    "/api/greg/spaces/{space_id}": {
       "delete": {
         "operationId": "delete_space",
         "parameters": [
@@ -1967,7 +3683,7 @@
         "tags": ["Spaces"]
       }
     },
-    "/greg/spaces/{space_id}/assign-documents": {
+    "/api/greg/spaces/{space_id}/assign-documents": {
       "post": {
         "operationId": "assign_documents_to_space",
         "parameters": [
@@ -2017,7 +3733,7 @@
         "tags": ["Spaces"]
       }
     },
-    "/greg/spaces/{space_id}/assign-history-access": {
+    "/api/greg/spaces/{space_id}/assign-history-access": {
       "post": {
         "operationId": "assign_history_access_to_space",
         "parameters": [
@@ -2071,7 +3787,7 @@
         "tags": ["Spaces"]
       }
     },
-    "/greg/stats": {
+    "/api/greg/stats": {
       "get": {
         "operationId": "get_greg_stats",
         "responses": {
@@ -2119,27 +3835,32 @@
             "description": "Erreur lors de la récupération des statistiques"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère les statistiques du système Greg.",
         "tags": ["System"]
       }
     },
-    "/greg/users": {
+    "/api/greg/users": {
       "get": {
         "operationId": "list_users",
         "parameters": [
           {
-            "description": "Rôle pour filtrer les utilisateurs",
+            "description": "Source préférée pour filtrer les utilisateurs",
             "in": "query",
-            "name": "role",
+            "name": "source_prefere",
             "required": false,
             "type": "string"
           },
           {
-            "description": "Statut pour filtrer les utilisateurs",
+            "description": "Filtrer par mode verbose",
             "in": "query",
-            "name": "status",
+            "name": "verbose",
             "required": false,
-            "type": "string"
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -2152,23 +3873,36 @@
                     "format": "date-time",
                     "type": "string"
                   },
-                  "email": {
+                  "custom_instruction": {
                     "type": "string"
                   },
-                  "first_name": {
+                  "frequence_utilisation": {
+                    "type": "integer"
+                  },
+                  "mail": {
                     "type": "string"
                   },
-                  "last_name": {
+                  "name": {
                     "type": "string"
                   },
-                  "role": {
+                  "rn": {
+                    "type": "integer"
+                  },
+                  "source_prefere": {
                     "type": "string"
                   },
-                  "status": {
+                  "sources": {
+                    "type": "boolean"
+                  },
+                  "updated_at": {
+                    "format": "date-time",
                     "type": "string"
                   },
                   "user_id": {
                     "type": "string"
+                  },
+                  "verbose": {
+                    "type": "boolean"
                   }
                 },
                 "type": "object"
@@ -2180,7 +3914,12 @@
             "description": "Erreur lors de la récupération des utilisateurs"
           }
         },
-        "summary": "Récupère la liste de tous les utilisateurs avec filtrage optionnel par role et statut.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Récupère la liste de tous les utilisateurs avec filtrage optionnel par source préférée et fréquence d'utilisation.",
         "tags": ["Users"]
       },
       "post": {
@@ -2192,32 +3931,40 @@
             "required": true,
             "schema": {
               "properties": {
-                "email": {
+                "custom_instruction": {
+                  "description": "Instructions personnalisées",
+                  "type": "string"
+                },
+                "frequence_utilisation": {
+                  "description": "Fréquence d'utilisation",
+                  "type": "integer"
+                },
+                "mail": {
                   "description": "Email de l'utilisateur",
                   "type": "string"
                 },
-                "first_name": {
-                  "description": "Prénom de l'utilisateur",
-                  "type": "string"
-                },
-                "last_name": {
+                "name": {
                   "description": "Nom de l'utilisateur",
                   "type": "string"
                 },
-                "preferences": {
-                  "description": "Préférences de l'utilisateur",
-                  "type": "object"
+                "rn": {
+                  "description": "Numéro de ligne",
+                  "type": "integer"
                 },
-                "role": {
-                  "description": "Rôle de l'utilisateur",
+                "source_prefere": {
+                  "description": "Source préférée de l'utilisateur",
                   "type": "string"
                 },
-                "status": {
-                  "description": "Statut de l'utilisateur (default active)",
-                  "type": "string"
+                "sources": {
+                  "description": "Sources activées",
+                  "type": "boolean"
+                },
+                "verbose": {
+                  "description": "Mode verbose",
+                  "type": "boolean"
                 }
               },
-              "required": ["first_name", "last_name", "email", "role"],
+              "required": ["mail", "name"],
               "type": "object"
             }
           }
@@ -2233,11 +3980,16 @@
             "description": "Erreur lors de la création de l'utilisateur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Crée un nouvel utilisateur.",
         "tags": ["Users"]
       }
     },
-    "/greg/users/{user_id}": {
+    "/api/greg/users/{user_id}": {
       "delete": {
         "operationId": "delete_user",
         "parameters": [
@@ -2260,6 +4012,11 @@
             "description": "Erreur lors de la suppression de l'utilisateur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Supprime un utilisateur.",
         "tags": ["Users"]
       },
@@ -2283,30 +4040,36 @@
                   "format": "date-time",
                   "type": "string"
                 },
-                "email": {
+                "custom_instruction": {
                   "type": "string"
                 },
-                "first_name": {
+                "frequence_utilisation": {
+                  "type": "integer"
+                },
+                "mail": {
                   "type": "string"
                 },
-                "last_active": {
+                "name": {
+                  "type": "string"
+                },
+                "rn": {
+                  "type": "integer"
+                },
+                "source_prefere": {
+                  "type": "string"
+                },
+                "sources": {
+                  "type": "boolean"
+                },
+                "updated_at": {
                   "format": "date-time",
-                  "type": "string"
-                },
-                "last_name": {
-                  "type": "string"
-                },
-                "preferences": {
-                  "type": "object"
-                },
-                "role": {
-                  "type": "string"
-                },
-                "status": {
                   "type": "string"
                 },
                 "user_id": {
                   "type": "string"
+                },
+                "verbose": {
+                  "type": "boolean"
                 }
               },
               "type": "object"
@@ -2319,6 +4082,11 @@
             "description": "Erreur lors de la récupération de l'utilisateur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère les détails d'un utilisateur spécifique par son ID.",
         "tags": ["Users"]
       },
@@ -2338,29 +4106,37 @@
             "required": true,
             "schema": {
               "properties": {
-                "email": {
+                "custom_instruction": {
+                  "description": "Instructions personnalisées",
+                  "type": "string"
+                },
+                "frequence_utilisation": {
+                  "description": "Fréquence d'utilisation",
+                  "type": "integer"
+                },
+                "mail": {
                   "description": "Email de l'utilisateur",
                   "type": "string"
                 },
-                "first_name": {
-                  "description": "Prénom de l'utilisateur",
-                  "type": "string"
-                },
-                "last_name": {
+                "name": {
                   "description": "Nom de l'utilisateur",
                   "type": "string"
                 },
-                "preferences": {
-                  "description": "Préférences de l'utilisateur",
-                  "type": "object"
+                "rn": {
+                  "description": "Numéro de ligne",
+                  "type": "integer"
                 },
-                "role": {
-                  "description": "Rôle de l'utilisateur",
+                "source_prefere": {
+                  "description": "Source préférée de l'utilisateur",
                   "type": "string"
                 },
-                "status": {
-                  "description": "Statut de l'utilisateur",
-                  "type": "string"
+                "sources": {
+                  "description": "Sources activées",
+                  "type": "boolean"
+                },
+                "verbose": {
+                  "description": "Mode verbose",
+                  "type": "boolean"
                 }
               },
               "type": "object"
@@ -2381,22 +4157,713 @@
             "description": "Erreur lors de la mise à jour de l'utilisateur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Met à jour un utilisateur existant.",
         "tags": ["Users"]
       }
     },
-    "/health": {
+    "/api/guestymirror/guests": {
       "get": {
-        "operationId": "get_health",
+        "operationId": "listGuestyGuests",
+        "parameters": [
+          {
+            "description": "Page number (starts at 1)",
+            "in": "query",
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "description": "Page size (max 100)",
+            "in": "query",
+            "name": "page_size",
+            "type": "integer"
+          },
+          {
+            "description": "Text search (firstName, lastName, email, phone, fullName)",
+            "in": "query",
+            "name": "q",
+            "type": "string"
+          },
+          {
+            "description": "Filter by exact guest ID",
+            "in": "query",
+            "name": "guest_id",
+            "type": "string"
+          },
+          {
+            "description": "Find guest by reservation confirmation code",
+            "in": "query",
+            "name": "confirmation_code",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Statut de santé de l'API",
+            "description": "A paginated list of guests",
             "schema": {
               "properties": {
+                "guests": {
+                  "items": {
+                    "properties": {
+                      "birthday": {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "first_name": {
+                        "type": "string"
+                      },
+                      "full_name": {
+                        "type": "string"
+                      },
+                      "gender": {
+                        "type": "string"
+                      },
+                      "hometown": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "is_returning": {
+                        "type": "boolean"
+                      },
+                      "last_name": {
+                        "type": "string"
+                      },
+                      "nationality": {
+                        "type": "string"
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "phone": {
+                        "type": "string"
+                      },
+                      "preferred_language": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Invalid pagination parameters"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Guesty mirror guests with filtering and pagination",
+        "tags": ["GuestyMirror"]
+      }
+    },
+    "/api/guestymirror/listings": {
+      "get": {
+        "operationId": "listGuestyListings",
+        "parameters": [
+          {
+            "description": "Page number (starts at 1)",
+            "in": "query",
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "description": "Page size (max 100)",
+            "in": "query",
+            "name": "page_size",
+            "type": "integer"
+          },
+          {
+            "description": "Text search (title, nickname, propertyType, address)",
+            "in": "query",
+            "name": "q",
+            "type": "string"
+          },
+          {
+            "description": "Filter by exact listing ID",
+            "in": "query",
+            "name": "listing_id",
+            "type": "string"
+          },
+          {
+            "description": "Find listing by reservation confirmation code",
+            "in": "query",
+            "name": "confirmation_code",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of listings",
+            "schema": {
+              "properties": {
+                "listings": {
+                  "items": {
+                    "properties": {
+                      "accommodates": {
+                        "type": "integer"
+                      },
+                      "active": {
+                        "type": "boolean"
+                      },
+                      "address": {
+                        "type": "string"
+                      },
+                      "bathrooms": {
+                        "type": "number"
+                      },
+                      "bedrooms": {
+                        "type": "integer"
+                      },
+                      "beds": {
+                        "type": "integer"
+                      },
+                      "created_at": {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "is_listed": {
+                        "type": "boolean"
+                      },
+                      "last_updated_at": {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      "nickname": {
+                        "type": "string"
+                      },
+                      "property_type": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Invalid pagination parameters"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Guesty mirror listings with filtering and pagination",
+        "tags": ["GuestyMirror"]
+      }
+    },
+    "/api/guestymirror/reservations": {
+      "get": {
+        "operationId": "listGuestyReservations",
+        "parameters": [
+          {
+            "description": "Page number (starts at 1)",
+            "in": "query",
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "description": "Page size (max 100)",
+            "in": "query",
+            "name": "page_size",
+            "type": "integer"
+          },
+          {
+            "description": "Text search (confirmation code, status)",
+            "in": "query",
+            "name": "q",
+            "type": "string"
+          },
+          {
+            "description": "Filter by exact confirmation code",
+            "in": "query",
+            "name": "confirmation_code",
+            "type": "string"
+          },
+          {
+            "description": "Filter by listing ID",
+            "in": "query",
+            "name": "listing_id",
+            "type": "string"
+          },
+          {
+            "description": "Filter by guest ID",
+            "in": "query",
+            "name": "guest_id",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of reservations",
+            "schema": {
+              "properties": {
+                "reservations": {
+                  "items": {
+                    "$ref": "#/definitions/Reservation"
+                  },
+                  "type": "array"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Invalid pagination parameters"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Guesty mirror reservations with filtering and pagination",
+        "tags": ["GuestyMirror"]
+      }
+    },
+    "/api/invoicing/audit-redundancy": {
+      "get": {
+        "description": "Analyse un échantillon de réservations \"INVOICED\" et compare des paires de champs\nsusceptibles d'être redondants (ex: REF vs confirmationCode) pour aider au nettoyage de l'ETL.\n",
+        "operationId": "audit_data_redundancy",
+        "parameters": [
+          {
+            "default": 100,
+            "description": "La taille de l'échantillon de réservations à analyser.",
+            "in": "query",
+            "name": "sample_size",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "default": "full",
+            "description": "Format du rapport. 'full' pour le rapport détaillé, 'codes_only' pour la liste des codes de confirmation avec des problèmes.",
+            "enum": ["full", "codes_only"],
+            "in": "query",
+            "name": "report_format",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rapport d'audit généré avec succès."
+          },
+          "500": {
+            "description": "Erreur lors de la génération du rapport."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Analyse un échantillon de réservations pour détecter les redondances de données.",
+        "tags": ["Invoicing"]
+      }
+    },
+    "/api/invoicing/execute-override-sync": {
+      "post": {
+        "description": "Crée les surcharges. Si une liste de 'confirmation_codes' est fournie dans le corps de la \nrequête (optionnel), l'opération est limitée à ces codes. Sinon, elle s'exécute \nsur toutes les réservations avec des différences.\n",
+        "operationId": "execute_override_sync",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": false,
+            "schema": {
+              "properties": {
+                "confirmation_codes": {
+                  "description": "Si fournie, limite la création des surcharges à cette liste de codes.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Surcharges créées avec succès."
+          },
+          "500": {
+            "description": "Erreur lors de la création des surcharges."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Crée en masse les surcharges manuelles basées sur les différences avec la compta.",
+        "tags": ["Invoicing"]
+      }
+    },
+    "/api/invoicing/execute-sync": {
+      "post": {
+        "description": "Opération synchrone. Lit les données 'INVOICED' de la comptabilité, trouve les derniers rapports \ncorrespondants dans 'act2_reports', les duplique, met à jour les champs `_trace`, et insère \nces nouvelles versions. Peut prendre plusieurs minutes.\n",
+        "operationId": "execute_invoicing_sync",
+        "responses": {
+          "200": {
+            "description": "Synchronisation terminée avec succès."
+          },
+          "500": {
+            "description": "Erreur lors de la synchronisation."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Exécute la synchronisation des données facturées en dupliquant les rapports.",
+        "tags": ["Invoicing"]
+      }
+    },
+    "/api/invoicing/find-missing-in-act2": {
+      "get": {
+        "description": "Retourne la liste des codes de confirmation qui existent comme 'INVOICED' dans les tables PROD2 mais n'ont aucun enregistrement dans act2_reports.",
+        "operationId": "find_missing_in_act2",
+        "responses": {
+          "200": {
+            "description": "Liste des codes manquants récupérée avec succès."
+          },
+          "500": {
+            "description": "Erreur lors de l'audit."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Trouve les réservations 'INVOICED' en compta mais absentes de act2_reports.",
+        "tags": ["Invoicing"]
+      }
+    },
+    "/api/invoicing/preview-override-sync": {
+      "post": {
+        "description": "Analyse les différences entre la compta et ACT2. Si une liste de 'confirmation_codes'\nest fournie dans le corps de la requête (optionnel), l'analyse est limitée à ces codes.\nSinon, elle s'exécute sur toutes les réservations 'INVOICED'.\n",
+        "operationId": "preview_override_sync",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": false,
+            "schema": {
+              "properties": {
+                "confirmation_codes": {
+                  "description": "Si fournie, limite l'analyse à cette liste de codes.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prévisualisation générée avec succès."
+          },
+          "500": {
+            "description": "Erreur lors de la prévisualisation."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Prévisualise la création des surcharges.",
+        "tags": ["Invoicing"]
+      }
+    },
+    "/api/invoicing/preview-sync": {
+      "post": {
+        "description": "Analyse les datasets '_PROD2' du projet comptable, compte le nombre de réservations 'INVOICED', \net vérifie combien de rapports correspondants existent dans 'act2_reports' pour une future mise à jour.\nCette opération est en lecture seule et ne modifie aucune donnée.\nSi une liste de 'confirmation_codes' est fournie dans le corps de la requête, l'analyse est limitée à ces codes.\nSinon, elle s'exécute sur toutes les réservations 'INVOICED'.\n",
+        "operationId": "preview_invoicing_sync",
+        "responses": {
+          "200": {
+            "description": "Prévisualisation réussie."
+          },
+          "500": {
+            "description": "Erreur interne du serveur."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Prévisualise la synchronisation des données facturées (invoiced).",
+        "tags": ["Invoicing"]
+      }
+    },
+    "/api/invoicing/trigger-recalculation": {
+      "post": {
+        "description": "Prend une liste de 'confirmation_codes' et les ajoute à la file de traitement\n`gm_to_act_processing_queue` pour que le moteur ACT2 les recalcule en\ntenant compte des nouvelles surcharges.\n",
+        "operationId": "trigger_recalculation_for_sync",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "properties": {
+                "confirmation_codes": {
+                  "description": "La liste des codes de confirmation à recalculer.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": ["confirmation_codes"],
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Réservations mises en file d'attente avec succès."
+          },
+          "400": {
+            "description": "Données d'entrée invalides."
+          },
+          "500": {
+            "description": "Erreur lors de la mise en file d'attente."
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Met en file d'attente une liste de réservations pour recalcul.",
+        "tags": ["Invoicing"]
+      }
+    },
+    "/api/legacy-sync/execute": {
+      "post": {
+        "description": "========================================\u003Cbr/\u003E\u003Cbr/\u003ECet endpoint exécute RÉELLEMENT la synchronisation des données comptables legacy \u003Cbr/\u003Evers les champs _trace dans act2_reports. ATTENTION : MODIFIE LES DONNÉES !\u003Cbr/\u003E\u003Cbr/\u003EIl effectue :\u003Cbr/\u003E• 🔄 Invalidation des anciens rapports (isLatest = false)\u003Cbr/\u003E• 🆕 Création de nouveaux rapports avec données legacy synchronisées\u003Cbr/\u003E• 📝 Mise à jour des calculationInputs avec audit trail complet\u003Cbr/\u003E• 📊 Traitement par lots (batches) pour éviter les timeouts\u003Cbr/\u003E\u003Cbr/\u003E💡 ALGORITHME D'EXÉCUTION :\u003Cbr/\u003E1. Scanne les tables comptables legacy (même logique que preview)\u003Cbr/\u003E2. Classe les réservations en 4 catégories\u003Cbr/\u003E3. EXÉCUTE les actions nécessaires :\u003Cbr/\u003E   - ✅ MISE À JOUR : Invalide l'ancien + crée nouveau avec données legacy\u003Cbr/\u003E   - 🆕 CRÉATION : Crée un rapport \"coquille\" avec données legacy\u003Cbr/\u003E   - ⏭️ IGNORE : Aucune action (déjà traité ou données identiques)\u003Cbr/\u003E\u003Cbr/\u003E🔒 SÉCURITÉ & AUDIT :\u003Cbr/\u003E• Chaque nouveau rapport contient :\u003Cbr/\u003E  - auditNote : \"FORCED_LEGACY_SYNC - Données synchronisées depuis [dataset]\"\u003Cbr/\u003E  - legacySourceTable : Référence exacte de la table source\u003Cbr/\u003E  - legacyData : Copie complète des données legacy pour audit\u003Cbr/\u003E  - syncTimestamp : Horodatage de la synchronisation\u003Cbr/\u003E\u003Cbr/\u003E📦 TRAITEMENT PAR LOTS :\u003Cbr/\u003E• batch_size configurable (1-1000, défaut: 100)\u003Cbr/\u003E• Arrêt immédiat en cas d'erreur sur un lot\u003Cbr/\u003E• Rapports détaillés par lot traité\u003Cbr/\u003E\u003Cbr/\u003E⚠️ PRÉREQUIS RECOMMANDÉS :\u003Cbr/\u003E1. Exécuter /api/legacy-sync/preview AVANT pour valider les actions\u003Cbr/\u003E2. Vérifier les métriques et l'estimation de temps\u003Cbr/\u003E3. S'assurer que targets_already_synced n'est pas trop élevé\u003Cbr/\u003E\u003Cbr/\u003E💻 EXEMPLES D'UTILISATION :\u003Cbr/\u003E\u003Cbr/\u003ESynchronisation complète (tous les datasets) :\u003Cbr/\u003EPOST /api/legacy-sync/execute\u003Cbr/\u003E{\u003Cbr/\u003E  \"batch_size\": 50\u003Cbr/\u003E}\u003Cbr/\u003E\u003Cbr/\u003ECodes spécifiques avec lots plus grands :\u003Cbr/\u003EPOST /api/legacy-sync/execute\u003Cbr/\u003E{\u003Cbr/\u003E  \"confirmation_codes\": [\"GY-5EBCMMKx\", \"Y75wlK4RA\"],\u003Cbr/\u003E  \"batch_size\": 200\u003Cbr/\u003E}\u003Cbr/\u003E\u003Cbr/\u003E📋 WORKFLOW RECOMMANDÉ :\u003Cbr/\u003E1. Preview → Analyser les actions prévues\u003Cbr/\u003E2. Execute → Appliquer les modifications\u003Cbr/\u003E3. Vérifier les résultats dans act2_reports\u003Cbr/\u003E\u003Cbr/\u003E",
+        "operationId": "execute_legacy_sync",
+        "parameters": [
+          {
+            "description": "Paramètres pour contrôler l'exécution :\n\n• confirmation_codes : Codes à traiter spécifiquement\n  Si omis, traite TOUTES les réservations des datasets legacy\n  \n• batch_size : Taille des lots pour le traitement\n  Plus grand = plus rapide mais plus de risque en cas d'erreur\n  Plus petit = plus sûr mais plus lent\n  \n⚠️ RECOMMANDATION : Commencez par un petit batch_size pour tester\n",
+            "in": "body",
+            "name": "body",
+            "required": false,
+            "schema": {
+              "properties": {
+                "batch_size": {
+                  "description": "Nombre de réservations traitées par lot (défaut: 100).\n\nGUIDE DE CHOIX :\n• 10-50 : Sécurisé, idéal pour tests ou données critiques\n• 100-200 : Équilibré, bon compromis vitesse/sécurité  \n• 500-1000 : Rapide, pour gros volumes avec confiance\n\nEn cas d'erreur sur un lot, l'exécution s'arrête immédiatement.\n",
+                  "example": 100,
+                  "maximum": 1000,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "confirmation_codes": {
+                  "description": "Liste optionnelle des codes de confirmation à synchroniser.\n\nEXEMPLES :\n[\"GY-5EBCMMKx\"] - Un seul code pour test\n[\"code1\", \"code2\", \"code3\"] - Groupe spécifique\n\nSi omis : Synchronise TOUTES les réservations legacy\n⚠️ ATTENTION : Peut prendre beaucoup de temps !\n",
+                  "example": ["GY-5EBCMMKx", "Y75wlK4RA"],
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "⚡ SYNCHRONISATION EXÉCUTÉE AVEC SUCCÈS\n\nLa réponse contient un rapport d'exécution détaillé :\n\n📊 RÉSUMÉ DES ACTIONS RÉALISÉES :\n• batches_processed : Nombre de lots traités avec succès\n• total_reservations_scanned : Réservations analysées dans les datasets\n• reports_invalidated : Anciens rapports invalidés (isLatest=false)  \n• new_reports_created : Nouveaux rapports créés avec données legacy\n• targets_already_synced : Réservations ignorées (données identiques)\n• duration_seconds : Temps total d'exécution\n\n🔒 AUDIT TRAIL CRÉÉ :\nChaque nouveau rapport contient dans calculationInputs :\n• auditNote avec référence au dataset source\n• legacySourceTable pour traçabilité complète\n• legacyData avec copie des données originales\n• syncTimestamp pour horodatage\n\n⚠️ GESTION D'ERREURS :\nSi status != \"completed\", vérifiez les access_errors\nEn cas d'erreur sur un lot, l'exécution s'arrête immédiatement\n",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "access_errors": {
+                      "description": "Liste des erreurs d'accès aux datasets (présent en cas de no_access)",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "execution_metrics": {
+                      "properties": {
+                        "datasets_checked": {
+                          "description": "Nombre de datasets vérifiés",
+                          "type": "integer"
+                        },
+                        "datasets_scanned": {
+                          "description": "Nombre de datasets effectivement scannés",
+                          "type": "integer"
+                        },
+                        "duration_seconds": {
+                          "description": "Durée totale de l'exécution en secondes",
+                          "type": "number"
+                        },
+                        "early_termination": {
+                          "description": "Arrêt anticipé activé (optimisation)",
+                          "type": "boolean"
+                        },
+                        "failed_queries": {
+                          "description": "Nombre de requêtes BigQuery échouées",
+                          "type": "integer"
+                        },
+                        "successful_queries": {
+                          "description": "Nombre de requêtes BigQuery réussies",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "message": {
+                      "description": "Message d'information (présent en cas de no_access)",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "Statut de l'exécution",
+                      "enum": ["completed", "partial", "failed", "no_access"],
+                      "type": "string"
+                    },
+                    "summary": {
+                      "properties": {
+                        "batches_processed": {
+                          "description": "Nombre de lots traités avec succès",
+                          "type": "integer"
+                        },
+                        "datasets_empty": {
+                          "description": "Datasets vides",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "datasets_failed": {
+                          "description": "Datasets en erreur",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "datasets_with_results": {
+                          "description": "Datasets ayant fourni des résultats",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "new_reports_created": {
+                          "description": "Nombre de nouveaux rapports créés avec données legacy",
+                          "type": "integer"
+                        },
+                        "reports_invalidated": {
+                          "description": "Nombre de rapports invalidés (isLatest=false)",
+                          "type": "integer"
+                        },
+                        "targets_already_synced": {
+                          "description": "Nombre de rapports ignorés (données identiques)",
+                          "type": "integer"
+                        },
+                        "targets_ignored": {
+                          "description": "Nombre de rapports ignorés (déjà traités via auditNote)",
+                          "type": "integer"
+                        },
+                        "total_reservations_scanned": {
+                          "description": "Nombre total de réservations analysées",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "type": "boolean"
+                },
                 "message": {
                   "type": "string"
                 },
-                "status": {
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "❌ ERREUR DE VALIDATION DES PARAMÈTRES\n\nCauses possibles :\n• confirmation_codes n'est pas une liste\n• Un code de confirmation n'est pas une chaîne de caractères  \n• batch_size n'est pas un entier ou hors limites (1-1000)\n",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "🔥 ERREUR INTERNE DU SERVEUR\n\nCauses possibles :\n• Problème de connexion BigQuery (credentials, réseau)\n• Erreur lors de l'écriture dans act2_reports (permissions)\n• Échec d'un lot pendant l'exécution (données corrompues)\n• Timeout sur une transaction BigQuery\n• Erreur dans le mapping des champs legacy\n\n⚠️ IMPORTANT : En cas d'erreur durant l'exécution, certaines données\npeuvent avoir été partiellement modifiées. Vérifiez l'état de\nact2_reports et relancez si nécessaire.\n",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
                   "type": "string"
                 }
               },
@@ -2404,11 +4871,937 @@
             }
           }
         },
-        "summary": "Endpoint de santé globale de l'API",
-        "tags": ["Accueil"]
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "⚡ EXÉCUTION DE LA SYNCHRONISATION LEGACY",
+        "tags": ["Legacy Sync"]
       }
     },
-    "/reservations": {
+    "/api/legacy-sync/preview": {
+      "post": {
+        "description": "============================================\u003Cbr/\u003E\u003Cbr/\u003ECet endpoint analyse les données comptables legacy et détermine quelles actions seraient \u003Cbr/\u003Enécessaires pour synchroniser les champs _trace dans act2_reports, SANS MODIFIER aucune donnée.\u003Cbr/\u003E\u003Cbr/\u003EIl vous permet de :\u003Cbr/\u003E• 📊 Estimer le temps d'exécution\u003Cbr/\u003E• 🎯 Voir exactement quelles réservations seront traitées\u003Cbr/\u003E• 📈 Analyser les performances par dataset\u003Cbr/\u003E• 🚀 Optimiser votre stratégie d'exécution\u003Cbr/\u003E\u003Cbr/\u003E💡 FONCTIONNEMENT :\u003Cbr/\u003E1. Scanne les tables comptables legacy (ql-accounting-tools-sql)\u003Cbr/\u003E2. Compare avec les données act2_reports existantes\u003Cbr/\u003E3. Classe chaque réservation en 4 catégories :\u003Cbr/\u003E   - ✅ À METTRE À JOUR : Données différentes, mise à jour nécessaire\u003Cbr/\u003E   - 🆕 À CRÉER : Aucun rapport existant, création d'un rapport \"coquille\"\u003Cbr/\u003E   - ⏭️ IGNORÉ (AUDITNOTE) : Déjà traité (auditNote contient \"INVOICED\" ou \"Forced legacy\")\u003Cbr/\u003E   - 🔄 DÉJÀ SYNCHRONISÉ : Données identiques, aucune action nécessaire\u003Cbr/\u003E\u003Cbr/\u003E🎯 MODES DE RAPPORT :\u003Cbr/\u003E- \"detailed\" : Infos complètes avec détails par dataset (≤ 10 codes)\u003Cbr/\u003E- \"minimal\" : Stats globales uniquement (\u003E 10 codes ou demande explicite)\u003Cbr/\u003E- \"auto\" : Sélection automatique selon le nombre de codes\u003Cbr/\u003E\u003Cbr/\u003E💻 EXEMPLES D'UTILISATION :\u003Cbr/\u003E\u003Cbr/\u003EAnalyse globale (tous les datasets) :\u003Cbr/\u003EPOST /api/legacy-sync/preview\u003Cbr/\u003E{}\u003Cbr/\u003E\u003Cbr/\u003ECodes spécifiques en mode détaillé :\u003Cbr/\u003EPOST /api/legacy-sync/preview\u003Cbr/\u003E{\u003Cbr/\u003E  \"confirmation_codes\": [\"GY-5EBCMMKx\", \"Y75wlK4RA\"],\u003Cbr/\u003E  \"report_mode\": \"detailed\"\u003Cbr/\u003E}\u003Cbr/\u003E\u003Cbr/\u003EBeaucoup de codes en mode minimal :\u003Cbr/\u003EPOST /api/legacy-sync/preview\u003Cbr/\u003E{\u003Cbr/\u003E  \"confirmation_codes\": [\"code1\", \"code2\", ...], \u003Cbr/\u003E  \"report_mode\": \"minimal\"\u003Cbr/\u003E}\u003Cbr/\u003E\u003Cbr/\u003E📋 OPTIMISATIONS INCLUSES :\u003Cbr/\u003E• Arrêt anticipé dès que tous les codes sont trouvés\u003Cbr/\u003E• Mémorisation du dernier dataset productif\u003Cbr/\u003E• Comparaison intelligente des données existantes\u003Cbr/\u003E• Métriques de performance détaillées\u003Cbr/\u003E\u003Cbr/\u003E",
+        "operationId": "preview_legacy_sync",
+        "parameters": [
+          {
+            "description": "Paramètres optionnels pour cibler l'analyse :\n\n• confirmation_codes : Liste des codes à analyser spécifiquement\n  Si omis, analyse TOUS les datasets legacy disponibles\n  \n• report_mode : Niveau de détail souhaité\n  - \"auto\" (défaut) : Détaillé si ≤10 codes, minimal si \u003E10 codes\n  - \"detailed\" : Toutes les métriques et détails par dataset\n  - \"minimal\" : Statistiques globales uniquement\n",
+            "in": "body",
+            "name": "body",
+            "required": false,
+            "schema": {
+              "properties": {
+                "confirmation_codes": {
+                  "description": "Liste optionnelle des codes de confirmation à analyser.\n\nEXEMPLES :\n[\"HMQEJ4JKWF\"] - Un seul code spécifique\n[\"GY-5EBCMMKx\", \"Y75wlK4RA\"] - Plusieurs codes\n\nSi omis : Analyse TOUS les datasets legacy (plus lent mais exhaustif)\n",
+                  "example": ["GY-5EBCMMKx", "Y75wlK4RA"],
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "report_mode": {
+                  "description": "Mode de rapport pour adapter le niveau de détail :\n\n• \"minimal\" : Stats globales, datasets productifs, estimation temps\n  Idéal pour beaucoup de codes (\u003E 10) ou analyse rapide\n  \n• \"detailed\" : Toutes les métriques + détails par dataset + échantillons\n  Idéal pour quelques codes (≤ 10) ou analyse approfondie\n  \n• \"auto\" (défaut) : Sélection automatique selon le nombre de codes\n",
+                  "enum": ["minimal", "detailed", "auto"],
+                  "example": "auto",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "📊 PRÉVISUALISATION GÉNÉRÉE AVEC SUCCÈS\n\nLa réponse contient une analyse complète des actions à effectuer :\n\n🎯 MÉTRIQUES D'EXÉCUTION :\n• Temps de l'analyse et estimation pour l'exécution réelle\n• Nombre de datasets vérifiés vs scannés (optimisation)\n• Requêtes réussies/échouées, arrêt anticipé\n\n📊 RÉSUMÉ PAR CATÉGORIE :\n• targets_to_be_updated : Données différentes → mise à jour requise\n• targets_to_be_created : Aucun rapport → création requise  \n• targets_ignored : Déjà traité via auditNote\n• targets_already_synced : Données identiques → aucune action\n\n📈 ANALYSE DES DATASETS (mode detailed) :\n• Datasets productifs, vides, en erreur\n• Codes trouvés par dataset avec temps de requête\n• Détails de chaque requête BigQuery\n\n🚀 ANALYSE DE PERFORMANCE :\n• Dataset le plus productif identifié\n• Optimisation active (mémorisation)\n• Prochain scan commencera par le dataset optimal\n",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "access_errors": {
+                      "description": "Liste des erreurs d'accès aux datasets (présent en cas de no_access)",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "dataset_analysis": {
+                      "description": "Analyse détaillée des datasets (mode detailed uniquement)",
+                      "properties": {
+                        "query_details": {
+                          "items": {
+                            "properties": {
+                              "codes_found": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "dataset": {
+                                "type": "string"
+                              },
+                              "query_duration_ms": {
+                                "type": "number"
+                              },
+                              "results_count": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "execution_metrics": {
+                      "properties": {
+                        "datasets_checked": {
+                          "description": "Nombre de datasets vérifiés",
+                          "type": "integer"
+                        },
+                        "datasets_scanned": {
+                          "description": "Nombre de datasets effectivement scannés",
+                          "type": "integer"
+                        },
+                        "duration_seconds": {
+                          "description": "Durée de l'analyse en secondes",
+                          "type": "number"
+                        },
+                        "early_termination": {
+                          "description": "Arrêt anticipé activé (optimisation)",
+                          "type": "boolean"
+                        },
+                        "estimated_execution_time_seconds": {
+                          "description": "Temps d'exécution estimé",
+                          "type": "number"
+                        },
+                        "failed_queries": {
+                          "description": "Nombre de requêtes échouées",
+                          "type": "integer"
+                        },
+                        "successful_queries": {
+                          "description": "Nombre de requêtes réussies",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "performance_analysis": {
+                      "properties": {
+                        "average_query_time_ms": {
+                          "description": "Temps moyen par requête en ms (mode detailed)",
+                          "type": "number"
+                        },
+                        "most_productive_dataset": {
+                          "description": "Dataset le plus productif",
+                          "type": "string"
+                        },
+                        "next_scan_will_start_with": {
+                          "description": "Dataset prioritaire pour le prochain scan",
+                          "type": "string"
+                        },
+                        "optimization_active": {
+                          "description": "Optimisation active",
+                          "type": "boolean"
+                        },
+                        "total_query_time_ms": {
+                          "description": "Temps total des requêtes en ms (mode detailed)",
+                          "type": "number"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "report_mode": {
+                      "description": "Mode de rapport utilisé",
+                      "enum": ["minimal", "detailed"],
+                      "type": "string"
+                    },
+                    "sample_of_changes": {
+                      "description": "Échantillon des changements (mode detailed uniquement)",
+                      "items": {
+                        "properties": {
+                          "action": {
+                            "type": "string"
+                          },
+                          "confirmationCode": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "status": {
+                      "description": "Statut de l'opération",
+                      "enum": ["success", "no_access"],
+                      "type": "string"
+                    },
+                    "summary": {
+                      "properties": {
+                        "datasets_empty": {
+                          "description": "Datasets vides",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "datasets_failed": {
+                          "description": "Datasets en erreur",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "datasets_with_results": {
+                          "description": "Datasets ayant fourni des résultats",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "reservations_scanned": {
+                          "description": "Nombre total de réservations analysées",
+                          "type": "integer"
+                        },
+                        "targets_already_synced": {
+                          "description": "Nombre de rapports déjà synchronisés (données identiques)",
+                          "type": "integer"
+                        },
+                        "targets_ignored": {
+                          "description": "Nombre de rapports ignorés (déjà traités via auditNote)",
+                          "type": "integer"
+                        },
+                        "targets_to_be_created": {
+                          "description": "Nombre de rapports à créer",
+                          "type": "integer"
+                        },
+                        "targets_to_be_updated": {
+                          "description": "Nombre de rapports à mettre à jour",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "❌ ERREUR DE VALIDATION DES PARAMÈTRES\n\nCauses possibles :\n• confirmation_codes n'est pas une liste\n• Un code de confirmation n'est pas une chaîne de caractères\n• report_mode n'est pas \"minimal\", \"detailed\" ou \"auto\"\n",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "🔥 ERREUR INTERNE DU SERVEUR\n\nCauses possibles :\n• Problème de connexion BigQuery (credentials, réseau)\n• Erreur dans les requêtes SQL (permissions, datasets)\n• Timeout sur une requête (trop de données)\n• Erreur de traitement des données legacy\n\n⚠️ Vérifiez les logs serveur pour plus de détails\n",
+            "schema": {
+              "properties": {
+                "error": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "🔍 PRÉVISUALISATION DE SYNCHRONISATION LEGACY",
+        "tags": ["Legacy Sync"]
+      }
+    },
+    "/api/ql-accounting-tools-sql/datasets": {
+      "get": {
+        "description": "Récupère la liste de tous les datasets du projet ql-accounting-tools-sql\navec leurs informations d'accessibilité et statistiques de base.\n\nMode basique: accessibilité + nombre d'enregistrements\nMode détaillé: inclut les statistiques complètes (dates, réservations, etc.)\n",
+        "operationId": "list_ql_accounting_datasets",
+        "parameters": [
+          {
+            "default": false,
+            "description": "Si true, inclut les statistiques détaillées pour chaque dataset accessible",
+            "in": "query",
+            "name": "detailed",
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des datasets récupérée avec succès",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "datasets": {
+                      "items": {
+                        "properties": {
+                          "accessible": {
+                            "example": true,
+                            "type": "boolean"
+                          },
+                          "base_name": {
+                            "example": "14M",
+                            "type": "string"
+                          },
+                          "dataset": {
+                            "example": "ql-accounting-tools-sql.14M_PROD2.DATABASE",
+                            "type": "string"
+                          },
+                          "error": {
+                            "description": "Erreur d'accès (si accessible=false)",
+                            "example": "Access denied",
+                            "type": "string"
+                          },
+                          "full_name": {
+                            "example": "14M_PROD2",
+                            "type": "string"
+                          },
+                          "priority": {
+                            "example": "PROD2",
+                            "type": "string"
+                          },
+                          "record_count": {
+                            "example": 1250,
+                            "type": "integer"
+                          },
+                          "statistics": {
+                            "description": "Statistiques détaillées (mode detailed uniquement)",
+                            "properties": {
+                              "earliest_date": {
+                                "format": "date",
+                                "type": "string"
+                              },
+                              "earliest_modification": {
+                                "format": "date-time",
+                                "type": "string"
+                              },
+                              "latest_date": {
+                                "format": "date",
+                                "type": "string"
+                              },
+                              "latest_modification": {
+                                "format": "date-time",
+                                "type": "string"
+                              },
+                              "total_reservations": {
+                                "type": "integer"
+                              },
+                              "unique_refs": {
+                                "type": "integer"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "mode": {
+                      "example": "basic",
+                      "type": "string"
+                    },
+                    "status": {
+                      "example": "success",
+                      "type": "string"
+                    },
+                    "summary": {
+                      "properties": {
+                        "accessible_datasets": {
+                          "example": 18,
+                          "type": "integer"
+                        },
+                        "inaccessible_datasets": {
+                          "example": 6,
+                          "type": "integer"
+                        },
+                        "total_datasets": {
+                          "example": 24,
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "example": false,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": true,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "📋 Liste tous les datasets disponibles",
+        "tags": ["ql-accounting-tools-sql"]
+      }
+    },
+    "/api/ql-accounting-tools-sql/datasets/{dataset_name}": {
+      "get": {
+        "description": "Fournit des statistiques détaillées sur un dataset spécifique du projet\nql-accounting-tools-sql.\n\nFormat du nom: \"14M_PROD2\", \"82S_DEV\", \"15C_PROD\", etc.\n",
+        "operationId": "get_ql_accounting_dataset_info",
+        "parameters": [
+          {
+            "description": "Nom du dataset (ex: 14M_PROD2, 82S_DEV)",
+            "in": "path",
+            "name": "dataset_name",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informations du dataset récupérées avec succès",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "accessible": {
+                      "example": true,
+                      "type": "boolean"
+                    },
+                    "dataset": {
+                      "example": "ql-accounting-tools-sql.14M_PROD2.DATABASE",
+                      "type": "string"
+                    },
+                    "error": {
+                      "description": "Erreur d'accès (si accessible=false)",
+                      "example": "Access denied",
+                      "type": "string"
+                    },
+                    "statistics": {
+                      "description": "Statistiques détaillées (si accessible)",
+                      "properties": {
+                        "earliest_date": {
+                          "description": "Date de création la plus ancienne",
+                          "example": "2023-01-01",
+                          "format": "date",
+                          "type": "string"
+                        },
+                        "earliest_modification": {
+                          "description": "Date de modification la plus ancienne",
+                          "example": "2023-01-01T10:00:00Z",
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "latest_date": {
+                          "description": "Date de création la plus récente",
+                          "example": "2024-07-15",
+                          "format": "date",
+                          "type": "string"
+                        },
+                        "latest_modification": {
+                          "description": "Date de modification la plus récente",
+                          "example": "2024-07-15T14:30:00Z",
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "total_reservations": {
+                          "description": "Nombre total de réservations",
+                          "example": 1250,
+                          "type": "integer"
+                        },
+                        "unique_refs": {
+                          "description": "Nombre de codes de confirmation uniques",
+                          "example": 1150,
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "status": {
+                      "example": "success",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "example": false,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Nom du dataset invalide",
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": true,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": true,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "📊 Récupère les informations détaillées d'un dataset spécifique",
+        "tags": ["ql-accounting-tools-sql"]
+      }
+    },
+    "/api/ql-accounting-tools-sql/search/codes": {
+      "get": {
+        "description": "Permet de rechercher une ou plusieurs réservations en utilisant leurs codes\nde confirmation dans les datasets legacy spécifiés du projet ql-accounting-tools-sql.\n\nLes datasets utilisés sont: 14M_PROD2, 15C_PROD2, 17C_PROD2, 82S_PROD2, 16L_PROD, 51M_PROD, 8BE_PROD, LE_PRE_PROD\n\nLes résultats sont triés par ordre de priorité des datasets puis par date de modification (plus récente en premier).\n",
+        "operationId": "search_ql_accounting_by_codes",
+        "parameters": [
+          {
+            "description": "Code(s) de confirmation à rechercher (séparés par des virgules pour plusieurs codes)",
+            "in": "query",
+            "name": "codes",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "default": 100,
+            "description": "Nombre maximum de résultats par dataset",
+            "in": "query",
+            "maximum": 1000,
+            "minimum": 1,
+            "name": "limit",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recherche terminée avec succès",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "codes_searched": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "execution_metrics": {
+                      "properties": {
+                        "duration_seconds": {
+                          "type": "number"
+                        },
+                        "end_time": {
+                          "type": "string"
+                        },
+                        "start_time": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "results": {
+                      "items": {
+                        "properties": {
+                          "EMAIL_GUEST": {
+                            "type": "string"
+                          },
+                          "NOM_GUEST": {
+                            "type": "string"
+                          },
+                          "REF": {
+                            "type": "string"
+                          },
+                          "_source_base": {
+                            "type": "string"
+                          },
+                          "_source_dataset": {
+                            "type": "string"
+                          },
+                          "_source_priority": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "search_type": {
+                      "example": "confirmation_codes",
+                      "type": "string"
+                    },
+                    "status": {
+                      "example": "success",
+                      "type": "string"
+                    },
+                    "summary": {
+                      "properties": {
+                        "datasets_searched": {
+                          "type": "integer"
+                        },
+                        "datasets_with_results": {
+                          "type": "integer"
+                        },
+                        "total_found": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "example": false,
+                  "type": "boolean"
+                },
+                "message": {
+                  "example": "Recherche terminée avec succès. 2 résultats trouvés.",
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Paramètres invalides",
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": true,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": true,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "🔍 Recherche les réservations par codes de confirmation",
+        "tags": ["ql-accounting-tools-sql"]
+      }
+    },
+    "/api/ql-accounting-tools-sql/search/filters": {
+      "get": {
+        "description": "Permet de rechercher des réservations en utilisant différents filtres\ndans les datasets legacy spécifiés du projet ql-accounting-tools-sql.\n\nLes datasets utilisés sont: 14M_PROD2, 15C_PROD2, 17C_PROD2, 82S_PROD2, 16L_PROD, 51M_PROD, 8BE_PROD, LE_PRE_PROD\n\nFiltres disponibles:\n- guest_name: Nom du client (recherche partielle, insensible à la casse)\n- guest_email: Email du client (recherche partielle, insensible à la casse)\n- listing_name: Nom du logement (recherche partielle, insensible à la casse)\n- platform: Plateforme de réservation (recherche partielle, insensible à la casse)\n- state: État de la réservation (recherche exacte, insensible à la casse)\n- date_from: Date de création à partir de (format: YYYY-MM-DD)\n- date_to: Date de création jusqu'à (format: YYYY-MM-DD)\n- checkin_from: Date de check-in à partir de (format: YYYY-MM-DD)\n- checkin_to: Date de check-in jusqu'à (format: YYYY-MM-DD)\n\nLes résultats sont triés par ordre de priorité des datasets puis par date de modification (plus récente en premier).\n",
+        "operationId": "search_ql_accounting_by_filters",
+        "parameters": [
+          {
+            "description": "Nom du client (recherche partielle)",
+            "in": "query",
+            "name": "guest_name",
+            "type": "string"
+          },
+          {
+            "description": "Email du client (recherche partielle)",
+            "in": "query",
+            "name": "guest_email",
+            "type": "string"
+          },
+          {
+            "description": "Nom du logement (recherche partielle)",
+            "in": "query",
+            "name": "listing_name",
+            "type": "string"
+          },
+          {
+            "description": "Plateforme de réservation (recherche partielle)",
+            "in": "query",
+            "name": "platform",
+            "type": "string"
+          },
+          {
+            "description": "État de la réservation (recherche exacte)",
+            "in": "query",
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "description": "Date de création à partir de (YYYY-MM-DD)",
+            "format": "date",
+            "in": "query",
+            "name": "date_from",
+            "type": "string"
+          },
+          {
+            "description": "Date de création jusqu'à (YYYY-MM-DD)",
+            "format": "date",
+            "in": "query",
+            "name": "date_to",
+            "type": "string"
+          },
+          {
+            "description": "Date de check-in à partir de (YYYY-MM-DD)",
+            "format": "date",
+            "in": "query",
+            "name": "checkin_from",
+            "type": "string"
+          },
+          {
+            "description": "Date de check-in jusqu'à (YYYY-MM-DD)",
+            "format": "date",
+            "in": "query",
+            "name": "checkin_to",
+            "type": "string"
+          },
+          {
+            "default": 100,
+            "description": "Nombre maximum de résultats par dataset",
+            "in": "query",
+            "maximum": 1000,
+            "minimum": 1,
+            "name": "limit",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recherche terminée avec succès",
+            "schema": {
+              "properties": {
+                "data": {
+                  "properties": {
+                    "execution_metrics": {
+                      "properties": {
+                        "duration_seconds": {
+                          "type": "number"
+                        },
+                        "end_time": {
+                          "type": "string"
+                        },
+                        "start_time": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "filters_applied": {
+                      "type": "object"
+                    },
+                    "results": {
+                      "items": {
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "search_type": {
+                      "example": "filters",
+                      "type": "string"
+                    },
+                    "status": {
+                      "example": "success",
+                      "type": "string"
+                    },
+                    "summary": {
+                      "properties": {
+                        "datasets_searched": {
+                          "type": "integer"
+                        },
+                        "datasets_with_results": {
+                          "type": "integer"
+                        },
+                        "total_found": {
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "error": {
+                  "example": false,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Paramètres invalides",
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": true,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Erreur interne du serveur",
+            "schema": {
+              "properties": {
+                "error": {
+                  "example": true,
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "🔍 Recherche les réservations par filtres",
+        "tags": ["ql-accounting-tools-sql"]
+      }
+    },
+    "/api/reservations": {
       "get": {
         "operationId": "list_reservations",
         "parameters": [
@@ -2486,7 +5879,7 @@
         "tags": ["Reservations"]
       }
     },
-    "/reservations/overrides/fields": {
+    "/api/reservations/overrides/fields": {
       "get": {
         "operationId": "get_allowed_override_fields",
         "responses": {
@@ -2525,11 +5918,16 @@
             "description": "Erreur interne du serveur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère la liste des champs autorisés pour les surcharges.",
         "tags": ["Overrides"]
       }
     },
-    "/reservations/queue/status": {
+    "/api/reservations/queue/status": {
       "get": {
         "operationId": "get_queue_status",
         "parameters": [
@@ -2584,39 +5982,85 @@
             "description": "Erreur interne du serveur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère le statut de la file d'attente de traitement.",
         "tags": ["Queue"]
       }
     },
-    "/reservations/{confirmation_code}": {
+    "/api/reservations/{confirmation_code}": {
       "get": {
-        "description": "Retourne les détails de la réservation correspondant au code fourni. Retourne une erreur si la réservation n'existe pas.",
+        "description": "Retourne un objet JSON complet contenant toutes les données disponibles pour une réservation,\naprès avoir appliqué une logique de fusion intelligente : pour chaque champ, la valeur `_trace` \n(source) est prioritaire sur la valeur `_value` (calculée).\n",
         "operationId": "get_reservation_by_code",
         "parameters": [
           {
-            "description": "Code de confirmation de la réservation",
+            "description": "Code de confirmation de la réservation.",
             "in": "path",
             "name": "confirmation_code",
             "required": true,
             "type": "string"
+          },
+          {
+            "default": false,
+            "description": "Inclure la liste complète des `reservation_logs` dans la réponse.",
+            "in": "query",
+            "name": "include_logs",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "default": false,
+            "description": "Inclure le champ `auditNote` (note d'audit du calcul) dans la réponse.",
+            "in": "query",
+            "name": "include_audit_note",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "default": false,
+            "description": "Force l'inclusion de tous les champs `_trace` et désactive la fusion par défaut.",
+            "in": "query",
+            "name": "force_trace",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "default": false,
+            "description": "Force l'inclusion de tous les champs `_value` et désactive la fusion par défaut. Combiné avec `force_trace`, retourne les données brutes.",
+            "in": "query",
+            "name": "force_value",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
           "200": {
-            "description": "Réservation trouvée avec succès"
+            "description": "Réservation trouvée avec succès.",
+            "schema": {
+              "description": "Un objet JSON contenant toutes les paires clé/valeur de la réservation traitée.",
+              "type": "object"
+            }
           },
           "404": {
-            "description": "Réservation non trouvée"
+            "description": "Réservation non trouvée."
           },
           "500": {
-            "description": "Erreur interne du serveur"
+            "description": "Erreur interne du serveur."
           }
         },
-        "summary": "Récupère les détails d'une réservation par son code de confirmation",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Récupère les détails complets et traités d'une réservation.",
         "tags": ["Reservations"]
       }
     },
-    "/reservations/{confirmation_code}/history": {
+    "/api/reservations/{confirmation_code}/history": {
       "get": {
         "operationId": "get_reservation_history",
         "parameters": [
@@ -2683,11 +6127,16 @@
             "description": "Erreur interne du serveur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère l'historique complet des versions de calcul pour une réservation.",
         "tags": ["History"]
       }
     },
-    "/reservations/{confirmation_code}/overrides": {
+    "/api/reservations/{confirmation_code}/overrides": {
       "get": {
         "operationId": "get_overrides_for_reservation",
         "parameters": [
@@ -2745,6 +6194,11 @@
             "description": "Erreur interne du serveur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Récupère toutes les surcharges manuelles pour une réservation.",
         "tags": ["Overrides"]
       },
@@ -2796,11 +6250,16 @@
             "description": "Erreur interne du serveur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Crée ou met à jour une surcharge manuelle pour une réservation.",
         "tags": ["Overrides"]
       }
     },
-    "/reservations/{confirmation_code}/overrides/{field_name}": {
+    "/api/reservations/{confirmation_code}/overrides/{field_name}": {
       "delete": {
         "operationId": "delete_override",
         "parameters": [
@@ -2830,11 +6289,16 @@
             "description": "Erreur interne du serveur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Supprime une surcharge manuelle pour une réservation.",
         "tags": ["Overrides"]
       }
     },
-    "/reservations/{confirmation_code}/recalculate": {
+    "/api/reservations/{confirmation_code}/recalculate": {
       "post": {
         "operationId": "recalculate_reservation",
         "parameters": [
@@ -2889,11 +6353,45 @@
             "description": "Erreur interne du serveur"
           }
         },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "summary": "Déclenche manuellement le recalcul d'une réservation.",
         "tags": ["Queue"]
       }
+    },
+    "/health": {
+      "get": {
+        "operationId": "get_health",
+        "responses": {
+          "200": {
+            "description": "Statut de santé de l'API",
+            "schema": {
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Endpoint de santé globale de l'API",
+        "tags": ["Accueil"]
+      }
     }
   },
+  "schemes": ["https"],
   "securityDefinitions": {
     "ApiKeyAuth": {
       "description": "Clé API pour l'accès à l'API Gateway",
@@ -2903,6 +6401,7 @@
     }
   },
   "swagger": "2.0",
+  "x-google-allow": "all",
   "x-google-backend": {
     "address": "https://apijhmhportail-22997865276.europe-west1.run.app",
     "protocol": "h2"

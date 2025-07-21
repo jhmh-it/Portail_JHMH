@@ -1,5 +1,139 @@
-# Exécuter lint-staged sur les fichiers modifiés
-npx lint-staged
+#!/bin/sh
+# 🔒 Pre-commit Hook - Vérifications de Qualité
+# Exécute les vérifications de qualité avant chaque commit
 
-# Vérifier que le build fonctionne
-npm run build
+echo "🔒 Pre-commit hook: Vérifications de qualité..."
+
+# Couleurs pour les messages
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Fonction pour les messages colorés
+print_step() {
+    echo "${BLUE}🔍 $1${NC}"
+}
+
+print_success() {
+    echo "${GREEN}✅ $1${NC}"
+}
+
+print_warning() {
+    echo "${YELLOW}⚠️ $1${NC}"
+}
+
+print_error() {
+    echo "${RED}❌ $1${NC}"
+}
+
+# Vérifier si nous sommes dans un repo Git
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    print_error "Pas dans un dépôt Git"
+    exit 1
+fi
+
+# 1. Lint-staged sur les fichiers modifiés
+print_step "Exécution de lint-staged..."
+if npx lint-staged; then
+    print_success "Lint-staged terminé avec succès"
+else
+    print_error "Lint-staged a échoué"
+    echo "${YELLOW}💡 Conseil: Corrigez les erreurs de linting ci-dessus avant de commiter${NC}"
+    exit 1
+fi
+
+# 2. Vérification TypeScript
+print_step "Vérification TypeScript..."
+if npm run type-check > /dev/null 2>&1; then
+    print_success "Types TypeScript valides"
+else
+    print_error "Erreurs TypeScript détectées"
+    echo "${YELLOW}💡 Conseil: Exécutez 'npm run type-check' pour voir les détails${NC}"
+    exit 1
+fi
+
+# 3. Test du build (rapide)
+print_step "Test de build..."
+if npm run build > /dev/null 2>&1; then
+    print_success "Build réussi"
+    # Nettoyer les fichiers de build pour éviter de les commiter
+    rm -rf .next/cache 2>/dev/null || true
+else
+    print_error "Build échoué"
+    echo "${YELLOW}💡 Conseil: Exécutez 'npm run build' pour voir les détails${NC}"
+    exit 1
+fi
+
+# 4. Vérification des Cloud Functions si modifiées
+if git diff --cached --name-only | grep -q "^functions/"; then
+    print_step "Vérification des Cloud Functions..."
+    
+    if [ -f "functions/main.py" ]; then
+        cd functions
+        
+        # Vérifier la compilation Python
+        if python3 -m py_compile main.py 2>/dev/null; then
+            print_success "Cloud Functions: compilation OK"
+        else
+            print_error "Cloud Functions: erreur de compilation"
+            cd ..
+            exit 1
+        fi
+        
+        # Lancer les tests de validation si disponibles
+        if [ -f "test_validation.py" ]; then
+            if python3 test_validation.py > /dev/null 2>&1; then
+                print_success "Cloud Functions: tests OK"
+            else
+                print_warning "Cloud Functions: tests ont échoué"
+                echo "${YELLOW}💡 Conseil: Vérifiez 'cd functions && python3 test_validation.py'${NC}"
+            fi
+        fi
+        
+        cd ..
+    fi
+fi
+
+# 5. Vérification des secrets (basique)
+print_step "Vérification des secrets..."
+secrets_patterns=(
+    "FIREBASE_PRIVATE_KEY"
+    "FIREBASE_CLIENT_EMAIL"
+    "API_KEY"
+    "SECRET_KEY"
+    "PASSWORD"
+    "TOKEN"
+)
+
+for pattern in "${secrets_patterns[@]}"; do
+    if git diff --cached | grep -i "$pattern" > /dev/null; then
+        print_warning "Possible secret détecté: $pattern"
+        echo "${YELLOW}💡 Assurez-vous que ce n'est pas un vrai secret${NC}"
+    fi
+done
+
+# 6. Vérification de la taille des fichiers
+print_step "Vérification de la taille des fichiers..."
+large_files=$(git diff --cached --name-only | xargs -I {} find {} -size +1M 2>/dev/null || true)
+if [ -n "$large_files" ]; then
+    print_warning "Fichiers volumineux détectés (>1MB):"
+    echo "$large_files"
+    echo "${YELLOW}💡 Conseil: Considérez Git LFS pour les gros fichiers${NC}"
+fi
+
+# 7. Vérification du message de commit (préparation)
+if [ -n "$HUSKY_GIT_PARAMS" ]; then
+    commit_msg_file="$1"
+    if [ -f "$commit_msg_file" ]; then
+        commit_msg=$(cat "$commit_msg_file")
+        if [ ${#commit_msg} -lt 10 ]; then
+            print_warning "Message de commit très court"
+            echo "${YELLOW}💡 Conseil: Utilisez des messages descriptifs${NC}"
+        fi
+    fi
+fi
+
+print_success "Toutes les vérifications pre-commit sont passées !"
+echo "${GREEN}🎉 Prêt à commiter !${NC}"
