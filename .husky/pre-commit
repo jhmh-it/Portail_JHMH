@@ -98,16 +98,9 @@ fi
 
 # 5. Vérification des secrets (basique)
 print_step "Vérification des secrets..."
-secrets_patterns=(
-    "FIREBASE_PRIVATE_KEY"
-    "FIREBASE_CLIENT_EMAIL"
-    "API_KEY"
-    "SECRET_KEY"
-    "PASSWORD"
-    "TOKEN"
-)
+secrets_patterns="FIREBASE_PRIVATE_KEY FIREBASE_CLIENT_EMAIL API_KEY SECRET_KEY PASSWORD TOKEN"
 
-for pattern in "${secrets_patterns[@]}"; do
+for pattern in $secrets_patterns; do
     if git diff --cached | grep -i "$pattern" > /dev/null; then
         print_warning "Possible secret détecté: $pattern"
         echo "${YELLOW}💡 Assurez-vous que ce n'est pas un vrai secret${NC}"
