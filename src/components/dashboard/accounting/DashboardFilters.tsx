@@ -48,9 +48,9 @@ export function DashboardFilters({
   const getActifColor = (type: Actif['type']) => {
     switch (type) {
       case 'global':
-        return 'bg-blue-500';
-      case 'property':
         return 'bg-green-500';
+      case 'property':
+        return 'bg-blue-500';
       case 'zone':
         return 'bg-purple-500';
       default:

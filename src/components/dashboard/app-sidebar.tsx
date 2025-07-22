@@ -157,6 +157,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     router.push('/home/exploitation/reservations');
   };
 
+  const handleActifsClick = () => {
+    showLoading(
+      'Chargement des Actifs...',
+      'Veuillez patienter pendant le chargement des données.'
+    );
+    router.push('/home/exploitation-information/actifs');
+  };
+
   // Nettoyer les timeouts au démontage du composant
   React.useEffect(() => {
     return () => {
@@ -280,6 +288,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         className="text-black hover:text-black/80 cursor-pointer"
                       >
                         <span>Réservations</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={handleActifsClick}
+                        className="text-black hover:text-black/80 cursor-pointer"
+                      >
+                        <span>Actifs</span>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   </SidebarMenuSub>

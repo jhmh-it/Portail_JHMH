@@ -1,0 +1,1337 @@
+[
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-06",
+    "id_opening": "60e43a534047fa002d7aa991",
+    "listing_complet": "(14M) Comm. 602/603",
+    "numero_mairie": "7510905727984",
+    "superficie_m2": 72,
+    "type_logement": "Comm. 602/603"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2e02a19de16002c9dbc6b",
+    "listing_complet": "(14M) PMR (002)",
+    "numero_mairie": "7510905725709",
+    "superficie_m2": 35.95,
+    "type_logement": "PMR"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "65f9a151b09cf0001392edc1",
+    "listing_complet": "(14M) PMR GROUP",
+    "numero_mairie": "7510905725709",
+    "superficie_m2": 35.95,
+    "type_logement": "PMR GROUP"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-06-25",
+    "id_opening": "60d59df6b9ea31002b13e4ad",
+    "listing_complet": "(14M) STUDIO (601)",
+    "numero_mairie": "7510905725214",
+    "superficie_m2": 22.02,
+    "type_logement": "STUDIO"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-06-25",
+    "id_opening": "65f9a2a1c2156d0012efa916",
+    "listing_complet": "(14M) STUDIO GROUP",
+    "numero_mairie": "7510905725214",
+    "superficie_m2": 22.02,
+    "type_logement": "STUDIO GROUP"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-06-25",
+    "id_opening": "60d59df6b9ea31002b13e4a6",
+    "listing_complet": "(14M) T1 (101)",
+    "numero_mairie": "7510905725808",
+    "superficie_m2": 22.02,
+    "type_logement": "T1"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-06-25",
+    "id_opening": "60d59df6b9ea31002b13e49f",
+    "listing_complet": "(14M) T1 (201)",
+    "numero_mairie": "7510905725907",
+    "superficie_m2": 22.02,
+    "type_logement": "T1"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-06-25",
+    "id_opening": "60d59df6b9ea31002b13e48a",
+    "listing_complet": "(14M) T1 (301)",
+    "numero_mairie": "7510905726105",
+    "superficie_m2": 22.02,
+    "type_logement": "T1"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-06-25",
+    "id_opening": "60d59df6b9ea31002b13e491",
+    "listing_complet": "(14M) T1 (401)",
+    "numero_mairie": "7510905726204",
+    "superficie_m2": 22.02,
+    "type_logement": "T1"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-06-25",
+    "id_opening": "60d59df6b9ea31002b13e498",
+    "listing_complet": "(14M) T1 (501)",
+    "numero_mairie": "7510905726303",
+    "superficie_m2": 22.02,
+    "type_logement": "T1"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-06-25",
+    "id_opening": "60d59df6b9ea31002b13e37c",
+    "listing_complet": "(14M) T1 GROUP",
+    "numero_mairie": "7510905725808",
+    "superficie_m2": 22.02,
+    "type_logement": "T1 GROUP"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2d9784ce604002e99a02e",
+    "listing_complet": "(14M) T2 (102)",
+    "numero_mairie": "7510905726501",
+    "superficie_m2": 31.96,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2d9784ce604002e99a035",
+    "listing_complet": "(14M) T2 (202)",
+    "numero_mairie": "7510905726697",
+    "superficie_m2": 31.96,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2d9784ce604002e99a03c",
+    "listing_complet": "(14M) T2 (302)",
+    "numero_mairie": "7510905726796",
+    "superficie_m2": 31.96,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2d9784ce604002e99a043",
+    "listing_complet": "(14M) T2 (402)",
+    "numero_mairie": "7510905726895",
+    "superficie_m2": 31.96,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2d9784ce604002e99a04a",
+    "listing_complet": "(14M) T2 (502)",
+    "numero_mairie": "7510905726994",
+    "superficie_m2": 31.96,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2d9784ce604002e99a051",
+    "listing_complet": "(14M) T2 (602)",
+    "numero_mairie": "7510905727093",
+    "superficie_m2": 31.96,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2d9774ce604002e999f22",
+    "listing_complet": "(14M) T2 GROUP",
+    "numero_mairie": "7510905726501",
+    "superficie_m2": 31.96,
+    "type_logement": "T2 GROUP"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2dc054c22c9002f780034",
+    "listing_complet": "(14M) T3 (103)",
+    "numero_mairie": "7510905727390",
+    "superficie_m2": 42.08,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2dc054c22c9002f78003b",
+    "listing_complet": "(14M) T3 (203)",
+    "numero_mairie": "7510905727489",
+    "superficie_m2": 42.08,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2dc054c22c9002f780042",
+    "listing_complet": "(14M) T3 (303)",
+    "numero_mairie": "7510905727588",
+    "superficie_m2": 42.08,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2dc054c22c9002f780049",
+    "listing_complet": "(14M) T3 (403)",
+    "numero_mairie": "7510905727687",
+    "superficie_m2": 42.08,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2dc054c22c9002f780050",
+    "listing_complet": "(14M) T3 (503)",
+    "numero_mairie": "7510905727786",
+    "superficie_m2": 42.08,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2dc054c22c9002f780057",
+    "listing_complet": "(14M) T3 (603)",
+    "numero_mairie": "7510905727885",
+    "superficie_m2": 42.08,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "14M",
+    "date_ouverture": "2021-07-05",
+    "id_opening": "60e2dc054c22c9002f77ff2a",
+    "listing_complet": "(14M) T3 GROUP",
+    "numero_mairie": "7510905727390",
+    "superficie_m2": 42.08,
+    "type_logement": "T3 GROUP"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-07-19",
+    "id_opening": "6486fd524053760061e42b16",
+    "listing_complet": "(15C) Comm. 501/502",
+    "numero_mairie": "7510908222666",
+    "superficie_m2": 83.5,
+    "type_logement": "Comm. 501/502"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2024-10-02",
+    "id_opening": "66fd2b54344cf00010d196fc",
+    "listing_complet": "(15C) T1 (002)",
+    "numero_mairie": "7510914659310",
+    "superficie_m2": 19.5,
+    "type_logement": "T1"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2024-07-10",
+    "id_opening": "667eb71de4b0f00011610832",
+    "listing_complet": "(15C) T1 (205)",
+    "numero_mairie": "7510914157284",
+    "superficie_m2": 19.2,
+    "type_logement": "T1"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-10-09",
+    "id_opening": "667eb71de4b0f000116105e8",
+    "listing_complet": "(15C) T1 GROUP",
+    "numero_mairie": "7510914157284",
+    "superficie_m2": null,
+    "type_logement": "T1 GROUP"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2024-07-10",
+    "id_opening": "667e93c26a16f30012644f14",
+    "listing_complet": "(15C) T2+ (203)",
+    "numero_mairie": "7510914156987",
+    "superficie_m2": 39.1,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2024-07-10",
+    "id_opening": "667eb1b08b5a950013689e9b",
+    "listing_complet": "(15C) T2+ (204)",
+    "numero_mairie": "7510914157086",
+    "superficie_m2": 52.9,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2024-03-29",
+    "id_opening": "65fd4d23aa122400144dd1f9",
+    "listing_complet": "(15C) T2+ (301)",
+    "numero_mairie": "7510912587765",
+    "superficie_m2": 51.5,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2024-03-29",
+    "id_opening": "65fd4d23aa122400144dd20f",
+    "listing_complet": "(15C) T2+ (302)",
+    "numero_mairie": "7510912587765",
+    "superficie_m2": 49.4,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2024-02-28",
+    "id_opening": "65b276e77e139500202d264e",
+    "listing_complet": "(15C) T2+ (401)",
+    "numero_mairie": "7510912022888",
+    "superficie_m2": 50.8,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2024-02-28",
+    "id_opening": "65b27a1f0a85fa0023433bb7",
+    "listing_complet": "(15C) T2+ (402)",
+    "numero_mairie": "7510912023086",
+    "superficie_m2": 48.8,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-12-26",
+    "id_opening": "654b99fcefaf3b003d1f0b1f",
+    "listing_complet": "(15C) T2+ (403)",
+    "numero_mairie": "7510910822167",
+    "superficie_m2": 46.7,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-07-19",
+    "id_opening": "643fe530c8291e0036321672",
+    "listing_complet": "(15C) T2+ (501)",
+    "numero_mairie": "7510908222468",
+    "superficie_m2": 42.1,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-07-19",
+    "id_opening": "6475bfad3d6da700570baa3f",
+    "listing_complet": "(15C) T2+ (502)",
+    "numero_mairie": "7510908222864",
+    "superficie_m2": 41.4,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-10-10",
+    "id_opening": "6525215f8cd2ff002b43f305",
+    "listing_complet": "(15C) T2+ GROUP",
+    "numero_mairie": "7510908222468",
+    "superficie_m2": null,
+    "type_logement": "T2+ GROUP"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2024-10-02",
+    "id_opening": "66fd2d7bd307000011a72bdc",
+    "listing_complet": "(15C) T2- (001)",
+    "numero_mairie": "7510914659211",
+    "superficie_m2": 24.7,
+    "type_logement": "T2-"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-10-04",
+    "id_opening": "651abc4e4c0eb2003d56486c",
+    "listing_complet": "(15C) T2- (101)",
+    "numero_mairie": "7510910066260",
+    "superficie_m2": 50.5,
+    "type_logement": "T2-"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-10-04",
+    "id_opening": "651d38c4193a3a00330b7e42",
+    "listing_complet": "(15C) T2- (102)",
+    "numero_mairie": "7510910066458",
+    "superficie_m2": 51.4,
+    "type_logement": "T2-"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-10-11",
+    "id_opening": "6523f99022129c00572463f9",
+    "listing_complet": "(15C) T2- (601)",
+    "numero_mairie": "7510910066161",
+    "superficie_m2": 30.4,
+    "type_logement": "T2-"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-10-09",
+    "id_opening": "6523f90071473e00328fc879",
+    "listing_complet": "(15C) T2- GROUP",
+    "numero_mairie": "7510910066260",
+    "superficie_m2": null,
+    "type_logement": "T2- GROUP"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-10-09",
+    "id_opening": "65f9b996e2c9bf00112da1d5",
+    "listing_complet": "(15C) T2- STUD GROUP",
+    "numero_mairie": "7510910066161",
+    "superficie_m2": null,
+    "type_logement": "T2- STUD GROUP"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-12-27",
+    "id_opening": "654ba4ad803daa004b009639",
+    "listing_complet": "(15C) T3+ (404)",
+    "numero_mairie": "7510910822266",
+    "superficie_m2": 71.6,
+    "type_logement": "T3+"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-11-08",
+    "id_opening": "6586e775fafccb001b404a23",
+    "listing_complet": "(15C) T3+ GROUP",
+    "numero_mairie": "7510910822266",
+    "superficie_m2": null,
+    "type_logement": "T3+ GROUP"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-12-23",
+    "id_opening": "654ba7cde59dc4002dcf2c36",
+    "listing_complet": "(15C) T3- (103)",
+    "numero_mairie": "7510910066557",
+    "superficie_m2": 75.4,
+    "type_logement": "T3-"
+  },
+  {
+    "code_site": "15C",
+    "date_ouverture": "2023-11-08",
+    "id_opening": "654ba8fb9d0adf003e912a60",
+    "listing_complet": "(15C) T3- GROUP",
+    "numero_mairie": "7510910066557",
+    "superficie_m2": null,
+    "type_logement": "T3- GROUP"
+  },
+  {
+    "code_site": "16L",
+    "date_ouverture": "2023-12-10",
+    "id_opening": "65763f31fc5df500639674ab",
+    "listing_complet": "(16L) T1 (22)",
+    "numero_mairie": "",
+    "superficie_m2": 30,
+    "type_logement": "T1"
+  },
+  {
+    "code_site": "16L",
+    "date_ouverture": "2023-06-13",
+    "id_opening": "64886ce88f244400585f6334",
+    "listing_complet": "(16L) T3 (21)",
+    "numero_mairie": "",
+    "superficie_m2": null,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-05-17",
+    "id_opening": "66471f59dab583001ada9946",
+    "listing_complet": "(17C) C. (104/106)",
+    "numero_mairie": "7510914233795",
+    "superficie_m2": 104.05,
+    "type_logement": "C."
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-05-17",
+    "id_opening": "664720f614c7d800115f74e0",
+    "listing_complet": "(17C) C. (204/206)",
+    "numero_mairie": "7510914233696",
+    "superficie_m2": 65,
+    "type_logement": "C."
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-05-17",
+    "id_opening": "66471f59dab583001ada995a",
+    "listing_complet": "(17C) C. (304/305)",
+    "numero_mairie": "7510914233894",
+    "superficie_m2": 104.05,
+    "type_logement": "C."
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-05-17",
+    "id_opening": "664720f614c7d800115f74f4",
+    "listing_complet": "(17C) C. (404/405)",
+    "numero_mairie": "7510914233993",
+    "superficie_m2": 65,
+    "type_logement": "C."
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-05-17",
+    "id_opening": "664720f614c7d800115f7508",
+    "listing_complet": "(17C) C. (504/505)",
+    "numero_mairie": "7510914234092",
+    "superficie_m2": 65,
+    "type_logement": "C."
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "66471f58dab583001ada9745",
+    "listing_complet": "(17C) Comm. (10pax)",
+    "numero_mairie": "7510914233795",
+    "superficie_m2": 104.05,
+    "type_logement": "Comm."
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "664720f514c7d800115f728b",
+    "listing_complet": "(17C) Comm. (8pax)",
+    "numero_mairie": "7510914233696",
+    "superficie_m2": 65,
+    "type_logement": "Comm."
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4c2135cf36001392c161",
+    "listing_complet": "(17C) T2 (101)",
+    "numero_mairie": "7510911999431",
+    "superficie_m2": 34.00222965,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4c2135cf36001392c16a",
+    "listing_complet": "(17C) T2 (201)",
+    "numero_mairie": "7510912022096",
+    "superficie_m2": 34.00222965,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4c2135cf36001392c173",
+    "listing_complet": "(17C) T2 (204)",
+    "numero_mairie": "7510912037835",
+    "superficie_m2": 34.00222965,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4c2135cf36001392c17c",
+    "listing_complet": "(17C) T2 (301)",
+    "numero_mairie": "7510912038132",
+    "superficie_m2": 34.00222965,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4c2135cf36001392c185",
+    "listing_complet": "(17C) T2 (401)",
+    "numero_mairie": "7510912038726",
+    "superficie_m2": 34.00222965,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4c2135cf36001392bfaa",
+    "listing_complet": "(17C) T2 GROUP",
+    "numero_mairie": "7510911999431",
+    "superficie_m2": 34.00222965,
+    "type_logement": "T2 GROUP"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3af72",
+    "listing_complet": "(17C) T2B (103)",
+    "numero_mairie": "7510911999629",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3afc3",
+    "listing_complet": "(17C) T2B (104)",
+    "numero_mairie": "7510911999728",
+    "superficie_m2": 35.02415459,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3afcc",
+    "listing_complet": "(17C) T2B (105)",
+    "numero_mairie": "7510911999827",
+    "superficie_m2": 35.02415459,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3afd5",
+    "listing_complet": "(17C) T2B (203)",
+    "numero_mairie": "7510912037538",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3afde",
+    "listing_complet": "(17C) T2B (205)",
+    "numero_mairie": "7510912037934",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3afe7",
+    "listing_complet": "(17C) T2B (303)",
+    "numero_mairie": "7510912038330",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3aff0",
+    "listing_complet": "(17C) T2B (305)",
+    "numero_mairie": "7510912038627",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3aff9",
+    "listing_complet": "(17C) T2B (403)",
+    "numero_mairie": "7510912038924",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3af7b",
+    "listing_complet": "(17C) T2B (405)",
+    "numero_mairie": "7510912039221",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3af84",
+    "listing_complet": "(17C) T2B (501)",
+    "numero_mairie": "7510912039320",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3af8d",
+    "listing_complet": "(17C) T2B (503)",
+    "numero_mairie": "7510912039716",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-23",
+    "id_opening": "65d8697ccf039100185924d8",
+    "listing_complet": "(17C) T2B (504)",
+    "numero_mairie": "7510912039914",
+    "superficie_m2": 35.02415459,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3af96",
+    "listing_complet": "(17C) T2B (505)",
+    "numero_mairie": "7510912040013",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3af9f",
+    "listing_complet": "(17C) T2B (601)",
+    "numero_mairie": "7510912040112",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3afa8",
+    "listing_complet": "(17C) T2B (603)",
+    "numero_mairie": "7510912040310",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3afb1",
+    "listing_complet": "(17C) T2B (604)",
+    "numero_mairie": "7510912040706",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50742676730012a3afba",
+    "listing_complet": "(17C) T2B (605)",
+    "numero_mairie": "7510912041003",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf50732676730012a3ad5f",
+    "listing_complet": "(17C) T2B GROUP",
+    "numero_mairie": "7510911999629",
+    "superficie_m2": 35.02,
+    "type_logement": "T2B GROUP"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-23",
+    "id_opening": "65d8614cf4e9a50012feffdd",
+    "listing_complet": "(17C) T2T (206)",
+    "numero_mairie": "7510912038033",
+    "superficie_m2": 45.05759941,
+    "type_logement": "T2T"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-23",
+    "id_opening": "65d862783027f70011c3eb4d",
+    "listing_complet": "(17C) T2T (404)",
+    "numero_mairie": "7510912039023",
+    "superficie_m2": 45.05759941,
+    "type_logement": "T2T"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65d8635a70dbfc0011b61b31",
+    "listing_complet": "(17C) T2T GROUP",
+    "numero_mairie": "7510912038033",
+    "superficie_m2": 45.05759941,
+    "type_logement": "T2T GROUP"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4384122f360019cc53a5",
+    "listing_complet": "(17C) T2V (102)",
+    "numero_mairie": "7510911999530",
+    "superficie_m2": 45.05759941,
+    "type_logement": "T2V"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4384122f360019cc53ad",
+    "listing_complet": "(17C) T2V (202)",
+    "numero_mairie": "7510912037439",
+    "superficie_m2": 45.05759941,
+    "type_logement": "T2V"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4384122f360019cc53b5",
+    "listing_complet": "(17C) T2V (302)",
+    "numero_mairie": "7510912038231",
+    "superficie_m2": 45.05759941,
+    "type_logement": "T2V"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4384122f360019cc53bd",
+    "listing_complet": "(17C) T2V (402)",
+    "numero_mairie": "7510912038825",
+    "superficie_m2": 45.05759941,
+    "type_logement": "T2V"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf4383122f360019cc5286",
+    "listing_complet": "(17C) T2V GROUP",
+    "numero_mairie": "7510911999530",
+    "superficie_m2": 45.05759941,
+    "type_logement": "T2V GROUP"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf49b7b972f7001186180f",
+    "listing_complet": "(17C) T2VB (502)",
+    "numero_mairie": "7510912039617",
+    "superficie_m2": 35,
+    "type_logement": "T2VB"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf49b7b972f70011861818",
+    "listing_complet": "(17C) T2VB (602)",
+    "numero_mairie": "7510912040211",
+    "superficie_m2": 35,
+    "type_logement": "T2VB"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf49b7b972f700118616af",
+    "listing_complet": "(17C) T2VB GROUP",
+    "numero_mairie": "7510912039617",
+    "superficie_m2": 35,
+    "type_logement": "T2VB GROUP"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf53aa85d1bb0012522967",
+    "listing_complet": "(17C) T3 (106)",
+    "numero_mairie": "7510912000025",
+    "superficie_m2": 65.03158677,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf53aa85d1bb0012522970",
+    "listing_complet": "(17C) T3 (304)",
+    "numero_mairie": "7510912038429",
+    "superficie_m2": 65.03158677,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "17C",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65cf53a985d1bb001252275b",
+    "listing_complet": "(17C) T3 GROUP",
+    "numero_mairie": "7510912000025",
+    "superficie_m2": 65.03158677,
+    "type_logement": "T3 GROUP"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-05-17",
+    "id_opening": "664722eeb21b980012f98462",
+    "listing_complet": "(82S) C. (203/204)",
+    "numero_mairie": "7510314234456",
+    "superficie_m2": 65.03,
+    "type_logement": "C."
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-05-17",
+    "id_opening": "664722eeb21b980012f98473",
+    "listing_complet": "(82S) C. (303/304)",
+    "numero_mairie": "7510314234654",
+    "superficie_m2": 65.03,
+    "type_logement": "C."
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-05-17",
+    "id_opening": "664722eeb21b980012f98484",
+    "listing_complet": "(82S) C. (403/404)",
+    "numero_mairie": "7510314234951",
+    "superficie_m2": 65.03,
+    "type_logement": "C."
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-05-17",
+    "id_opening": "664722eeb21b980012f98495",
+    "listing_complet": "(82S) C. (503/504)",
+    "numero_mairie": "7510314235050",
+    "superficie_m2": 65.03,
+    "type_logement": "C."
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "664722eeb21b980012f982a6",
+    "listing_complet": "(82S) Comm. (9pax)",
+    "numero_mairie": "7510314234456",
+    "superficie_m2": 65.03,
+    "type_logement": "Comm."
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108e2d",
+    "listing_complet": "(82S) T12P (205)",
+    "numero_mairie": "7510313558723",
+    "superficie_m2": 22.02,
+    "type_logement": "T12P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108e5d",
+    "listing_complet": "(82S) T12P (305)",
+    "numero_mairie": "7510313559515",
+    "superficie_m2": 22.02,
+    "type_logement": "T12P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108dc1",
+    "listing_complet": "(82S) T12P (405)",
+    "numero_mairie": "7510313560307",
+    "superficie_m2": 22.02,
+    "type_logement": "T12P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108df1",
+    "listing_complet": "(82S) T12P (505)",
+    "numero_mairie": "7510313561295",
+    "superficie_m2": 22.02,
+    "type_logement": "T12P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-07-04",
+    "id_opening": "6686c2b4aef4ed0012698322",
+    "listing_complet": "(82S) T12P GROUP",
+    "numero_mairie": "",
+    "superficie_m2": 22.02,
+    "type_logement": "T12P GROUP"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108d91",
+    "listing_complet": "(82S) T13P (102)",
+    "numero_mairie": "7510313557931",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108dfd",
+    "listing_complet": "(82S) T13P (105)",
+    "numero_mairie": "7510313558030",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108e09",
+    "listing_complet": "(82S) T13P (106)",
+    "numero_mairie": "7510313558129",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108e15",
+    "listing_complet": "(82S) T13P (202)",
+    "numero_mairie": "7510313558426",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108e21",
+    "listing_complet": "(82S) T13P (203)",
+    "numero_mairie": "7510313558525",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108e39",
+    "listing_complet": "(82S) T13P (206)",
+    "numero_mairie": "7510313558921",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108e45",
+    "listing_complet": "(82S) T13P (302)",
+    "numero_mairie": "7510313559218",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108e51",
+    "listing_complet": "(82S) T13P (303)",
+    "numero_mairie": "7510313559317",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108d9d",
+    "listing_complet": "(82S) T13P (306)",
+    "numero_mairie": "7510313559614",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108da9",
+    "listing_complet": "(82S) T13P (402)",
+    "numero_mairie": "7510313560010",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108db5",
+    "listing_complet": "(82S) T13P (403)",
+    "numero_mairie": "7510313560109",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108dcd",
+    "listing_complet": "(82S) T13P (406)",
+    "numero_mairie": "7510313560406",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108dd9",
+    "listing_complet": "(82S) T13P (502)",
+    "numero_mairie": "7510313560901",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca135b0ed0d0012108de5",
+    "listing_complet": "(82S) T13P (503)",
+    "numero_mairie": "7510313561097",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-03-27",
+    "id_opening": "6603f01a62f8a1004c292033",
+    "listing_complet": "(82S) T13P (506)",
+    "numero_mairie": "7510313561394",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65dca134b0ed0d0012108b7c",
+    "listing_complet": "(82S) T13P GROUP",
+    "numero_mairie": "7510313557931",
+    "superficie_m2": 25.08,
+    "type_logement": "T13P GROUP"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca1c705738a0053f1afc7",
+    "listing_complet": "(82S) T2 (101)",
+    "numero_mairie": "7510313557832",
+    "superficie_m2": 40.04,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca1c705738a0053f1afd3",
+    "listing_complet": "(82S) T2 (201)",
+    "numero_mairie": "7510313558327",
+    "superficie_m2": 40.04,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca1c705738a0053f1afdf",
+    "listing_complet": "(82S) T2 (301)",
+    "numero_mairie": "7510313559119",
+    "superficie_m2": 40.04,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca1c705738a0053f1afeb",
+    "listing_complet": "(82S) T2 (401)",
+    "numero_mairie": "7510313559911",
+    "superficie_m2": 40.04,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca1c705738a0053f1aff7",
+    "listing_complet": "(82S) T2 (501)",
+    "numero_mairie": "7510313560703",
+    "superficie_m2": 40.04,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca1c705738a0053f1b003",
+    "listing_complet": "(82S) T2 (602)",
+    "numero_mairie": "7510313561790",
+    "superficie_m2": 40.04,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65dca1c605738a0053f1ad5e",
+    "listing_complet": "(82S) T2 GROUP",
+    "numero_mairie": "7510313557832",
+    "superficie_m2": 40.04,
+    "type_logement": "T2 GROUP"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1c9b1",
+    "listing_complet": "(82S) T3 (107)",
+    "numero_mairie": "7510313558228",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1ca1d",
+    "listing_complet": "(82S) T3 (204)",
+    "numero_mairie": "7510313558624",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1ca29",
+    "listing_complet": "(82S) T3 (207)",
+    "numero_mairie": "7510313559020",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1ca35",
+    "listing_complet": "(82S) T3 (304)",
+    "numero_mairie": "7510313559416",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1c9bd",
+    "listing_complet": "(82S) T3 (307)",
+    "numero_mairie": "7510313559713",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1c9c9",
+    "listing_complet": "(82S) T3 (404)",
+    "numero_mairie": "7510313560208",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1c9d5",
+    "listing_complet": "(82S) T3 (407)",
+    "numero_mairie": "7510313560604",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1c9e1",
+    "listing_complet": "(82S) T3 (504)",
+    "numero_mairie": "7510313561196",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1c9ed",
+    "listing_complet": "(82S) T3 (507)",
+    "numero_mairie": "7510313561592",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1c9f9",
+    "listing_complet": "(82S) T3 (601)",
+    "numero_mairie": "7510313561691",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-26",
+    "id_opening": "65dca2b905738a0053f1ca05",
+    "listing_complet": "(82S) T3 (603)",
+    "numero_mairie": "7510313561889",
+    "superficie_m2": 45.06,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "82S",
+    "date_ouverture": "2024-02-16",
+    "id_opening": "65dca2b805738a0053f1c6f4",
+    "listing_complet": "(82S) T3 GROUP",
+    "numero_mairie": "7510313558228",
+    "superficie_m2": 45.06,
+    "type_logement": "T3 GROUP"
+  },
+  {
+    "code_site": "8BE",
+    "date_ouverture": "2023-12-05",
+    "id_opening": "656f2b7469f50e001658faf9",
+    "listing_complet": "(8BE) T2 (201)",
+    "numero_mairie": "",
+    "superficie_m2": 50.07,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "8BE",
+    "date_ouverture": "2023-12-05",
+    "id_opening": "656f2b7469f50e001658fb02",
+    "listing_complet": "(8BE) T2 (301)",
+    "numero_mairie": "",
+    "superficie_m2": 50.07,
+    "type_logement": "T2"
+  },
+  {
+    "code_site": "8BE",
+    "date_ouverture": "2023-12-05",
+    "id_opening": "656f2b7469f50e001658f9dd",
+    "listing_complet": "(8BE) T2 GROUP",
+    "numero_mairie": "",
+    "superficie_m2": 50.07,
+    "type_logement": "T2 GROUP"
+  },
+  {
+    "code_site": "8BE",
+    "date_ouverture": "2023-12-05",
+    "id_opening": "656f2eb86bc1ef00199a4ac3",
+    "listing_complet": "(8BE) T2+ (101)",
+    "numero_mairie": "",
+    "superficie_m2": 50.07,
+    "type_logement": "T2+"
+  },
+  {
+    "code_site": "8BE",
+    "date_ouverture": "2023-12-05",
+    "id_opening": "656f2fe36bc1ef00199a70c5",
+    "listing_complet": "(8BE) T3 (401)",
+    "numero_mairie": "",
+    "superficie_m2": 100,
+    "type_logement": "T3"
+  },
+  {
+    "code_site": "51M",
+    "date_ouverture": "2023-10-13",
+    "id_opening": "652960ba467171005bbaed79",
+    "listing_complet": "51M",
+    "numero_mairie": "",
+    "superficie_m2": 250,
+    "type_logement": ""
+  },
+  {
+    "code_site": "51M",
+    "date_ouverture": "2024-05-06",
+    "id_opening": "6638ecf08176ef00139cc8ca",
+    "listing_complet": "51M (2)",
+    "numero_mairie": "",
+    "superficie_m2": 250,
+    "type_logement": ""
+  }
+]
+
+
+

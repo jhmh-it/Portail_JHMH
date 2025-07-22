@@ -2,11 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { Actif } from '@/app/api/actifs/route';
+import type { JhmhActif } from '@/lib/external-api';
 
 interface ActifsResponse {
   success: boolean;
-  data: Actif[];
+  data: JhmhActif[];
   meta: {
     total: number;
     generatedAt: string;
@@ -14,7 +14,7 @@ interface ActifsResponse {
 }
 
 interface UseActifsReturn {
-  actifs: Actif[];
+  actifs: JhmhActif[];
   isLoading: boolean;
   error: Error | null;
   refetch: () => void;

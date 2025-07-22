@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { fetchJhmhActifs } from '@/lib/external-api';
+import { fetchJhmhListingsActifs } from '@/lib/external-api';
 
 /**
- * GET /api/actifs
- * Récupère les actifs depuis l'API JHMH externe
+ * GET /api/listings-actifs
+ * Récupère les listings actifs détaillés depuis l'API JHMH externe
  */
 export async function GET(request: NextRequest) {
   try {
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.warn('[API] Fetching actifs from external JHMH API...', {
+      console.warn('[API] Fetching listings actifs from external JHMH API...', {
         limit,
         offset,
         filters: {
@@ -67,48 +67,64 @@ export async function GET(request: NextRequest) {
     }
 
     // Appel à l'API externe
-    const response = await fetchJhmhActifs();
+    const response = await fetchJhmhListingsActifs({
+      limit,
+      offset,
+      code_site,
+      type_logement,
+      order_by,
+      order_direction,
+      q,
+      superficie_min,
+      superficie_max,
+      date_ouverture_from,
+      date_ouverture_to,
+    });
 
-    if (!response.success) {
+    if (!response.success || response.data.length === undefined) {
       console.warn(
-        '[API] External API returned success: false, returning empty data'
+        '[API] External API returned error or invalid data',
+        response.error
       );
       return NextResponse.json(
         {
           success: false,
-          data: [],
-          error: 'External API error',
-          message: "Impossible de récupérer les actifs depuis l'API externe",
-          meta: {
+          error: response.error ?? 'Failed to fetch listings actifs',
+          data: {
+            actifs: [],
             total: 0,
-            generatedAt: new Date().toISOString(),
-            source: 'external-api',
+            limit,
+            offset,
           },
         },
-        { status: 503 }
-      ); // Service Unavailable
+        { status: 503 } // Service Unavailable
+      );
     }
-
-    // Filtrer seulement les actifs actifs
-    const activeActifs = response.data.filter(actif => actif.isActive);
 
     if (process.env.NODE_ENV === 'development') {
       console.warn(
-        `[API] Successfully fetched ${activeActifs.length} active actifs`
+        `[API] Successfully fetched ${response.data.length} listings actifs`
       );
     }
 
     return NextResponse.json({
       success: true,
-      data: activeActifs,
+      data: {
+        actifs: response.data,
+        total: response.total,
+        limit,
+        offset,
+      },
       meta: {
-        total: activeActifs.length,
-        generatedAt: new Date().toISOString(),
+        timestamp: new Date().toISOString(),
         source: 'external-api',
       },
     });
   } catch (error) {
-    console.error('[API] Error fetching actifs from external API:', error);
+    console.error(
+      '[API] Error fetching listings actifs from external API:',
+      error
+    );
 
     return NextResponse.json(
       {
@@ -117,7 +133,7 @@ export async function GET(request: NextRequest) {
         message:
           error instanceof Error
             ? error.message
-            : 'Erreur lors de la récupération des actifs',
+            : 'Erreur lors de la récupération des listings actifs',
         details: process.env.NODE_ENV === 'development' ? error : undefined,
       },
       { status: 500 }

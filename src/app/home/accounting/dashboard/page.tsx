@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useActifs } from '@/hooks/useActifs';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { useDashboardState } from '@/hooks/useDashboardState';
+import type { JhmhActif } from '@/lib/external-api';
 import type { DashboardMetrics } from '@/types/dashboard';
 
 /**
@@ -35,10 +36,22 @@ export default function AccountingDashboardPage() {
   } = useDashboardState();
 
   const {
-    actifs,
+    actifs: actifsData,
     isLoading: isLoadingActifs,
     error: actifsError,
   } = useActifs();
+
+  // Extract actifs from data and convert to dashboard format
+  const actifs = React.useMemo(() => {
+    if (!actifsData) return [];
+
+    // Convert simple site actifs to dashboard actifs format
+    return actifsData.map((actif: JhmhActif) => ({
+      id: actif.id,
+      label: actif.label,
+      type: actif.type,
+    }));
+  }, [actifsData]);
 
   // Pré-sélectionner le premier actif lorsque les actifs sont chargés
   React.useEffect(() => {

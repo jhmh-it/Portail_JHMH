@@ -162,6 +162,19 @@ export interface ExternalReservationsResponse {
 }
 
 /**
+ * Types pour les listings actifs détaillés
+ */
+export interface ExternalListingActif {
+  code_site: string;
+  date_ouverture: string;
+  id_opening: string;
+  listing_complet: string;
+  numero_mairie: string;
+  superficie_m2: number | null;
+  type_logement: string;
+}
+
+/**
  * Service pour récupérer les actifs depuis l'API JHMH
  */
 export async function fetchJhmhActifs(): Promise<JhmhActifsResponse> {
@@ -353,6 +366,78 @@ export async function fetchJhmhReservationByCode(
     return {
       success: false,
       data: null,
+      error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN,
+    };
+  }
+}
+
+/**
+ * Service pour récupérer les listings actifs depuis l'API JHMH
+ */
+export async function fetchJhmhListingsActifs(params?: {
+  page?: number;
+  page_size?: number;
+  limit?: number;
+  offset?: number;
+  code_site?: string;
+  type_logement?: string;
+  order_by?: string;
+  order_direction?: string;
+  q?: string;
+  superficie_min?: number;
+  superficie_max?: number;
+  date_ouverture_from?: string;
+  date_ouverture_to?: string;
+}): Promise<{
+  success: boolean;
+  data: ExternalListingActif[];
+  total: number;
+  error?: string;
+}> {
+  try {
+    const queryParams = new URLSearchParams();
+
+    // Paramètres de pagination
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+
+    // Filtres de base
+    if (params?.code_site) queryParams.append('code_site', params.code_site);
+    if (params?.type_logement)
+      queryParams.append('type_logement', params.type_logement);
+    if (params?.order_by) queryParams.append('order_by', params.order_by);
+    if (params?.order_direction)
+      queryParams.append('order_direction', params.order_direction);
+
+    // Filtres supplémentaires (si l'API les supporte)
+    if (params?.q) queryParams.append('q', params.q);
+    if (params?.superficie_min)
+      queryParams.append('superficie_min', params.superficie_min.toString());
+    if (params?.superficie_max)
+      queryParams.append('superficie_max', params.superficie_max.toString());
+    if (params?.date_ouverture_from)
+      queryParams.append('date_ouverture_from', params.date_ouverture_from);
+    if (params?.date_ouverture_to)
+      queryParams.append('date_ouverture_to', params.date_ouverture_to);
+
+    const queryString = queryParams.toString();
+    const url = `/api/assets/listings-actifs${queryString ? `?${queryString}` : ''}`;
+
+    const response = await jhmhApiClient.get<ExternalListingActif[]>(url);
+
+    // L'API retourne directement un tableau selon le swagger
+    return {
+      success: true,
+      data: response.data ?? [],
+      total: response.data?.length ?? 0, // On peut calculer le total côté front si l'API ne le fournit pas
+    };
+  } catch (error) {
+    console.error('Error fetching JHMH listings actifs:', error);
+
+    return {
+      success: false,
+      data: [],
+      total: 0,
       error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN,
     };
   }
