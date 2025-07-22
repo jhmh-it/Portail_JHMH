@@ -22,10 +22,13 @@ export function FinancialSummary({ reservation }: FinancialSummaryProps) {
   const otaFee = reservation.OTA_FEE ?? 0;
   const cityTax = reservation.CITY_TAX ?? 0;
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | null | undefined) => {
+    if (amount == null) return '-';
+    // Assurer que currency n'est jamais null
+    const currencyCode = currency || 'EUR';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency,
+      currency: currencyCode,
     }).format(amount);
   };
 

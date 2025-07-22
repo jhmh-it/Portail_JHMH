@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Hash, MapPin, Users } from 'lucide-react';
+import { ArrowLeft, Hash, MapPin, Users, Building2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
@@ -38,19 +38,6 @@ export function ReservationHeader({ reservation }: ReservationHeaderProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Navigation bar */}
-      <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push('/home/exploitation/reservations')}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour aux réservations
-        </Button>
-      </div>
-
       {/* Main header */}
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
         <div className="flex flex-col gap-4">
@@ -100,22 +87,25 @@ export function ReservationHeader({ reservation }: ReservationHeaderProps) {
 
             {/* Platform */}
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>Réservé via</span>
-              <span className={`font-medium ${platform.color}`}>
+              <Building2 className="h-4 w-4" />
+              <span className="text-sm">Réservé via</span>
+              <Badge variant="outline" className="text-xs">
                 {platform.label}
-              </span>
+              </Badge>
             </div>
           </div>
         </div>
 
-        {/* Quick actions */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button variant="outline" size="sm">
-            Exporter PDF
-          </Button>
-          <Button variant="outline" size="sm">
-            Envoyer par email
+        {/* Action buttons */}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/home/exploitation/reservations')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour aux réservations
           </Button>
         </div>
       </div>

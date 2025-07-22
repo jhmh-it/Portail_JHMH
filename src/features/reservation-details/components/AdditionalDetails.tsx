@@ -237,9 +237,12 @@ export function AdditionalDetails({ reservation }: AdditionalDetailsProps) {
         const numValue =
           typeof value === 'number' ? value : parseFloat(String(value));
         if (isNaN(numValue)) return String(value);
+        // Assurer que currency n'est jamais null
+        const currencyCode =
+          reservation.currency ?? reservation.money_currency ?? 'EUR';
         return new Intl.NumberFormat('fr-FR', {
           style: 'currency',
-          currency: reservation.currency ?? reservation.money_currency ?? 'EUR',
+          currency: currencyCode,
         }).format(numValue);
 
       case 'date':

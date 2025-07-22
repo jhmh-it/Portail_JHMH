@@ -20,8 +20,8 @@ cd portail_jhmh
 npm install
 
 # 2. Configuration environnement
-cp .env.example .env.local
-# Éditer .env.local avec les bonnes valeurs
+touch .env.local
+# Éditer .env.local avec les bonnes valeurs (voir docs/ENVIRONMENT.md)
 
 # 3. Lancer le dev server
 npm run dev

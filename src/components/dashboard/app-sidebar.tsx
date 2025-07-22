@@ -81,7 +81,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: user } = useUser();
+  const { data: user, isLoading: isLoadingUser } = useUser();
   const { logout } = useAuth();
   const router = useRouter();
   const { showLoading } = useLoadingStore();
@@ -181,7 +181,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   alt="Logo JHMH"
                   width={110}
                   height={110}
-                  style={{ height: 'auto' }}
+                  style={{ width: 'auto', height: 'auto' }}
                   className="rounded"
                 />
               </a>
@@ -341,57 +341,73 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuButton
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  disabled={isLoadingUser}
                 >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage
-                      src={user?.photoURL ?? undefined}
-                      alt={user?.displayName ?? 'User'}
-                    />
-                    <AvatarFallback className="rounded-lg">
-                      {user?.displayName
-                        ?.split(' ')
-                        .map(n => n[0])
-                        .join('')
-                        .toUpperCase() ?? 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold text-black">
-                      {user?.displayName ?? 'Utilisateur'}
-                    </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {user?.email}
-                    </span>
-                  </div>
-                  <ChevronUp className="ml-auto size-4" />
+                  {isLoadingUser ? (
+                    <>
+                      <div className="h-8 w-8 rounded-lg bg-gray-200 animate-pulse" />
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse mb-1" />
+                        <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4" />
+                      </div>
+                      <ChevronUp className="ml-auto size-4" />
+                    </>
+                  ) : (
+                    <>
+                      <Avatar className="h-8 w-8 rounded-lg">
+                        <AvatarImage
+                          src={user?.photoURL ?? undefined}
+                          alt={user?.displayName ?? 'User'}
+                        />
+                        <AvatarFallback className="rounded-lg">
+                          {user?.displayName
+                            ?.split(' ')
+                            .map(n => n[0])
+                            .join('')
+                            .toUpperCase() ?? 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-semibold text-black">
+                          {user?.displayName ?? 'Utilisateur'}
+                        </span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {user?.email}
+                        </span>
+                      </div>
+                      <ChevronUp className="ml-auto size-4" />
+                    </>
+                  )}
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuItem className="cursor-pointer">
-                  <User2 className="mr-2 h-4 w-4" />
-                  Mon profil
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleSettings}
-                  className="cursor-pointer"
+              {!isLoadingUser && (
+                <DropdownMenuContent
+                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                  side="bottom"
+                  align="end"
+                  sideOffset={4}
                 >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Paramètres
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="cursor-pointer text-red-600"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Se déconnecter
-                </DropdownMenuItem>
-              </DropdownMenuContent>
+                  <DropdownMenuItem className="cursor-pointer">
+                    <User2 className="mr-2 h-4 w-4" />
+                    Mon profil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleSettings}
+                    className="cursor-pointer"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Paramètres
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Se déconnecter
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              )}
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>

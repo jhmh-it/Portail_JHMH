@@ -195,7 +195,7 @@ interface MonthlyComparison {
   };
 }
 
-// Mock data - données réalistes basées sur l'exemple du fichier api.md
+// Mock data - données réalistes pour le développement
 const generateMockData = (
   date: string,
   actif: string

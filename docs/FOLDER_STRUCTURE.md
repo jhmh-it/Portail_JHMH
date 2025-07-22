@@ -20,7 +20,6 @@ portail_jhmh/
 ├── .eslintrc.json         # Configuration ESLint
 ├── .gitignore            # Fichiers ignorés par Git
 ├── .prettierrc           # Configuration Prettier
-├── CHANGELOG.md          # Historique des versions
 ├── components.json       # Configuration Shadcn UI
 ├── next.config.ts        # Configuration Next.js
 ├── package.json          # Dépendances et scripts
@@ -134,10 +133,9 @@ lib/
 
 ```
 stores/
-├── auth-store.ts       # État authentification (deprecated?)
-├── toast-store.ts      # État des notifications
-├── ui-store.ts         # État UI (modals, sidebar, etc.)
-└── index.ts           # Barrel export
+├── loading-store.ts    # État de chargement global
+└── toast-store.ts      # État des notifications
+                        # Note: L'authentification est gérée par useAuth hook
 
 **Conventions stores:**
 - Un store par domaine

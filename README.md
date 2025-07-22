@@ -4,27 +4,19 @@
 
 Cette documentation est conçue pour faciliter la collaboration entre développeurs et agents IA (comme Cursor) en fournissant un contexte complet sur l'architecture, les conventions et les processus du projet.
 
+## 🚀 Déploiement
+
+Le projet est déployé automatiquement sur **Vercel** :
+
+- **Production** : Push sur la branche `main`
+- **Preview** : Automatique pour chaque Pull Request
+- **Documentation** : [Guide de déploiement](./DEPLOYMENT.md)
+
 ## 🔒 Sécurité et Authentification
 
-### Cloud Function de Restriction de Domaine
+### Restriction de domaine
 
-Le projet inclut une **Cloud Function Firebase** qui restreint l'authentification Google exclusivement aux utilisateurs avec des emails `@jhmh.com`.
-
-📁 **Localisation** : `functions/`
-
-- `main.py` - Fonction de restriction et validation
-- `README.md` - Documentation complète
-- `QUICK_START.md` - Guide de déploiement rapide
-- `deploy.sh` - Script de déploiement automatisé
-
-🚀 **Déploiement rapide** :
-
-```bash
-cd functions
-firebase deploy --only functions
-```
-
-⚠️ **Important** : Activez d'abord **Identity Platform** dans la console Firebase.
+L'authentification Google est restreinte exclusivement aux utilisateurs avec des emails `@jhmh.com`. Cette restriction est gérée par l'API Next.js dans `/api/auth/login`.
 
 ## 📖 Table des matières
 
@@ -32,7 +24,6 @@ firebase deploy --only functions
 
 - [Architecture du projet](./docs/ARCHITECTURE.md) - Vue d'ensemble de l'architecture technique
 - [Structure des dossiers](./docs/FOLDER_STRUCTURE.md) - Organisation détaillée du code
-- [Flux de données](./docs/DATA_FLOW.md) - Diagrammes et explications des flux
 
 ### 💻 Développement
 
@@ -49,21 +40,44 @@ firebase deploy --only functions
 ### 🔧 Configuration
 
 - [Variables d'environnement](./docs/ENVIRONMENT.md) - Configuration requise
-- [Secrets GitHub Actions](./docs/GITHUB_SECRETS_CONFIG.md) - Configuration Firebase CI/CD
-- [Configuration APIs Firebase](./docs/FIREBASE_APIS_SETUP.md) - Activation des APIs Google Cloud
-- [Dépendances](./docs/DEPENDENCIES.md) - Packages et leurs rôles
-
-### 📋 Processus
-
-- [Workflow Git](./docs/GIT_WORKFLOW.md) - Branches, merge requests, etc.
-- [Déploiement](./docs/DEPLOYMENT.md) - Processus de mise en production
+- [Secrets GitHub Actions](./docs/GITHUB_SECRETS_CONFIG.md) - Configuration CI/CD
 
 ## 🚀 Démarrage rapide
 
-1. **Pour les nouveaux développeurs** : Commencez par [ARCHITECTURE.md](./docs/ARCHITECTURE.md) et [DEVELOPMENT.md](./docs/DEVELOPMENT.md)
-2. **Pour les agents IA** : Lisez d'abord [AI_AGENT_GUIDE.md](./docs/AI_AGENT_GUIDE.md) et [PROJECT_CONTEXT.md](./docs/PROJECT_CONTEXT.md)
-3. **Pour la contribution** : Consultez [STYLE_GUIDE.md](./docs/STYLE_GUIDE.md) et [COMMITS.md](./docs/COMMITS.md)
-4. **Pour la sécurité** : Déployez les Cloud Functions de restriction avec [functions/QUICK_START.md](./functions/QUICK_START.md)
+1. **Installation**
+
+   ```bash
+   git clone [repo-url]
+   cd portail_jhmh
+   npm install
+   ```
+
+2. **Configuration**
+   - Créer `.env.local` avec les variables nécessaires
+   - Voir [ENVIRONMENT.md](./docs/ENVIRONMENT.md) pour la liste complète
+
+3. **Développement**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Tests et qualité**
+   ```bash
+   npm run test
+   npm run lint
+   npm run type-check
+   ```
+
+## 🛠️ Stack technique
+
+- **Frontend** : Next.js 15, React 19, TypeScript, TailwindCSS
+- **Backend** : Next.js API Routes
+- **Base de données** : Firebase Firestore
+- **Authentification** : Firebase Auth (Google OAuth)
+- **Stockage** : Firebase Storage
+- **Déploiement** : Vercel
+- **CI/CD** : GitHub Actions
 
 ## 📌 Principes clés
 
@@ -80,4 +94,4 @@ Cette documentation doit être maintenue activement. Lors de tout changement maj
 1. Mettez à jour les fichiers pertinents
 2. Vérifiez la cohérence avec le code actuel
 3. Ajoutez des exemples si nécessaire
-4. Testez les Cloud Functions après modification
+4. Testez les changements localement avant de pousser

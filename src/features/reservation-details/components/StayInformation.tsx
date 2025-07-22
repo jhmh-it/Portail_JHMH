@@ -1,8 +1,7 @@
-import { Calendar, Clock, Home, MapPin, Hash } from 'lucide-react';
+import { Calendar, Home, MapPin, Hash, ExternalLink } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import {
   extractDateInformation,
   getDisplayPlatform,
@@ -67,99 +66,110 @@ export function StayInformation({ reservation }: StayInformationProps) {
   };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-6 md:grid-cols-2">
       {/* Property information */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Home className="h-5 w-5" />
-            Logement
-          </CardTitle>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Home className="h-5 w-5" />
+              Logement
+            </CardTitle>
+            <Badge variant={status.variant} className="text-sm">
+              {status.label}
+            </Badge>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Property name and ID */}
-          <div className="space-y-2">
+        <CardContent className="space-y-6">
+          {/* Property name and main info */}
+          <div className="space-y-3">
+            {/* Name with OTA badge */}
             {listingName && (
-              <h3 className="font-semibold text-lg">{listingName}</h3>
+              <div className="flex items-center gap-3">
+                <h3 className="font-semibold text-lg leading-tight">
+                  {listingName}
+                </h3>
+                <Badge variant="outline" className="font-normal">
+                  {platform.label}
+                </Badge>
+              </div>
             )}
 
-            {/* IDs */}
-            <div className="flex flex-wrap gap-3 text-xs">
-              {listingId && (
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Hash className="h-3 w-3" />
-                  <span>ID: {listingId}</span>
+            {/* Address with enhanced styling */}
+            {listingAddress && (
+              <div className="space-y-2">
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm leading-relaxed text-foreground">
+                      {listingAddress}
+                    </p>
+                  </div>
                 </div>
-              )}
-              {internalRef && (
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Hash className="h-3 w-3" />
-                  <span>REF: {internalRef}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Address */}
-          {listingAddress && (
-            <div className="pt-2">
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm leading-relaxed">{listingAddress}</p>
+                <div className="ml-7">
                   <a
                     href={`https://maps.google.com/?q=${encodeURIComponent(listingAddress)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-primary hover:underline mt-1 inline-flex items-center gap-1"
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
                   >
                     Voir sur Google Maps
-                    <MapPin className="h-3 w-3" />
+                    <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* Metadata at bottom */}
+          {(listingId ?? internalRef) && (
+            <div className="mt-auto pt-4 border-t border-muted/50">
+              <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                {listingId && (
+                  <div className="flex items-center gap-1">
+                    <Hash className="h-3 w-3" />
+                    <span>ID: {listingId}</span>
+                  </div>
+                )}
+                {internalRef && (
+                  <div className="flex items-center gap-1">
+                    <Hash className="h-3 w-3" />
+                    <span>REF: {internalRef}</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
-
-          <Separator />
-
-          {/* Platform and status */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="font-normal">
-                {platform.label}
-              </Badge>
-            </div>
-            <Badge variant={status.variant}>{status.label}</Badge>
-          </div>
         </CardContent>
       </Card>
 
       {/* Stay dates */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <CardTitle className="text-lg flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Dates du séjour
+            Dates du séjour ({dates.nights} nuit{dates.nights > 1 ? 's' : ''})
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Check-in/out dates grid */}
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent className="space-y-6">
+          {/* Check-in/out dates with improved layout */}
+          <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Arrivée</p>
+              <p className="text-sm text-muted-foreground font-medium">
+                Arrivée
+              </p>
               {dates.checkin ? (
                 (() => {
                   const formatted = formatDateTime(dates.checkin);
                   return formatted === '-' ? (
                     <p className="text-muted-foreground">-</p>
                   ) : (
-                    <>
-                      <p className="font-medium">{formatted.date}</p>
+                    <div className="space-y-1">
+                      <p className="font-semibold">{formatted.date}</p>
                       <p className="text-sm text-muted-foreground">
                         {formatted.time}
                       </p>
-                    </>
+                    </div>
                   );
                 })()
               ) : (
@@ -168,19 +178,21 @@ export function StayInformation({ reservation }: StayInformationProps) {
             </div>
 
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Départ</p>
+              <p className="text-sm text-muted-foreground font-medium">
+                Départ
+              </p>
               {dates.checkout ? (
                 (() => {
                   const formatted = formatDateTime(dates.checkout);
                   return formatted === '-' ? (
                     <p className="text-muted-foreground">-</p>
                   ) : (
-                    <>
-                      <p className="font-medium">{formatted.date}</p>
+                    <div className="space-y-1">
+                      <p className="font-semibold">{formatted.date}</p>
                       <p className="text-sm text-muted-foreground">
                         {formatted.time}
                       </p>
-                    </>
+                    </div>
                   );
                 })()
               ) : (
@@ -189,43 +201,36 @@ export function StayInformation({ reservation }: StayInformationProps) {
             </div>
           </div>
 
-          {/* Duration */}
-          <div className="bg-muted/50 rounded-lg p-4 text-center">
-            <div className="flex items-center justify-center gap-2 text-primary">
-              <Clock className="h-5 w-5" />
-              <span className="text-2xl font-bold">{dates.nights}</span>
-              <span className="text-lg font-medium">
-                nuit{dates.nights > 1 ? 's' : ''}
-              </span>
-            </div>
-          </div>
-
-          <Separator />
-
           {/* Other important dates */}
-          <div className="space-y-2 text-sm">
+          <div className="space-y-3">
             {dates.booking && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Date de réservation
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">
+                  Réservé le
                 </span>
-                <span>{formatDate(dates.booking)}</span>
+                <span className="text-sm font-medium">
+                  {formatDate(dates.booking)}
+                </span>
               </div>
             )}
 
             {dates.confirmation && dates.confirmation !== dates.booking && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Date de confirmation
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">
+                  Confirmé le
                 </span>
-                <span>{formatDate(dates.confirmation)}</span>
+                <span className="text-sm font-medium">
+                  {formatDate(dates.confirmation)}
+                </span>
               </div>
             )}
 
             {dates.cancellation && (
-              <div className="flex justify-between text-destructive">
-                <span>Date d&apos;annulation</span>
-                <span>{formatDate(dates.cancellation)}</span>
+              <div className="flex justify-between items-center text-destructive">
+                <span className="text-sm">Annulé le</span>
+                <span className="text-sm font-medium">
+                  {formatDate(dates.cancellation)}
+                </span>
               </div>
             )}
           </div>

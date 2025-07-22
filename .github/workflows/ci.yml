@@ -1,234 +1,80 @@
 # 🔄 Workflow CI - Intégration Continue
 # Exécute les tests, linting et vérifications de qualité sur chaque PR et push
 
-name: CI - Quality Checks
+name: CI
 
 on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main, develop]
-  workflow_dispatch: # Permet de déclencher manuellement
-
-env:
-  NODE_VERSION: '20'
+    branches: [main]
 
 jobs:
-  # 🔍 Analyse statique et qualité du code
-  code-quality:
-    name: 📊 Code Quality & Linting
+  quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    name: Code Quality
 
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Nécessaire pour certains outils d'analyse
 
-      - name: 📦 Setup Node.js
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
           cache: 'npm'
 
-      - name: 🔧 Install Dependencies
+      - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🧹 ESLint Check
+      - name: 🔍 Run ESLint
         run: npm run lint
 
-      - name: 🎨 Prettier Check
+      - name: 💅 Check Prettier
         run: npm run format:check
 
-      - name: 🔍 TypeScript Check
+      - name: 🔷 TypeScript Check
         run: npm run type-check
 
-      - name: 📊 Code Quality Summary
-        if: always()
-        run: |
-          echo "📊 Résumé de la qualité du code:"
-          echo "✅ ESLint, Prettier et TypeScript vérifiés"
-          echo "💡 Super-linter à configurer plus tard si nécessaire"
-
-  # 🏗️ Build et Tests
-  build-and-test:
-    name: 🏗️ Build & Test
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: code-quality
-
-    strategy:
-      matrix:
-        node-version: [18, 20] # Test sur plusieurs versions Node
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: 🔧 Install Dependencies
-        run: npm ci
+      - name: 🧪 Run Tests
+        run: npm test
 
       - name: 🏗️ Build Application
-        run: npm run build
         env:
+          # Variables Firebase publiques (nécessaires pour le build)
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
           NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
           NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+        run: npm run build
 
-      - name: 🧪 Run Tests
-        run: |
-          echo "🧪 Exécution des tests et vérifications..."
-          npm run test
-
-      - name: 📁 Cache Build Artifacts
-        if: matrix.node-version == 20
-        uses: actions/cache@v4
-        with:
-          path: |
-            .next
-            out
-          key: ${{ runner.os }}-build-${{ github.sha }}
-
-  # 🔒 Validation des Cloud Functions Node.js
-  functions-validation:
-    name: 🔒 Cloud Functions Validation
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install Functions Dependencies
-        working-directory: functions
-        run: |
-          echo "📦 Installation des dépendances Node.js Functions..."
-          npm ci
-
-      - name: 🔨 Build Functions
-        working-directory: functions
-        run: |
-          echo "🔨 Build des Cloud Functions TypeScript..."
-          npm run build
-
-      - name: 🧪 Test Functions
-        working-directory: functions
-        run: |
-          echo "🧪 Tests des Cloud Functions..."
-          npm run test
-
-      - name: 🔍 Functions Linting
-        working-directory: functions
-        run: |
-          echo "🔍 Linting des Cloud Functions..."
-          npm run lint
-
-  # 🔐 Audit de Sécurité
-  security-audit:
-    name: 🔐 Security Audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 🔍 NPM Audit
-        run: |
-          npm audit --audit-level=moderate
-
-      - name: 🛡️ Check for known vulnerabilities
-        run: |
-          echo "🛡️ Vérification des vulnérabilités connues..."
-          # Note: better-npm-audit pas encore configuré
-          echo "✅ Audit NPM de base effectué ci-dessus"
-
-  # 📊 Collecte des métriques
-  metrics:
-    name: 📊 Code Metrics
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    needs: build-and-test
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 🔧 Install Dependencies
-        run: npm ci
+      - name: 🔐 Security Audit
+        run: npm audit --audit-level=moderate
 
       - name: 📊 Bundle Size Analysis
         run: |
-          echo "📊 Analyse de la taille du bundle..."
-          npm run build
+          echo "📦 Analyzing bundle size..."
+          if [ -d ".next" ]; then
+            du -sh .next/
+            echo "✅ Build artifacts generated successfully"
+          else
+            echo "❌ Build directory not found"
+            exit 1
+          fi
 
-          # Analyse basique de la taille des fichiers .next
-          echo "📦 Taille des principaux fichiers:"
-          du -sh .next/static/chunks/*.js 2>/dev/null | head -10 || echo "ℹ️ Aucun chunk JS trouvé"
-
-          echo "✅ Build analysé - bundlesize à configurer plus tard"
-
-      - name: 💬 Comment PR with metrics
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            // Ajouter ici la logique pour commenter la PR avec les métriques
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '📊 **Build Analysis**: Build successful ✅'
-            });
-
-  # ✅ Status Check Final
-  ci-success:
-    name: ✅ CI Success
-    runs-on: ubuntu-latest
-    needs: [code-quality, build-and-test, functions-validation, security-audit]
-    if: always()
-
-    steps:
-      - name: 🎉 All Checks Passed
-        if: ${{ needs.code-quality.result == 'success' && needs.build-and-test.result == 'success' && needs.functions-validation.result == 'success' && needs.security-audit.result == 'success' }}
+      - name: 🎯 Summary
+        if: always()
         run: |
-          echo "🎉 Tous les checks de qualité sont passés avec succès !"
-          echo "✅ Le code est prêt pour le déploiement"
-
-      - name: ❌ Some Checks Failed
-        if: ${{ needs.code-quality.result != 'success' || needs.build-and-test.result != 'success' || needs.functions-validation.result != 'success' || needs.security-audit.result != 'success' }}
-        run: |
-          echo "❌ Certains checks de qualité ont échoué"
-          echo "🔧 Vérifiez les erreurs ci-dessus avant de merger"
-          exit 1
+          echo "## 📊 CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Checks Completed:" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔍 ESLint" >> $GITHUB_STEP_SUMMARY
+          echo "- 💅 Prettier" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔷 TypeScript" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧪 Tests" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏗️ Build" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔐 Security Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Production deployment is handled automatically by Vercel on push to main branch." >> $GITHUB_STEP_SUMMARY

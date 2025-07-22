@@ -32,11 +32,33 @@ export const useAuth = () => {
         router.push('/home');
       }
     },
-    onError: (error: unknown) => {
-      if (axios.isAxiosError(error)) {
-        showAuthError(
-          error.response?.data?.error ?? 'Erreur lors de la connexion'
+    onError: async (error: unknown) => {
+      // Déconnecter automatiquement côté client en cas d'erreur serveur
+      try {
+        await signOutUser();
+        console.warn(
+          '[Auth] Déconnexion côté client effectuée après erreur serveur'
         );
+      } catch (signOutError) {
+        console.error(
+          '[Auth] Erreur lors de la déconnexion automatique:',
+          signOutError
+        );
+      }
+
+      if (axios.isAxiosError(error)) {
+        const errorData = error.response?.data;
+
+        // Gestion spécifique des erreurs de domaine
+        if (errorData?.code === 'DOMAIN_NOT_ALLOWED') {
+          showAuthError(
+            `Accès refusé. Seuls les emails @jhmh.com sont autorisés. (Tenté: ${errorData.details?.attempted_email ?? 'email inconnu'})`
+          );
+        } else if (errorData?.code === 'EMAIL_REQUIRED') {
+          showAuthError("Email requis pour l'authentification");
+        } else {
+          showAuthError(errorData?.error ?? 'Erreur lors de la connexion');
+        }
       } else {
         showAuthError('Erreur lors de la connexion');
       }
@@ -77,10 +99,17 @@ export const useAuth = () => {
       const result = await firebaseSignInWithGoogle();
       const idToken = await result.user.getIdToken();
 
-      // Envoi du token au serveur
+      // Envoi du token au serveur (qui vérifiera le domaine)
       loginMutation.mutate(idToken);
     } catch (error: unknown) {
       console.error('Erreur lors de la connexion:', error);
+
+      // S'assurer que l'utilisateur est déconnecté côté client en cas d'erreur
+      try {
+        await signOutUser();
+      } catch (signOutError) {
+        console.error('[Auth] Erreur déconnexion après échec:', signOutError);
+      }
 
       // Gestion des erreurs spécifiques Firebase
       if (typeof error === 'object' && error !== null && 'code' in error) {

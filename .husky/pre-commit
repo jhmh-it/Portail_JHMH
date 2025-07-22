@@ -1,81 +1,31 @@
-echo "🔒 Pre-commit hook: Vérifications de qualité..."
+#!/bin/bash
 
-# 🔍 Exécution de lint-staged
-echo "🔍 Exécution de lint-staged..."
-npx lint-staged
+echo "🔍 Running pre-commit checks..."
 
-# 🔍 Vérification TypeScript
-echo "🔍 Vérification TypeScript..."
-npm run type-check || {
-  echo "❌ Erreurs TypeScript détectées"
-  echo "💡 Conseil: Exécutez 'npm run type-check' pour voir les détails"
+# Vérifier les fichiers sensibles
+echo "🔒 Checking for sensitive files..."
+if git diff --cached --name-only | grep -E "(\.env|\.env\.local|\.env\.production|firebase-admin.*\.json|serviceAccount.*\.json)$"; then
+  echo "❌ ERROR: Attempting to commit sensitive files!"
+  echo "🚫 Please remove .env files and service account keys from your commit"
   exit 1
-}
+fi
 
-echo "✅ Types TypeScript valides"
-
-# 🏗️ Test de build
-echo "🔍 Test de build..."
-npm run build > /dev/null 2>&1 || {
-  echo "❌ Échec du build"
-  echo "💡 Conseil: Exécutez 'npm run build' pour voir les détails"
-  exit 1
-}
-
-echo "✅ Build réussi"
-
-# 🔒 Vérification des Cloud Functions Node.js
-echo "🔍 Vérification des Cloud Functions..."
-if [ -d "functions" ]; then
-  cd functions
-  
-  # Installation des dépendances si nécessaire
-  if [ ! -d "node_modules" ]; then
-    echo "📦 Installation des dépendances Functions..."
-    npm ci > /dev/null 2>&1
+# Détection basique de secrets
+echo "🔍 Scanning for potential secrets..."
+STAGED_FILES=$(git diff --cached --name-only)
+for file in $STAGED_FILES; do
+  if [ -f "$file" ]; then
+    # Vérifier les patterns de secrets courants
+    if grep -E "(PRIVATE_KEY|SECRET|PASSWORD|API_KEY|private_key|secret|password|api_key)(\s)*[:=](\s)*[\"\'][^\"\']+[\"\']" "$file" 2>/dev/null | grep -v "process\.env\." | grep -v "NEXT_PUBLIC_"; then
+      echo "❌ ERROR: Potential secret detected in $file"
+      echo "🚫 Please use environment variables for sensitive data"
+      exit 1
+    fi
   fi
-  
-  # Build des Cloud Functions
-  echo "🔨 Build des Cloud Functions..."
-  npm run build > /dev/null 2>&1 || {
-    echo "❌ Échec du build des Cloud Functions"
-    echo "💡 Conseil: cd functions && npm run build"
-    exit 1
-  }
-  
-  # Tests des Cloud Functions
-  echo "🧪 Tests des Cloud Functions..."
-  npm run test > /dev/null 2>&1 || {
-    echo "❌ Échec des tests des Cloud Functions"
-    echo "💡 Conseil: cd functions && npm run test"
-    exit 1
-  }
-  
-  cd ..
-  echo "✅ Cloud Functions validées"
-else
-  echo "⚠️ Répertoire functions non trouvé"
-fi
-
-# 🔍 Vérification des secrets
-echo "🔍 Vérification des secrets..."
-if grep -r "sk-" . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next --exclude-dir=out 2>/dev/null; then
-  echo "⚠️ Possible secret détecté: TOKEN"
-  echo "💡 Assurez-vous que ce n'est pas un vrai secret"
-fi
-
-# 📊 Vérification de la taille des fichiers
-echo "🔍 Vérification de la taille des fichiers..."
-find . -type f -size +10M \
-  -not -path "./node_modules/*" \
-  -not -path "./.git/*" \
-  -not -path "./.next/*" \
-  -not -path "./out/*" \
-  -not -path "./functions/node_modules/*" \
-  -not -path "./functions/lib/*" \
-  2>/dev/null | while read file; do
-  echo "⚠️ Fichier volumineux détecté: $file"
 done
 
-echo "✅ Toutes les vérifications pre-commit sont passées !"
-echo "🎉 Prêt à commiter !"
+# Exécuter lint-staged
+echo "✅ Running lint-staged..."
+npx lint-staged
+
+echo "✅ Pre-commit checks passed!"

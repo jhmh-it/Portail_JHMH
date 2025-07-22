@@ -15,7 +15,7 @@ import {
 import { useUser } from '@/hooks/useUser';
 
 export default function DashboardPage() {
-  const { data: user } = useUser();
+  const { data: user, isLoading: isLoadingUser } = useUser();
 
   const breadcrumbs = [{ label: 'Accueil' }];
 
@@ -48,13 +48,22 @@ export default function DashboardPage() {
       <div className="my-6">
         {/* Welcome Section */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">
-            Bonjour, {user?.displayName?.split(' ')[0] ?? 'Utilisateur'} 👋
-          </h1>
-          <p className="text-muted-foreground">
-            Accédez aux outils internes de l&apos;entreprise depuis votre
-            portail d&apos;accueil.
-          </p>
+          {isLoadingUser ? (
+            <>
+              <div className="h-9 bg-gray-200 rounded animate-pulse w-64 mb-2" />
+              <div className="h-5 bg-gray-200 rounded animate-pulse w-96" />
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold tracking-tight text-navy">
+                Bonjour, {user?.displayName?.split(' ')[0] ?? 'Utilisateur'} 👋
+              </h1>
+              <p className="text-muted-foreground">
+                Accédez aux outils internes de l&apos;entreprise depuis votre
+                portail d&apos;accueil.
+              </p>
+            </>
+          )}
         </div>
 
         {/* Tools Section */}

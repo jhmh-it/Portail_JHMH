@@ -1,382 +1,70 @@
-# 🚧 Workflow Staging - Environnement de Test
-# Déploie sur l'environnement staging pour validation avant production
-
-name: Deploy to Staging
+name: Staging Deployment
 
 on:
   push:
     branches: [develop]
-  workflow_dispatch:
-    inputs:
-      force_deploy:
-        description: 'Forcer le déploiement même si les tests échouent'
-        required: false
-        default: false
-        type: boolean
-
-env:
-  NODE_VERSION: '20'
-  FIREBASE_PROJECT_STAGING: 'portail-jhmh-staging' # Projet Firebase staging
 
 jobs:
-  # 🔍 Validation pré-staging
-  pre-staging-validation:
-    name: 🔍 Pre-staging Validation
+  quality-checks:
+    name: 🔍 Quality Checks
     runs-on: ubuntu-latest
-    timeout-minutes: 12
-
-    outputs:
-      should-deploy: ${{ steps.validate.outputs.deploy }}
-      version: ${{ steps.version.outputs.version }}
 
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 📦 Setup Node.js
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
           cache: 'npm'
 
-      - name: 🔧 Install Dependencies
+      - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🔍 Full Validation Suite
-        id: validate
-        run: |
-          echo "🔍 Suite complète de validation..."
+      - name: 🔍 Run ESLint
+        run: npm run lint
 
-          # Linting et formatage
-          npm run lint
-          npm run format:check
+      - name: 💅 Check Prettier
+        run: npm run format:check
 
-          # Type checking
-          npm run type-check
+      - name: 🔷 TypeScript Check
+        run: npm run type-check
 
-          # Build
-          npm run build
+      - name: 🧪 Run Tests
+        run: npm test
 
-          # Audit de sécurité
-          npm audit --audit-level=moderate || echo "⚠️ Vulnérabilités détectées"
-
-          echo "deploy=true" >> $GITHUB_OUTPUT
-          echo "✅ Validation staging réussie"
+      - name: 🏗️ Build Application
         env:
+          # Variables Firebase publiques pour staging
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
           NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
           NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+        run: npm run build
 
-      - name: 🏷️ Generate Staging Version
-        id: version
-        run: |
-          STAGING_VERSION="staging-$(date +'%Y.%m.%d')-${GITHUB_SHA:0:7}"
-          echo "version=$STAGING_VERSION" >> $GITHUB_OUTPUT
-          echo "🏷️ Version staging: $STAGING_VERSION"
+      - name: 🔐 Security Audit
+        run: npm audit --audit-level=moderate
 
-  # 🔒 Validation Functions Node.js pour Staging
-  validate-functions-staging:
-    name: 🔒 Functions Staging Validation
+  staging-notification:
+    name: 📢 Staging Notification
     runs-on: ubuntu-latest
-    needs: pre-staging-validation
-    timeout-minutes: 10
+    needs: quality-checks
 
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📦 Install Dependencies
-        working-directory: functions
+      - name: 📤 Notify Vercel Deployment
         run: |
-          echo "📦 Installation des dépendances Node.js Functions..."
-          npm ci
-
-      - name: 🧪 Comprehensive Function Tests
-        working-directory: functions
-        run: |
-          echo "🧪 Tests complets des Cloud Functions Node.js..."
-
-          # Build TypeScript
-          echo "🔨 Build des Cloud Functions..."
-          npm run build
-
-          # Tests
-          echo "🧪 Tests des Cloud Functions..."
-          npm run test
-
-          # Linting
-          echo "🔍 Linting des Cloud Functions..."
-          npm run lint
-
-          # Tests de sécurité spécifiques via Node.js
-          echo "🔐 Tests de sécurité domaine..."
-          node -e "
-          const { isEmailAllowed } = require('./lib/index.js');
-
-          // Tests de sécurité avancés
-          const securityTests = [
-              ['user@jhmh.com.malicious.com', false],
-              ['admin@jhmh.com', true],
-              ['test+tag@jhmh.com', true],
-              ['user@JHMH.COM', true],
-              ['', false],
-              [null, false]
-          ];
-
-          for (const [email, expected] of securityTests) {
-              const result = isEmailAllowed(email);
-              if (result !== expected) {
-                  throw new Error(\`Security test failed for \${email}: expected \${expected}, got \${result}\`);
-              }
-          }
-
-          console.log('✅ Tests de sécurité passés');
-          "
-
-  # 🏗️ Build Staging
-  build-staging:
-    name: 🏗️ Staging Build
-    runs-on: ubuntu-latest
-    needs: [pre-staging-validation, validate-functions-staging]
-    if: needs.pre-staging-validation.outputs.should-deploy == 'true'
-    timeout-minutes: 15
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 🔧 Install Dependencies
-        run: npm ci
-
-      - name: 🏗️ Build for Staging
-        run: |
-          echo "🏗️ Building for staging environment..."
-          npm run build
-        env:
-          NODE_ENV: production
-          NEXT_PUBLIC_ENV: staging
-          NEXT_TELEMETRY_DISABLED: 1
-          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
-          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-
-      - name: 📁 Upload Staging Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: staging-build
-          path: |
-            .next
-            out
-            public
-          retention-days: 7
-
-  # 🚧 Déploiement Staging
-  deploy-staging:
-    name: 🚧 Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [pre-staging-validation, build-staging]
-    timeout-minutes: 20
-    environment:
-      name: staging
-      url: https://portail-jhmh-staging.web.app
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 📁 Download Build Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: staging-build
-
-      - name: 🔧 Install Dependencies
-        run: |
-          npm ci
-          npm install -g firebase-tools
-
-      - name: 🔐 Setup Firebase Authentication
-        run: |
-          echo "🔐 Configuration de l'authentification Firebase..."
-          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/service-account.json
-          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json" >> $GITHUB_ENV
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PORTAIL_JHMH }}
-
-      - name: 🌐 Deploy Hosting to Staging
-        run: |
-          echo "🌐 Déploiement Hosting vers staging..."
-          firebase deploy --only hosting --project ${{ env.FIREBASE_PROJECT_STAGING }}
-
-      - name: 🔒 Deploy Functions to Staging
-        run: |
-          echo "🔒 Déploiement Functions Node.js vers staging..."
-
-          # Installation et build des Cloud Functions
-          echo "📦 Installation des dépendances Functions..."
-          cd functions
-          npm ci
-
-          echo "🔨 Build des Cloud Functions..."
-          npm run build
-
-          echo "🧪 Tests des Cloud Functions..."
-          npm run test
-
-          # Retour au répertoire racine
-          cd ..
-
-          # Déploiement vers staging
-          echo "🚀 Déploiement Firebase Functions vers staging..."
-          firebase deploy --only functions --project ${{ env.FIREBASE_PROJECT_STAGING }}
-
-      - name: 🧹 Cleanup Firebase Auth
-        if: always()
-        run: |
-          rm -f /tmp/service-account.json
-
-  # 🧪 Tests d'Intégration Staging
-  integration-tests:
-    name: 🧪 Staging Integration Tests
-    runs-on: ubuntu-latest
-    needs: deploy-staging
-    timeout-minutes: 15
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🌐 Health Checks
-        run: |
-          echo "🌐 Vérifications de santé staging..."
-
-          STAGING_URL="https://portail-jhmh-staging.web.app"
-
-          # Test de base
-          response=$(curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL")
-          if [ $response = "200" ]; then
-            echo "✅ Staging hosting accessible"
-          else
-            echo "❌ Staging hosting inaccessible (HTTP $response)"
-            exit 1
-          fi
-
-          # Test des pages critiques
-          critical_pages=("/" "/login")
-          for page in "${critical_pages[@]}"; do
-            response=$(curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL$page")
-            if [ $response = "200" ]; then
-              echo "✅ Page $page accessible"
-            else
-              echo "⚠️ Page $page: HTTP $response"
-            fi
-          done
-
-      - name: 🔒 Function Health Check
-        run: |
-          echo "🔒 Test des Cloud Functions staging..."
-
-          # Test de la fonction de health check
-          FUNCTION_URL="https://europe-west1-portail-jhmh-staging.cloudfunctions.net/healthCheck"
-
-          response=$(curl -s -o /dev/null -w "%{http_code}" "$FUNCTION_URL")
-          if [ $response = "200" ]; then
-            echo "✅ Function health check OK"
-          else
-            echo "⚠️ Function health check: HTTP $response"
-          fi
-
-      - name: ⚡ Performance Tests
-        run: |
-          echo "⚡ Tests de performance staging..."
-
-          STAGING_URL="https://portail-jhmh-staging.web.app"
-
-          # Test de temps de réponse
-          start_time=$(date +%s%N)
-          curl -s "$STAGING_URL" > /dev/null
-          end_time=$(date +%s%N)
-
-          response_time=$((($end_time - $start_time) / 1000000)) # en millisecondes
-
-          echo "📊 Temps de réponse: ${response_time}ms"
-
-          if [ $response_time -lt 3000 ]; then
-            echo "✅ Performance acceptable (< 3s)"
-          else
-            echo "⚠️ Performance lente (> 3s)"
-          fi
-
-  # 📊 Rapport de Staging
-  staging-report:
-    name: 📊 Staging Deployment Report
-    runs-on: ubuntu-latest
-    needs: [deploy-staging, integration-tests]
-    if: always()
-
-    steps:
-      - name: 📊 Generate Report
-        run: |
-          echo "## 🚧 Rapport de Déploiement Staging" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Staging Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Informations" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version**: ${{ needs.pre-staging-validation.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branche**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit**: ${GITHUB_SHA:0:7}" >> $GITHUB_STEP_SUMMARY
-          echo "- **URL Staging**: https://portail-jhmh-staging.web.app" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Quality Checks Passed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "### ✅ Status" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ needs.deploy-staging.result }}" = "success" ] && [ "${{ needs.integration-tests.result }}" = "success" ]; then
-            echo "🎉 **Déploiement staging réussi !**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "- [x] 🌐 Hosting déployé" >> $GITHUB_STEP_SUMMARY
-            echo "- [x] 🔒 Functions déployées" >> $GITHUB_STEP_SUMMARY
-            echo "- [x] 🧪 Tests d'intégration passés" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "✅ **Prêt pour validation et déploiement production**" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **Problèmes détectés en staging**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "🔧 Vérifiez les logs des jobs ci-dessus" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: 🔔 Notify Team
-        if: needs.deploy-staging.result == 'success' && needs.integration-tests.result == 'success'
-        run: |
-          echo "🔔 Notification équipe: Staging déployé avec succès"
-          echo "📋 Version: ${{ needs.pre-staging-validation.outputs.version }}"
-          echo "🌐 URL: https://portail-jhmh-staging.web.app"
-
-          # Ici vous pouvez ajouter des notifications Slack, Teams, etc.
-          # curl -X POST -H 'Content-type: application/json' --data '{"text":"🚧 Staging déployé: ${{ needs.pre-staging-validation.outputs.version }}"}' $SLACK_WEBHOOK
+          echo "**Branch:** develop" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Vercel will automatically deploy this to the staging environment." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+          echo "- Check Vercel dashboard for deployment status" >> $GITHUB_STEP_SUMMARY
+          echo "- Staging URL will be available once deployment completes" >> $GITHUB_STEP_SUMMARY

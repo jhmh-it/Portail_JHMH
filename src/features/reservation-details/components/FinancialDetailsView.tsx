@@ -38,11 +38,13 @@ export function FinancialDetailsView({
 }: FinancialDetailsViewProps) {
   const currency = reservation.currency ?? reservation.money_currency ?? 'EUR';
 
-  const formatCurrency = (amount?: number) => {
+  const formatCurrency = (amount?: number | null) => {
     if (amount === undefined || amount === null) return '-';
+    // Assurer que currency n'est jamais null
+    const currencyCode = currency ?? 'EUR';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency,
+      currency: currencyCode,
     }).format(amount);
   };
 

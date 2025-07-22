@@ -29,10 +29,13 @@ export function PaymentOverview({ reservation }: PaymentOverviewProps) {
   const paymentProgress = totalDue > 0 ? (totalPaid / totalDue) * 100 : 0;
   const isFullyPaid = balanceDue <= 0;
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | null | undefined) => {
+    if (amount == null) return '-';
+    // Assurer que currency n'est jamais null
+    const currencyCode = currency ?? 'EUR';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency,
+      currency: currencyCode,
     }).format(amount);
   };
 

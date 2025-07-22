@@ -35,6 +35,8 @@ export default function LoginPage() {
                 alt="Logo JHMH"
                 width={150}
                 height={150}
+                priority
+                style={{ width: 'auto', height: 'auto' }}
                 className="rounded mx-auto"
               />
             </div>

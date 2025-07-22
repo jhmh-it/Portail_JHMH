@@ -36,13 +36,15 @@ export function FinancialBreakdown({ reservation }: FinancialBreakdownProps) {
   });
 
   const formatCurrency = (
-    amount: number | undefined,
+    amount: number | undefined | null,
     currency = totalAmount.currency
   ) => {
-    if (amount === undefined) return '-';
+    if (amount === undefined || amount === null) return '-';
+    // Assurer que currency n'est jamais null
+    const currencyCode = currency || 'EUR';
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency,
+      currency: currencyCode,
     }).format(amount);
   };
 

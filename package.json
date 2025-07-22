@@ -15,32 +15,16 @@
     "type-check": "tsc --noEmit",
     "pre-commit": "lint-staged",
     "prepare": "husky",
-    "deploy:functions": "cd functions && npm run deploy",
-    "deploy:hosting": "firebase deploy --only hosting",
-    "deploy:all": "firebase deploy",
-    "deploy:staging": "firebase use portail-jhmh-staging && npm run deploy:all && firebase use portail-jhmh",
-    "deploy:production": "firebase use portail-jhmh && npm run deploy:all",
-    "test:functions": "cd functions && npm run test",
-    "test:functions:watch": "cd functions && npm run build:watch",
     "test:build": "npm run build && echo '✅ Build test successful'",
-    "test:all": "npm run lint && npm run type-check && npm run test:build && npm run test:functions",
+    "test:all": "npm run lint && npm run type-check && npm run test:build",
     "validate:pre-deploy": "npm run test:all && echo '🎉 Ready for deployment!'",
     "validate:security": "npm audit --audit-level=moderate",
-    "validate:functions": "npm run test:functions",
     "clean": "rm -rf .next out node_modules/.cache",
     "clean:all": "npm run clean && rm -rf node_modules && npm install",
-    "clean:functions": "cd functions && npm run clean",
-    "setup:dev": "npm install && cd functions && npm install",
+    "setup:dev": "npm install",
     "setup:hooks": "husky install && chmod +x .husky/pre-commit",
-    "setup:firebase": "firebase login && firebase projects:list",
-    "logs:functions": "firebase functions:log",
-    "logs:hosting": "firebase hosting:channel:list",
-    "logs:all": "npm run logs:functions && npm run logs:hosting",
     "status": "echo '📊 Project Status:' && npm run lint --silent && npm run type-check --silent && echo '✅ All checks passed'",
-    "health": "curl -s https://portail-jhmh.web.app > /dev/null && echo '✅ Production is healthy' || echo '❌ Production issues detected'",
-    "health:staging": "curl -s https://portail-jhmh-staging.web.app > /dev/null && echo '✅ Staging is healthy' || echo '❌ Staging issues detected'",
     "workflow:pr": "npm run lint:fix && npm run format && npm run type-check && npm run build",
-    "workflow:deploy": "npm run validate:pre-deploy && echo '🚀 Ready to deploy to staging'",
     "workflow:hotfix": "npm run lint:fix && npm run type-check && npm run build && echo '🔥 Hotfix ready'"
   },
   "dependencies": {
@@ -116,9 +100,6 @@
     ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"
-    ],
-    "functions/src/*.ts": [
-      "cd functions && npm run build && npm run test"
     ]
   }
 }

@@ -10,7 +10,6 @@ Le projet utilise des variables d'environnement pour gérer les configurations s
 
 ```
 .env.local          # Variables locales (dev) - NE PAS COMMITER
-.env.example        # Template avec valeurs d'exemple - COMMITÉ
 .env.production     # Variables production (sur serveur)
 .env.test          # Variables pour tests automatisés
 ```
@@ -19,8 +18,7 @@ Le projet utilise des variables d'environnement pour gérer les configurations s
 
 1. `.env.production` (en production)
 2. `.env.local` (en développement)
-3. `.env`
-4. Variables système
+3. Variables système
 
 ## 📝 Variables requises
 
@@ -43,7 +41,7 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 # Firebase Admin SDK (Server-side only)
 FIREBASE_PROJECT_ID=your-project-id
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour-Private-Key\n-----END PRIVATE KEY-----\n"
+FIREBASE_PRIVATE_KEY=[Format: "-----BEGIN PRIVATE KEY-----\n[Your-Key-Content]\n-----END PRIVATE KEY-----\n"]
 ```
 
 ### 🌐 Application
@@ -100,11 +98,13 @@ JHMH_API_BASE_URL=https://apijhmhportail-22997865276.europe-west1.run.app
 JHMH_API_KEY=your-api-key-here
 ```
 
-## 🔨 Fichier .env.example
+## 🔨 Template .env.local
+
+Créez un fichier `.env.local` à la racine du projet avec le contenu suivant :
 
 ```bash
 # =====================================================
-# COPY THIS FILE TO .env.local AND FILL WITH YOUR VALUES
+# CONFIGURATION LOCALE - NE PAS COMMITER
 # =====================================================
 
 # Firebase Client Configuration (Public)
@@ -114,7 +114,6 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
 
 # Firebase Admin SDK (Server-side)
 # Get from Firebase Console > Project Settings > Service Accounts
@@ -122,15 +121,8 @@ FIREBASE_PROJECT_ID=
 FIREBASE_CLIENT_EMAIL=
 FIREBASE_PRIVATE_KEY=
 
-# Application
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME="Portail JHMH"
-
 # Security
-AUTH_SECRET=generate-random-32-char-string
-COOKIE_NAME=__session
-COOKIE_SECURE=false
-COOKIE_MAX_AGE=604800
+SESSION_SECRET=generate-random-32-char-string
 
 # External APIs
 JHMH_API_BASE_URL=https://apijhmhportail-22997865276.europe-west1.run.app
@@ -142,13 +134,13 @@ JHMH_API_KEY=your-api-key-here
 ### Développement local
 
 ```bash
-# 1. Copier le template
-cp .env.example .env.local
+# 1. Créer le fichier .env.local (voir template ci-dessus)
+touch .env.local
 
 # 2. Remplir les valeurs Firebase depuis la console
 # https://console.firebase.google.com
 
-# 3. Générer AUTH_SECRET
+# 3. Générer SESSION_SECRET
 openssl rand -base64 32
 
 # 4. Lancer l'app
@@ -276,7 +268,7 @@ npm run dev
 ```bash
 # Erreur commune : Private key mal formatée
 # Solution : Entourer la clé avec des guillemets
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+FIREBASE_PRIVATE_KEY=[Format: "-----BEGIN PRIVATE KEY-----\n[Your-Key-Content]\n-----END PRIVATE KEY-----\n"]
 ```
 
 ### Cookies non définis
