@@ -222,9 +222,18 @@ function buildReservationQueryParams(params?: {
   page_size?: number;
   checkinDateFrom?: string;
   checkinDateTo?: string;
+  checkoutDateFrom?: string;
+  checkoutDateTo?: string;
   status?: string;
   ota?: string;
   q?: string;
+  amountMin?: number;
+  amountMax?: number;
+  nightsMin?: number;
+  nightsMax?: number;
+  guestsMin?: number;
+  guestsMax?: number;
+  currency?: string;
 }): URLSearchParams {
   const queryParams = new URLSearchParams();
 
@@ -235,9 +244,26 @@ function buildReservationQueryParams(params?: {
     queryParams.append('checkin_date_from', params.checkinDateFrom);
   if (params?.checkinDateTo)
     queryParams.append('checkin_date_to', params.checkinDateTo);
+  if (params?.checkoutDateFrom)
+    queryParams.append('checkout_date_from', params.checkoutDateFrom);
+  if (params?.checkoutDateTo)
+    queryParams.append('checkout_date_to', params.checkoutDateTo);
   if (params?.status) queryParams.append('status', params.status);
   if (params?.ota) queryParams.append('ota', params.ota);
   if (params?.q) queryParams.append('q', params.q);
+  if (params?.amountMin)
+    queryParams.append('amount_min', params.amountMin.toString());
+  if (params?.amountMax)
+    queryParams.append('amount_max', params.amountMax.toString());
+  if (params?.nightsMin)
+    queryParams.append('nights_min', params.nightsMin.toString());
+  if (params?.nightsMax)
+    queryParams.append('nights_max', params.nightsMax.toString());
+  if (params?.guestsMin)
+    queryParams.append('guests_min', params.guestsMin.toString());
+  if (params?.guestsMax)
+    queryParams.append('guests_max', params.guestsMax.toString());
+  if (params?.currency) queryParams.append('currency', params.currency);
 
   return queryParams;
 }
@@ -250,9 +276,18 @@ export async function fetchJhmhReservations(params?: {
   page_size?: number;
   checkinDateFrom?: string;
   checkinDateTo?: string;
+  checkoutDateFrom?: string;
+  checkoutDateTo?: string;
   status?: string;
   ota?: string;
   q?: string;
+  amountMin?: number;
+  amountMax?: number;
+  nightsMin?: number;
+  nightsMax?: number;
+  guestsMin?: number;
+  guestsMax?: number;
+  currency?: string;
 }): Promise<{
   success: boolean;
   data: ExternalReservation[];

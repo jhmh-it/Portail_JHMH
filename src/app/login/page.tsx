@@ -33,8 +33,8 @@ export default function LoginPage() {
               <Image
                 src="/images/logo.webp"
                 alt="Logo JHMH"
-                width={150}
-                height={150}
+                width={130}
+                height={130}
                 priority
                 style={{ width: 'auto', height: 'auto' }}
                 className="rounded mx-auto"

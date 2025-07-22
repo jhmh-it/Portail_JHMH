@@ -24,7 +24,7 @@ function buildQueryParams(filters: ReservationFilters): URLSearchParams {
 
   // Helper to add non-null params
   const addParam = (key: string, value: string | number | undefined) => {
-    if (value !== undefined && value !== null) {
+    if (value !== undefined && value !== null && value !== '') {
       params.append(key, value.toString());
     }
   };
@@ -33,9 +33,18 @@ function buildQueryParams(filters: ReservationFilters): URLSearchParams {
   addParam('page_size', filters.page_size);
   addParam('checkinDateFrom', filters.checkinDateFrom);
   addParam('checkinDateTo', filters.checkinDateTo);
+  addParam('checkoutDateFrom', filters.checkoutDateFrom);
+  addParam('checkoutDateTo', filters.checkoutDateTo);
   addParam('status', filters.status);
   addParam('ota', filters.ota);
   addParam('q', filters.q);
+  addParam('amountMin', filters.amountMin);
+  addParam('amountMax', filters.amountMax);
+  addParam('nightsMin', filters.nightsMin);
+  addParam('nightsMax', filters.nightsMax);
+  addParam('guestsMin', filters.guestsMin);
+  addParam('guestsMax', filters.guestsMax);
+  addParam('currency', filters.currency);
 
   return params;
 }

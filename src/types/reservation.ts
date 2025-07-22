@@ -32,9 +32,18 @@ export interface ReservationFilters {
   page_size?: number;
   checkinDateFrom?: string;
   checkinDateTo?: string;
+  checkoutDateFrom?: string;
+  checkoutDateTo?: string;
   status?: string;
   ota?: string;
   q?: string; // Recherche textuelle
+  amountMin?: number;
+  amountMax?: number;
+  nightsMin?: number;
+  nightsMax?: number;
+  guestsMin?: number;
+  guestsMax?: number;
+  currency?: string;
 }
 
 // Réponse de l'API pour la liste des réservations
