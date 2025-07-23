@@ -1,4 +1,5 @@
 import { Users, Mail, Phone, FileText, UserCheck } from 'lucide-react';
+import * as React from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -122,7 +123,9 @@ export function GuestInformation({ reservation }: GuestInformationProps) {
                 <h4 className="text-sm font-medium">Notes et commentaires</h4>
               </div>
               <div className="bg-muted/50 rounded-lg p-3">
-                <p className="text-sm whitespace-pre-wrap">{guestNotes}</p>
+                <div className="text-sm whitespace-pre-wrap">
+                  {formatNotes(guestNotes)}
+                </div>
               </div>
             </div>
           </>
@@ -130,4 +133,66 @@ export function GuestInformation({ reservation }: GuestInformationProps) {
       </CardContent>
     </Card>
   );
+}
+
+/**
+ * Formate les notes en gérant les JSON et autres formats
+ */
+function formatNotes(notes: string): React.JSX.Element {
+  if (!notes) return <span>-</span>;
+
+  try {
+    // Tenter de parser comme JSON
+    const parsed = JSON.parse(notes);
+
+    // Si c'est un objet, l'afficher comme key: value
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      !Array.isArray(parsed)
+    ) {
+      return (
+        <div className="space-y-1">
+          {Object.entries(parsed).map(([key, value]) => (
+            <div key={key} className="flex gap-2">
+              <span className="font-medium text-muted-foreground min-w-0 break-words">
+                {key}:
+              </span>
+              <span className="flex-1 break-words">
+                {typeof value === 'object'
+                  ? JSON.stringify(value, null, 2)
+                  : String(value)}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Si c'est un array, l'afficher comme liste
+    if (Array.isArray(parsed)) {
+      return (
+        <div className="space-y-1">
+          {parsed.map((item, index) => (
+            <div key={index} className="flex gap-2">
+              <span className="font-medium text-muted-foreground">
+                {index + 1}.
+              </span>
+              <span className="flex-1 break-words">
+                {typeof item === 'object'
+                  ? JSON.stringify(item, null, 2)
+                  : String(item)}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Si c'est une valeur primitive, l'afficher telle quelle
+    return <span>{String(parsed)}</span>;
+  } catch {
+    // Si ce n'est pas du JSON valide, afficher le texte brut
+    return <span>{notes}</span>;
+  }
 }

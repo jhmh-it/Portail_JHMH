@@ -8,84 +8,43 @@ import { fetchJhmhListingsActifs } from '@/lib/external-api';
  */
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const { searchParams } = request.nextUrl;
 
-    // Extraire les paramètres de pagination
-    const limitParam = searchParams.get('limit');
-    const limit = limitParam ? parseInt(limitParam) : 20;
-    const offsetParam = searchParams.get('offset');
-    const offset = offsetParam ? parseInt(offsetParam) : 0;
+    // Paramètres de pagination côté serveur
+    const limit = parseInt(searchParams.get('limit') ?? '20');
+    const offset = parseInt(searchParams.get('offset') ?? '0');
 
-    // Filtres de recherche
-    const code_site = searchParams.get('code_site') ?? undefined;
-    const type_logement = searchParams.get('type_logement') ?? undefined;
-    const order_by = searchParams.get('order_by') ?? undefined;
-    const order_direction = searchParams.get('order_direction') ?? undefined;
-    const q = searchParams.get('q') ?? undefined;
-
-    // Filtres numériques
-    const superficie_minParam = searchParams.get('superficie_min');
-    const superficie_min = superficie_minParam
-      ? parseFloat(superficie_minParam)
-      : undefined;
-    const superficie_maxParam = searchParams.get('superficie_max');
-    const superficie_max = superficie_maxParam
-      ? parseFloat(superficie_maxParam)
-      : undefined;
-    const date_ouverture_from =
-      searchParams.get('date_ouverture_from') ?? undefined;
-    const date_ouverture_to =
-      searchParams.get('date_ouverture_to') ?? undefined;
-
-    // Validation de base
-    if (limit > 100) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Limit cannot exceed 100',
-        },
-        { status: 400 }
-      );
-    }
+    // Paramètres de filtrage à passer à l'API externe
+    const filters = {
+      code_site: searchParams.get('code_site') ?? undefined,
+      type_logement: searchParams.get('type_logement') ?? undefined,
+      order_by: searchParams.get('order_by') ?? undefined,
+      order_direction: searchParams.get('order_direction') ?? undefined,
+      q: searchParams.get('q') ?? undefined,
+      superficie_min: searchParams.get('superficie_min')
+        ? parseFloat(searchParams.get('superficie_min') ?? '0')
+        : undefined,
+      superficie_max: searchParams.get('superficie_max')
+        ? parseFloat(searchParams.get('superficie_max') ?? '0')
+        : undefined,
+      date_ouverture_from: searchParams.get('date_ouverture_from') ?? undefined,
+      date_ouverture_to: searchParams.get('date_ouverture_to') ?? undefined,
+    };
 
     if (process.env.NODE_ENV === 'development') {
-      console.warn('[API] Fetching listings actifs from external JHMH API...', {
-        limit,
-        offset,
-        filters: {
-          code_site,
-          type_logement,
-          order_by,
-          order_direction,
-          q,
-          superficie_min,
-          superficie_max,
-          date_ouverture_from,
-          date_ouverture_to,
-        },
-      });
+      console.warn('[API] Fetching listings actifs with filters:', filters);
+      console.warn('[API] Pagination params:', { limit, offset });
     }
 
-    // Appel à l'API externe
-    const response = await fetchJhmhListingsActifs({
-      limit,
-      offset,
-      code_site,
-      type_logement,
-      order_by,
-      order_direction,
-      q,
-      superficie_min,
-      superficie_max,
-      date_ouverture_from,
-      date_ouverture_to,
-    });
+    // Récupérer TOUS les actifs de l'API externe (sans pagination)
+    const response = await fetchJhmhListingsActifs(filters);
 
-    if (!response.success || response.data.length === undefined) {
-      console.warn(
-        '[API] External API returned error or invalid data',
+    if (!response.success) {
+      console.error(
+        '[API] Failed to fetch listings actifs from external API:',
         response.error
       );
+
       return NextResponse.json(
         {
           success: false,
@@ -101,17 +60,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Appliquer la pagination côté serveur sur toutes les données
+    const allActifs = response.data;
+    const totalItems = allActifs.length;
+    const paginatedActifs = allActifs.slice(offset, offset + limit);
+
     if (process.env.NODE_ENV === 'development') {
       console.warn(
-        `[API] Successfully fetched ${response.data.length} listings actifs`
+        `[API] Successfully fetched ${totalItems} total actifs, returning ${paginatedActifs.length} for page`
       );
     }
 
     return NextResponse.json({
       success: true,
       data: {
-        actifs: response.data,
-        total: response.total,
+        actifs: paginatedActifs,
+        total: totalItems, // Le vrai total maintenant !
         limit,
         offset,
       },
@@ -130,11 +94,12 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         error: 'Internal server error',
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Erreur lors de la récupération des listings actifs',
-        details: process.env.NODE_ENV === 'development' ? error : undefined,
+        data: {
+          actifs: [],
+          total: 0,
+          limit: 20,
+          offset: 0,
+        },
       },
       { status: 500 }
     );

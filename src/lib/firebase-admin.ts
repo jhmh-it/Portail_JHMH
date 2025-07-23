@@ -1,8 +1,12 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
+// Vérifier si on est en mode build (pas de variables Firebase Admin)
+const isBuildTime =
+  process.env.NODE_ENV === 'production' && !process.env.FIREBASE_PROJECT_ID;
+
 // Initialiser Firebase Admin SDK
-if (!getApps().length) {
+if (!getApps().length && !isBuildTime) {
   if (
     !process.env.FIREBASE_PROJECT_ID ||
     !process.env.FIREBASE_CLIENT_EMAIL ||
@@ -24,4 +28,5 @@ if (!getApps().length) {
   });
 }
 
-export const adminAuth = getAuth();
+// Exporter adminAuth avec une protection pour le build
+export const adminAuth = isBuildTime ? null : getAuth();

@@ -204,7 +204,7 @@ export function StayInformation({ reservation }: StayInformationProps) {
           {/* Other important dates */}
           <div className="space-y-3">
             {dates.booking && (
-              <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">
                   Réservé le
                 </span>
@@ -215,7 +215,7 @@ export function StayInformation({ reservation }: StayInformationProps) {
             )}
 
             {dates.confirmation && dates.confirmation !== dates.booking && (
-              <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">
                   Confirmé le
                 </span>
@@ -226,7 +226,7 @@ export function StayInformation({ reservation }: StayInformationProps) {
             )}
 
             {dates.cancellation && (
-              <div className="flex justify-between items-center text-destructive">
+              <div className="flex items-center gap-3 text-destructive">
                 <span className="text-sm">Annulé le</span>
                 <span className="text-sm font-medium">
                   {formatDate(dates.cancellation)}

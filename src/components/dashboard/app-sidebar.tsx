@@ -162,7 +162,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       'Chargement des Actifs...',
       'Veuillez patienter pendant le chargement des données.'
     );
-    router.push('/home/exploitation-information/actifs');
+    router.push('/home/exploitation/actifs');
   };
 
   // Nettoyer les timeouts au démontage du composant

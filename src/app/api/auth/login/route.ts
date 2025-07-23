@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { checkJhmhApiHealth } from '@/lib/external-api';
 import { adminAuth } from '@/lib/firebase-admin';
 
 /**
@@ -36,6 +37,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // VÉRIFICATION DE LA SANTÉ DE L'API EXTERNE AVANT TOUT
+    console.warn("[Auth] Vérification de la santé de l'API externe...");
+    const healthCheck = await checkJhmhApiHealth();
+
+    if (!healthCheck.success || !healthCheck.healthy) {
+      console.error(
+        '[Auth] API externe non disponible:',
+        healthCheck.error ?? 'Status not healthy'
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Service temporairement indisponible',
+          code: 'API_UNAVAILABLE',
+          details: {
+            message:
+              "L'API externe n'est pas disponible. Veuillez réessayer plus tard.",
+            apiStatus: healthCheck.healthy ? 'unhealthy' : 'unreachable',
+            apiMessage: healthCheck.message ?? healthCheck.error,
+          },
+        },
+        { status: 503 } // Service Unavailable
+      );
+    }
+
+    console.warn(
+      "[Auth] API externe disponible, poursuite de l'authentification"
+    );
+
+    // Vérifier que Firebase Admin est disponible
+    if (!adminAuth) {
+      console.error('[Auth] Firebase Admin non initialisé');
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Service temporairement indisponible',
+          code: 'AUTH_UNAVAILABLE',
+        },
+        { status: 503 }
+      );
+    }
+
     // Vérifier le token avec Firebase Admin SDK
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const email = decodedToken.email;
@@ -47,8 +91,10 @@ export async function POST(request: NextRequest) {
 
       // Supprimer le profil Firebase créé
       try {
-        await adminAuth.deleteUser(uid);
-        console.warn("[Auth] Profil Firebase supprimé (pas d'email):", uid);
+        if (adminAuth) {
+          await adminAuth.deleteUser(uid);
+          console.warn("[Auth] Profil Firebase supprimé (pas d'email):", uid);
+        }
       } catch (deleteError) {
         console.error('[Auth] Erreur suppression profil:', deleteError);
       }
@@ -72,12 +118,14 @@ export async function POST(request: NextRequest) {
 
       // Supprimer le profil Firebase créé
       try {
-        await adminAuth.deleteUser(uid);
-        console.warn(
-          '[Auth] Profil Firebase supprimé (domaine non autorisé):',
-          email,
-          uid
-        );
+        if (adminAuth) {
+          await adminAuth.deleteUser(uid);
+          console.warn(
+            '[Auth] Profil Firebase supprimé (domaine non autorisé):',
+            email,
+            uid
+          );
+        }
       } catch (deleteError) {
         console.error('[Auth] Erreur suppression profil:', deleteError);
       }
@@ -98,8 +146,8 @@ export async function POST(request: NextRequest) {
 
     console.warn('[Auth] Connexion autorisée pour:', email);
 
-    // Récupérer les custom claims (rôles)
-    const userRecord = await adminAuth.getUser(uid);
+    // Récupérer les custom claims (rôles) - seulement si adminAuth est disponible
+    const userRecord = adminAuth ? await adminAuth.getUser(uid) : null;
 
     const user = {
       uid: uid,
@@ -107,7 +155,7 @@ export async function POST(request: NextRequest) {
       displayName: decodedToken.name ?? '',
       photoURL: decodedToken.picture ?? '',
       emailVerified: decodedToken.email_verified ?? false,
-      customClaims: userRecord.customClaims ?? {},
+      customClaims: userRecord?.customClaims ?? {},
     };
 
     // Créer un cookie de session sécurisé
@@ -128,7 +176,7 @@ export async function POST(request: NextRequest) {
     console.error('Erreur lors de la vérification du token:', error);
 
     // En cas d'erreur, essayer de nettoyer si on a des infos sur l'utilisateur
-    if (error && typeof error === 'object' && 'uid' in error) {
+    if (error && typeof error === 'object' && 'uid' in error && adminAuth) {
       try {
         await adminAuth.deleteUser(error.uid as string);
         console.warn('[Auth] Profil Firebase nettoyé après erreur:', error.uid);

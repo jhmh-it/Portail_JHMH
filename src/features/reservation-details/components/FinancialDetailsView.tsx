@@ -1,13 +1,5 @@
-import { Receipt, AlertTriangle } from 'lucide-react';
+import { Receipt, Home, Brush, Settings, CreditCard } from 'lucide-react';
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -233,51 +225,6 @@ export function FinancialDetailsView({
 
   const financialLines = buildFinancialLines();
 
-  const renderTableSection = (lines: FinancialLine[], showHeaders = true) => {
-    if (lines.length === 0) return null;
-
-    return (
-      <>
-        {showHeaders && (
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50%]">Description</TableHead>
-              <TableHead className="text-right">HT</TableHead>
-              <TableHead className="text-right">TVA</TableHead>
-              <TableHead className="text-right">TTC</TableHead>
-            </TableRow>
-          </TableHeader>
-        )}
-        <TableBody>
-          {lines.map((line, index) => (
-            <TableRow
-              key={index}
-              className={`
-                ${line.isTotal ? 'font-bold text-lg' : ''}
-                ${line.isSubtotal ? 'font-medium bg-muted/50' : ''}
-                ${line.isDiscount ? 'text-green-600 dark:text-green-400' : ''}
-              `}
-            >
-              <TableCell>{line.label}</TableCell>
-              <TableCell className="text-right">
-                {line.isDiscount && line.ht ? '-' : ''}
-                {formatCurrency(line.ht)}
-              </TableCell>
-              <TableCell className="text-right">
-                {line.isDiscount && line.vat ? '-' : ''}
-                {formatCurrency(line.vat)}
-              </TableCell>
-              <TableCell className="text-right font-medium">
-                {line.isDiscount && line.ttc ? '-' : ''}
-                {formatCurrency(line.ttc)}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </>
-    );
-  };
-
   // Price per night calculation
   const nights = reservation.NUMBER_OF_NIGHTS ?? reservation.nights ?? 0;
   const totalTTC = reservation.TOTAL_TTC ?? reservation.total_ttc ?? 0;
@@ -285,17 +232,6 @@ export function FinancialDetailsView({
 
   return (
     <div className="space-y-6">
-      {/* Audit note alert */}
-      {reservation.auditNote && (
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            <span className="font-medium">Note d&apos;audit:</span>{' '}
-            {reservation.auditNote}
-          </AlertDescription>
-        </Alert>
-      )}
-
       {/* Main financial breakdown */}
       <Card>
         <CardHeader>
@@ -305,90 +241,211 @@ export function FinancialDetailsView({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Accordion
-            type="single"
-            collapsible
-            defaultValue="main"
-            className="w-full"
-          >
-            <AccordionItem value="main">
-              <AccordionTrigger>Détail des prestations</AccordionTrigger>
-              <AccordionContent>
-                <Table>
-                  {/* Accommodation */}
+          <div className="space-y-6">
+            {/* Main pricing table */}
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b-2">
+                    <TableHead className="w-[40%] font-semibold">
+                      Prestation
+                    </TableHead>
+                    <TableHead className="text-right font-semibold">
+                      Prix HT
+                    </TableHead>
+                    <TableHead className="text-right font-semibold">
+                      TVA
+                    </TableHead>
+                    <TableHead className="text-right font-semibold">
+                      Prix TTC
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {/* Accommodation section */}
                   {financialLines.accommodation.length > 0 && (
                     <>
-                      <TableHeader>
-                        <TableRow className="bg-muted/30">
-                          <TableHead colSpan={4} className="font-semibold">
-                            Hébergement
-                          </TableHead>
+                      <TableRow className="bg-muted/30">
+                        <TableCell colSpan={4} className="font-bold py-3">
+                          <div className="flex items-center gap-2">
+                            <Home className="h-4 w-4" />
+                            HÉBERGEMENT
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {financialLines.accommodation.map((line, index) => (
+                        <TableRow
+                          key={index}
+                          className={
+                            line.isDiscount
+                              ? 'text-green-600 dark:text-green-400'
+                              : ''
+                          }
+                        >
+                          <TableCell className="pl-6">{line.label}</TableCell>
+                          <TableCell className="text-center">
+                            {line.ht ? formatCurrency(line.ht) : '-'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {line.vat ? formatCurrency(line.vat) : '-'}
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatCurrency(line.ttc)}
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      {renderTableSection(financialLines.accommodation, false)}
+                      ))}
                     </>
                   )}
 
-                  {/* Cleaning */}
+                  {/* Cleaning section */}
                   {financialLines.cleaning.length > 0 && (
                     <>
-                      <TableHeader>
-                        <TableRow className="bg-muted/30">
-                          <TableHead colSpan={4} className="font-semibold">
-                            Nettoyage
-                          </TableHead>
+                      <TableRow className="bg-muted/30">
+                        <TableCell colSpan={4} className="font-bold py-3">
+                          <div className="flex items-center gap-2">
+                            <Brush className="h-4 w-4" />
+                            NETTOYAGE
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {financialLines.cleaning.map((line, index) => (
+                        <TableRow
+                          key={index}
+                          className={
+                            line.isDiscount
+                              ? 'text-green-600 dark:text-green-400'
+                              : ''
+                          }
+                        >
+                          <TableCell className="pl-6">{line.label}</TableCell>
+                          <TableCell className="text-center">
+                            {line.ht ? formatCurrency(line.ht) : '-'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {line.vat ? formatCurrency(line.vat) : '-'}
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatCurrency(line.ttc)}
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      {renderTableSection(financialLines.cleaning, false)}
+                      ))}
                     </>
                   )}
 
-                  {/* Services */}
+                  {/* Services section */}
                   {financialLines.services.length > 0 && (
                     <>
-                      <TableHeader>
-                        <TableRow className="bg-muted/30">
-                          <TableHead colSpan={4} className="font-semibold">
-                            Services additionnels
-                          </TableHead>
+                      <TableRow className="bg-muted/30">
+                        <TableCell colSpan={4} className="font-bold py-3">
+                          <div className="flex items-center gap-2">
+                            <Settings className="h-4 w-4" />
+                            SERVICES ADDITIONNELS
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {financialLines.services.map((line, index) => (
+                        <TableRow
+                          key={index}
+                          className={
+                            line.isDiscount
+                              ? 'text-green-600 dark:text-green-400'
+                              : ''
+                          }
+                        >
+                          <TableCell className="pl-6">{line.label}</TableCell>
+                          <TableCell className="text-center">
+                            {line.ht ? formatCurrency(line.ht) : '-'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {line.vat ? formatCurrency(line.vat) : '-'}
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatCurrency(line.ttc)}
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      {renderTableSection(financialLines.services, false)}
+                      ))}
                     </>
                   )}
 
-                  {/* Other charges */}
+                  {/* Other charges section */}
                   {financialLines.otherCharges.length > 0 && (
                     <>
-                      <TableHeader>
-                        <TableRow className="bg-muted/30">
-                          <TableHead colSpan={4} className="font-semibold">
-                            Autres frais
-                          </TableHead>
+                      <TableRow className="bg-muted/30">
+                        <TableCell colSpan={4} className="font-bold py-3">
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            AUTRES FRAIS
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {financialLines.otherCharges.map((line, index) => (
+                        <TableRow
+                          key={index}
+                          className={
+                            line.isDiscount
+                              ? 'text-green-600 dark:text-green-400'
+                              : ''
+                          }
+                        >
+                          <TableCell className="pl-6">{line.label}</TableCell>
+                          <TableCell className="text-center">-</TableCell>
+                          <TableCell className="text-center">-</TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatCurrency(line.ttc)}
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      {renderTableSection(financialLines.otherCharges, false)}
+                      ))}
                     </>
                   )}
-                </Table>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
 
-          {/* Totals table */}
-          <div className="mt-6">
-            <Table>{renderTableSection(financialLines.totals, true)}</Table>
-          </div>
-
-          {/* Price per night */}
-          {nights > 0 && (
-            <div className="mt-4 text-center">
-              <Badge variant="secondary" className="text-sm">
-                {formatCurrency(pricePerNight)} / nuit ({nights} nuit
-                {nights > 1 ? 's' : ''})
-              </Badge>
+                  {/* Totals section */}
+                  <TableRow className="border-t-2 border-muted">
+                    <TableCell colSpan={4} className="py-2" />
+                  </TableRow>
+                  {financialLines.totals.map((line, index) => (
+                    <TableRow
+                      key={index}
+                      className={`
+                        ${line.isTotal ? 'bg-muted/50 border-t border-b' : 'bg-muted/20'}
+                        ${line.isTotal ? 'font-bold' : 'font-semibold'}
+                      `}
+                    >
+                      <TableCell
+                        className={line.isTotal ? 'font-bold' : 'font-semibold'}
+                      >
+                        {line.label}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {line.ht ? formatCurrency(line.ht) : '-'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {line.vat ? formatCurrency(line.vat) : '-'}
+                      </TableCell>
+                      <TableCell className="text-right font-bold">
+                        {formatCurrency(line.ttc)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          )}
+
+            {/* Price per night information */}
+            {nights > 0 && (
+              <div className="flex justify-center pt-4 border-t">
+                <div className="bg-primary/5 dark:bg-primary/10 rounded-lg px-4 py-2">
+                  <div className="text-center">
+                    <span className="text-lg font-semibold">
+                      {formatCurrency(pricePerNight)}
+                    </span>
+                    <span className="text-sm text-muted-foreground ml-2">
+                      par nuit ({nights} nuit{nights > 1 ? 's' : ''})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

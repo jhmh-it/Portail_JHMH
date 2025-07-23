@@ -375,8 +375,6 @@ export async function fetchJhmhReservationByCode(
  * Service pour récupérer les listings actifs depuis l'API JHMH
  */
 export async function fetchJhmhListingsActifs(params?: {
-  page?: number;
-  page_size?: number;
   limit?: number;
   offset?: number;
   code_site?: string;
@@ -397,9 +395,8 @@ export async function fetchJhmhListingsActifs(params?: {
   try {
     const queryParams = new URLSearchParams();
 
-    // Paramètres de pagination
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    // Note: On ne passe plus limit/offset à l'API externe
+    // On récupère tout et on pagine côté client
 
     // Filtres de base
     if (params?.code_site) queryParams.append('code_site', params.code_site);
@@ -425,11 +422,11 @@ export async function fetchJhmhListingsActifs(params?: {
 
     const response = await jhmhApiClient.get<ExternalListingActif[]>(url);
 
-    // L'API retourne directement un tableau selon le swagger
+    // Récupérer tous les actifs, le total réel est la longueur complète
     return {
       success: true,
       data: response.data ?? [],
-      total: response.data?.length ?? 0, // On peut calculer le total côté front si l'API ne le fournit pas
+      total: response.data?.length ?? 0, // Maintenant c'est le vrai total
     };
   } catch (error) {
     console.error('Error fetching JHMH listings actifs:', error);
@@ -438,6 +435,39 @@ export async function fetchJhmhListingsActifs(params?: {
       success: false,
       data: [],
       total: 0,
+      error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN,
+    };
+  }
+}
+
+/**
+ * Vérifie l'état de santé de l'API externe JHMH
+ */
+export async function checkJhmhApiHealth(): Promise<{
+  success: boolean;
+  healthy: boolean;
+  message?: string;
+  error?: string;
+}> {
+  try {
+    const response = await jhmhApiClient.get<{
+      status: string;
+      message: string;
+    }>('/health');
+
+    const isHealthy = response.data?.status === 'healthy';
+
+    return {
+      success: true,
+      healthy: isHealthy,
+      message: response.data?.message || 'Health check completed',
+    };
+  } catch (error) {
+    console.error('Error checking JHMH API health:', error);
+
+    return {
+      success: false,
+      healthy: false,
       error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN,
     };
   }

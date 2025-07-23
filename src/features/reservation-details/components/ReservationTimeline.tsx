@@ -10,7 +10,6 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import type { ReservationDetails } from '@/types/reservation-details';
 
 interface ReservationTimelineProps {
@@ -272,6 +271,14 @@ export function ReservationTimeline({ reservation }: ReservationTimelineProps) {
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="font-medium">{event.label}</h4>
+                          <span className="text-sm font-medium text-muted-foreground">
+                            {date}
+                          </span>
+                          {time && (
+                            <span className="text-xs text-muted-foreground">
+                              à {time}
+                            </span>
+                          )}
                           <Badge
                             variant={getBadgeVariant(event)}
                             className="text-xs"
@@ -283,21 +290,6 @@ export function ReservationTimeline({ reservation }: ReservationTimelineProps) {
                         <p className="text-sm text-muted-foreground">
                           {event.description}
                         </p>
-
-                        <div className="flex items-center gap-4 text-sm">
-                          <span className="font-medium">{date}</span>
-                          {time && (
-                            <>
-                              <Separator
-                                orientation="vertical"
-                                className="h-4"
-                              />
-                              <span className="text-muted-foreground">
-                                {time}
-                              </span>
-                            </>
-                          )}
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -307,61 +299,6 @@ export function ReservationTimeline({ reservation }: ReservationTimelineProps) {
           )}
         </CardContent>
       </Card>
-
-      {/* Metadata */}
-      {reservation.reportGenerationTimestamp && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Métadonnées
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                Rapport généré le
-              </span>
-              <span className="text-sm font-medium">
-                {formatDateTime(reservation.reportGenerationTimestamp).date}
-              </span>
-            </div>
-
-            {reservation.reportGenerationTimestamp && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Heure de génération
-                </span>
-                <span className="text-sm font-medium">
-                  {formatDateTime(reservation.reportGenerationTimestamp).time}
-                </span>
-              </div>
-            )}
-
-            {reservation.generatingUser && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Généré par
-                </span>
-                <span className="text-sm font-medium">
-                  {reservation.generatingUser}
-                </span>
-              </div>
-            )}
-
-            {reservation.dataSourceOrigin && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Source des données
-                </span>
-                <span className="text-sm font-medium">
-                  {reservation.dataSourceOrigin}
-                </span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

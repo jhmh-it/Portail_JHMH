@@ -29,6 +29,22 @@ export function PaymentOverview({ reservation }: PaymentOverviewProps) {
   const paymentProgress = totalDue > 0 ? (totalPaid / totalDue) * 100 : 0;
   const isFullyPaid = balanceDue <= 0;
 
+  // Vérifier le statut de la réservation pour déterminer si le paiement est en retard
+  const reservationStatus =
+    reservation.STATE ?? reservation.status ?? reservation.reservation_status;
+  const isReservationCompleted =
+    reservationStatus === 'CHECKED-OUT' || reservationStatus === 'terminee';
+
+  // Ne considérer le solde comme impayé en retard que si la réservation est terminée
+  const isPaymentOverdue = balanceDue > 0 && isReservationCompleted;
+
+  // Déterminer la variant du badge pour le solde
+  const getBalanceBadgeVariant = () => {
+    if (isFullyPaid) return 'secondary';
+    if (isPaymentOverdue) return 'destructive';
+    return 'outline';
+  };
+
   const formatCurrency = (amount: number | null | undefined) => {
     if (amount == null) return '-';
     // Assurer que currency n'est jamais null
@@ -41,12 +57,12 @@ export function PaymentOverview({ reservation }: PaymentOverviewProps) {
 
   return (
     <div className="space-y-4">
-      {/* Payment Status Alert */}
-      {balanceDue > 0 && (
+      {/* Payment Status Alert - Seulement si en retard */}
+      {isPaymentOverdue && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Solde impayé de {formatCurrency(balanceDue)}
+            Solde impayé de {formatCurrency(balanceDue)} - Réservation terminée
           </AlertDescription>
         </Alert>
       )}
@@ -98,7 +114,7 @@ export function PaymentOverview({ reservation }: PaymentOverviewProps) {
 
               <div className="flex justify-between items-center border-t pt-3">
                 <span className="text-sm font-medium">Solde restant</span>
-                <Badge variant={isFullyPaid ? 'secondary' : 'destructive'}>
+                <Badge variant={getBalanceBadgeVariant()}>
                   {formatCurrency(balanceDue)}
                 </Badge>
               </div>

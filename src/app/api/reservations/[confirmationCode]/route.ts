@@ -21,6 +21,18 @@ export async function GET(
       );
     }
 
+    // Vérifier que Firebase Admin est disponible
+    if (!adminAuth) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Service temporairement indisponible',
+          code: 'AUTH_UNAVAILABLE',
+        },
+        { status: 503 }
+      );
+    }
+
     // Verify the session token
     try {
       await adminAuth.verifyIdToken(sessionCookie.value);

@@ -56,6 +56,11 @@ export const useAuth = () => {
           );
         } else if (errorData?.code === 'EMAIL_REQUIRED') {
           showAuthError("Email requis pour l'authentification");
+        } else if (errorData?.code === 'API_UNAVAILABLE') {
+          // Gestion spécifique de l'indisponibilité de l'API externe
+          showAuthError(
+            "🚨 Service temporairement indisponible. L'API externe n'est pas accessible. Veuillez réessayer dans quelques instants ou contacter matt@jhmh.com."
+          );
         } else {
           showAuthError(errorData?.error ?? 'Erreur lors de la connexion');
         }
