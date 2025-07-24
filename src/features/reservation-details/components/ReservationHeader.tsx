@@ -1,4 +1,4 @@
-import { ArrowLeft, Hash, MapPin, Users, Building2 } from 'lucide-react';
+import { ArrowLeft, Hash, MapPin, Users, Building2, Edit } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +13,13 @@ import type { ReservationDetails } from '@/types/reservation-details';
 
 interface ReservationHeaderProps {
   reservation: ReservationDetails;
+  onEditReservation?: () => void;
 }
 
-export function ReservationHeader({ reservation }: ReservationHeaderProps) {
+export function ReservationHeader({
+  reservation,
+  onEditReservation,
+}: ReservationHeaderProps) {
   const router = useRouter();
   const status = getDisplayStatus(reservation);
   const platform = getDisplayPlatform(reservation);
@@ -97,7 +101,7 @@ export function ReservationHeader({ reservation }: ReservationHeaderProps) {
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -107,6 +111,16 @@ export function ReservationHeader({ reservation }: ReservationHeaderProps) {
             <ArrowLeft className="h-4 w-4" />
             Retour aux réservations
           </Button>
+          {onEditReservation && (
+            <Button
+              size="sm"
+              onClick={onEditReservation}
+              className="gap-2 mt-2"
+            >
+              <Edit className="h-4 w-4" />
+              Modifier la réservation
+            </Button>
+          )}
         </div>
       </div>
 

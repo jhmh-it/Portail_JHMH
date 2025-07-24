@@ -187,8 +187,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Image
                   src="/images/logo.webp"
                   alt="Logo JHMH"
-                  width={110}
-                  height={110}
+                  width={100}
+                  height={100}
                   style={{ width: 'auto', height: 'auto' }}
                   className="rounded"
                 />
