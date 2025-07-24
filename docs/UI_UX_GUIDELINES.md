@@ -359,7 +359,7 @@ xl:  1280px  /* Écrans standards */
 <Card className="transition-shadow hover:shadow-lg">
 
 // ❌ Animations lourdes
-<div className="animate-bounce animate-pulse animate-spin">
+<div className="animate-pulse">
 ```
 
 ---
