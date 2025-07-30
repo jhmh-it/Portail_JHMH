@@ -1,5 +1,4 @@
-import { ArrowLeft, Hash, MapPin, Users, Building2, Edit } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Hash, MapPin, Users, Building2, Edit } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,13 +13,14 @@ import type { ReservationDetails } from '@/types/reservation-details';
 interface ReservationHeaderProps {
   reservation: ReservationDetails;
   onEditReservation?: () => void;
+  onGuestClick?: (guestId: string) => void;
 }
 
 export function ReservationHeader({
   reservation,
   onEditReservation,
+  onGuestClick,
 }: ReservationHeaderProps) {
-  const router = useRouter();
   const status = getDisplayStatus(reservation);
   const platform = getDisplayPlatform(reservation);
   const guests = extractGuestBreakdown(reservation);
@@ -32,6 +32,10 @@ export function ReservationHeader({
     reservation.guest_name ??
     null;
 
+  // Extract guest ID from multiple possible fields
+  const guestId =
+    reservation.GUEST_ID ?? reservation.guest_id ?? reservation.GuestId ?? null;
+
   // Extract listing name and address from multiple possible fields
   const listingName =
     reservation.LISTING_NAME ??
@@ -39,6 +43,12 @@ export function ReservationHeader({
     reservation.listing_name ??
     null;
   const fullAddress = reservation.reservation_listing_full_address ?? null;
+
+  const handleGuestNameClick = () => {
+    if (guestId && onGuestClick) {
+      onGuestClick(guestId);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -62,7 +72,18 @@ export function ReservationHeader({
             {guestName && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Users className="h-4 w-4" />
-                <span className="font-medium text-foreground">{guestName}</span>
+                {guestId && onGuestClick ? (
+                  <span
+                    className="font-medium text-foreground cursor-pointer text-primary hover:underline transition-colors"
+                    onClick={handleGuestNameClick}
+                  >
+                    {guestName}
+                  </span>
+                ) : (
+                  <span className="font-medium text-foreground">
+                    {guestName}
+                  </span>
+                )}
                 {guests.total > 0 && (
                   <span className="text-sm">
                     ({guests.total}{' '}
@@ -102,15 +123,6 @@ export function ReservationHeader({
 
         {/* Action buttons */}
         <div className="flex flex-col gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push('/home/exploitation/reservations')}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour aux réservations
-          </Button>
           {onEditReservation && (
             <Button
               size="sm"

@@ -69,7 +69,7 @@ export function Header({ breadcrumbs = [] }: HeaderProps) {
 
       {/* Search Bar */}
       <div className="flex flex-1 items-center gap-2 px-3">
-        <div className="relative w-full max-w-sm">
+        <div className="relative w-full max-w-lg">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"

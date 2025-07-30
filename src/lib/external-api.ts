@@ -1,5 +1,7 @@
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
 
+import type { ExternalGuestsResponse } from '@/types/guest';
+
 // Configuration constants
 const JHMH_API_BASE_URL = process.env.JHMH_API_BASE_URL;
 const JHMH_API_KEY = process.env.JHMH_API_KEY ?? '';
@@ -468,6 +470,91 @@ export async function checkJhmhApiHealth(): Promise<{
     return {
       success: false,
       healthy: false,
+      error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN,
+    };
+  }
+}
+
+/**
+ * Helper function to build query parameters for guests API
+ */
+function buildGuestQueryParams(params?: {
+  page?: number;
+  page_size?: number;
+  q?: string;
+  guest_id?: string;
+  confirmation_code?: string;
+}): URLSearchParams {
+  const queryParams = new URLSearchParams();
+
+  if (params?.page) queryParams.append('page', params.page.toString());
+  if (params?.page_size)
+    queryParams.append('page_size', params.page_size.toString());
+  if (params?.q) queryParams.append('q', params.q);
+  if (params?.guest_id) queryParams.append('guest_id', params.guest_id);
+  if (params?.confirmation_code)
+    queryParams.append('confirmation_code', params.confirmation_code);
+
+  return queryParams;
+}
+
+/**
+ * Service pour récupérer les guests depuis l'API JHMH
+ */
+export async function fetchJhmhGuests(params?: {
+  page?: number;
+  page_size?: number;
+  q?: string;
+  guest_id?: string;
+  confirmation_code?: string;
+}): Promise<{
+  success: boolean;
+  data?: ExternalGuestsResponse;
+  error?: string;
+}> {
+  try {
+    const queryParams = buildGuestQueryParams(params);
+    const queryString = queryParams.toString();
+    const url = `/api/guestymirror/guests${queryString ? `?${queryString}` : ''}`;
+
+    const response = await jhmhApiClient.get<ExternalGuestsResponse>(url);
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error('Error fetching JHMH guests:', error);
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN,
+    };
+  }
+}
+
+/**
+ * Service pour récupérer un guest spécifique par son ID
+ */
+export async function fetchJhmhGuestById(guestId: string): Promise<{
+  success: boolean;
+  data?: ExternalGuestsResponse;
+  error?: string;
+}> {
+  try {
+    const response = await jhmhApiClient.get<ExternalGuestsResponse>(
+      `/api/guestymirror/guests?guest_id=${guestId}`
+    );
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error('Error fetching JHMH guest by ID:', error);
+
+    return {
+      success: false,
       error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN,
     };
   }

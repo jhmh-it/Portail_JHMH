@@ -242,7 +242,7 @@ export function AnalysisTab({ metrics }: AnalysisTabProps) {
                           {formatPercentage(item.evolution)}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          Base : {formatCurrency(item.lastMonth)}
+                          Référence : {formatCurrency(item.lastMonth)}
                         </div>
                       </div>
                     </div>

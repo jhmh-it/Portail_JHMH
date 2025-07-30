@@ -4,14 +4,20 @@ import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { extractGuestBreakdown } from '@/features/reservation-details/utils/data-processors';
+import { useLoadingStore } from '@/stores/loading-store';
 import type { ReservationDetails } from '@/types/reservation-details';
 
 interface GuestInformationProps {
   reservation: ReservationDetails;
+  onGuestClick?: (guestId: string) => void;
 }
 
-export function GuestInformation({ reservation }: GuestInformationProps) {
+export function GuestInformation({
+  reservation,
+  onGuestClick,
+}: GuestInformationProps) {
   const guests = extractGuestBreakdown(reservation);
+  const { showLoading } = useLoadingStore();
 
   // Extract all possible guest details
   const guestName =
@@ -23,9 +29,17 @@ export function GuestInformation({ reservation }: GuestInformationProps) {
   const guestPhone = reservation.guest_phone ?? null;
   const guestNotes =
     reservation.guest_notes ?? reservation.reservation_notes ?? null;
-  const guestId = reservation.guest_id ?? null;
+  const guestId =
+    reservation.GUEST_ID ?? reservation.guest_id ?? reservation.GuestId ?? null;
 
   const hasContactInfo = guestEmail ?? guestPhone;
+
+  const handleGuestNameClick = () => {
+    if (guestId && onGuestClick) {
+      showLoading();
+      onGuestClick(guestId);
+    }
+  };
 
   return (
     <Card>
@@ -42,7 +56,16 @@ export function GuestInformation({ reservation }: GuestInformationProps) {
             <div className="flex items-start gap-3">
               <UserCheck className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-semibold text-lg">{guestName}</h3>
+                {guestId && onGuestClick ? (
+                  <h3
+                    className="font-semibold text-lg cursor-pointer text-primary hover:underline transition-colors"
+                    onClick={handleGuestNameClick}
+                  >
+                    {guestName}
+                  </h3>
+                ) : (
+                  <h3 className="font-semibold text-lg">{guestName}</h3>
+                )}
                 {guestId && (
                   <p className="text-xs text-muted-foreground mt-0.5">
                     ID Client: {guestId}

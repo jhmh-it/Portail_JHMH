@@ -10,6 +10,7 @@ import {
   User2,
   LogOut,
   BookOpen,
+  Bot,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -66,18 +67,21 @@ const data = {
       icon: BookOpen,
     },
     {
+      title: 'Greg',
+      url: '/home/greg',
+      icon: Bot,
+    },
+    {
       title: 'RM Tool',
       url: '/home/rm',
       icon: Users,
     },
   ],
-  navSecondary: [
-    {
-      title: 'Paramètres',
-      url: '/home/settings',
-      icon: Settings,
-    },
-  ],
+  navSecondary: [] as Array<{
+    title: string;
+    url: string;
+    icon: React.ComponentType;
+  }>,
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -91,10 +95,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     React.useState(false);
   const [expandedExploitationTool, setExpandedExploitationTool] =
     React.useState(false);
+  const [expandedGregTool, setExpandedGregTool] = React.useState(false);
   const [clickTimeout, setClickTimeout] = React.useState<NodeJS.Timeout | null>(
     null
   );
   const [exploitationClickTimeout, setExploitationClickTimeout] =
+    React.useState<NodeJS.Timeout | null>(null);
+  const [gregClickTimeout, setGregClickTimeout] =
     React.useState<NodeJS.Timeout | null>(null);
 
   const handleLogout = async () => {
@@ -149,6 +156,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setExploitationClickTimeout(timeout);
   };
 
+  const handleGregToolClick = () => {
+    // Si un timeout existe déjà, c'est un double clic
+    if (gregClickTimeout) {
+      clearTimeout(gregClickTimeout);
+      setGregClickTimeout(null);
+      // Double clic : rediriger vers la page principale
+      router.push('/home/greg');
+      return;
+    }
+
+    // Premier clic : démarrer le timeout pour détecter un éventuel double clic
+    const timeout = setTimeout(() => {
+      // Simple clic : toggle le dropdown
+      setExpandedGregTool(prev => !prev);
+      setGregClickTimeout(null);
+    }, 250); // Délai de 250ms pour détecter le double clic
+
+    setGregClickTimeout(timeout);
+  };
+
+  const handleGregSubPageClick = (path: string, title: string) => {
+    showLoading(
+      `Chargement de ${title}...`,
+      'Veuillez patienter pendant le chargement des données.'
+    );
+    router.push(path);
+  };
+
   const handleReservationsClick = () => {
     showLoading(
       'Chargement de Réservations...',
@@ -165,6 +200,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     router.push('/home/exploitation/actifs');
   };
 
+  const handleGuestsClick = () => {
+    showLoading(
+      'Chargement des Guests...',
+      'Veuillez patienter pendant le chargement des données.'
+    );
+    router.push('/home/exploitation/guests');
+  };
+
   // Nettoyer les timeouts au démontage du composant
   React.useEffect(() => {
     return () => {
@@ -174,8 +217,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       if (exploitationClickTimeout) {
         clearTimeout(exploitationClickTimeout);
       }
+      if (gregClickTimeout) {
+        clearTimeout(gregClickTimeout);
+      }
     };
-  }, [clickTimeout, exploitationClickTimeout]);
+  }, [clickTimeout, exploitationClickTimeout, gregClickTimeout]);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -252,7 +298,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <SidebarMenuSubItem key={tool.id}>
                         <SidebarMenuSubButton
                           asChild
-                          className="text-black hover:text-black/80 cursor-pointer"
+                          className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
                         >
                           <a href={tool.url}>
                             <span>{tool.title}</span>
@@ -285,7 +331,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton
                         onClick={handleReservationsClick}
-                        className="text-black hover:text-black/80 cursor-pointer"
+                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
                       >
                         <span>Réservations</span>
                       </SidebarMenuSubButton>
@@ -293,9 +339,111 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton
                         onClick={handleActifsClick}
-                        className="text-black hover:text-black/80 cursor-pointer"
+                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
                       >
                         <span>Actifs</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={handleGuestsClick}
+                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        <span>Guests</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+
+              {/* Greg Tool avec sous-menus */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Greg"
+                  onClick={handleGregToolClick}
+                  className="text-black hover:text-black/80 cursor-pointer"
+                >
+                  <Bot />
+                  <span>Greg</span>
+                  {expandedGregTool ? (
+                    <ChevronDown className="ml-auto h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="ml-auto h-4 w-4" />
+                  )}
+                </SidebarMenuButton>
+
+                {expandedGregTool && (
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={() =>
+                          handleGregSubPageClick('/home/greg/spaces', 'Espaces')
+                        }
+                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        <span>Espaces</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={() =>
+                          handleGregSubPageClick(
+                            '/home/greg/documents',
+                            'Documents'
+                          )
+                        }
+                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        <span>Documents</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={() =>
+                          handleGregSubPageClick(
+                            '/home/greg/access',
+                            'Gestion des accès'
+                          )
+                        }
+                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        <span>Gestion des accès</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={() =>
+                          handleGregSubPageClick(
+                            '/home/greg/users',
+                            'Utilisateurs'
+                          )
+                        }
+                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        <span>Utilisateurs</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={() =>
+                          handleGregSubPageClick('/home/greg/shifts', 'Shifts')
+                        }
+                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        <span>Shifts</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        onClick={() =>
+                          handleGregSubPageClick(
+                            '/home/greg/reminders',
+                            'Rappels'
+                          )
+                        }
+                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        <span>Rappels</span>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   </SidebarMenuSub>
@@ -307,7 +455,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 .filter(
                   tool =>
                     tool.title !== 'Accounting Tool' &&
-                    tool.title !== 'Exploitation Information'
+                    tool.title !== 'Exploitation Information' &&
+                    tool.title !== 'Greg'
                 )
                 .map(item => (
                   <SidebarMenuItem key={item.title}>

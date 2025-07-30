@@ -1,6 +1,6 @@
 'use client';
 
-import { Calculator, Users, BookOpen, ArrowRight } from 'lucide-react';
+import { Calculator, Users, BookOpen, Bot, ArrowRight } from 'lucide-react';
 import * as React from 'react';
 
 import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
@@ -32,6 +32,13 @@ export default function DashboardPage() {
       description: "Outils d'analyse et de gestion de l'exploitation",
       icon: BookOpen,
       href: '/home/exploitation',
+      available: true, // Maintenant disponible
+    },
+    {
+      title: 'Greg',
+      description: "Système de gestion d'espaces, documents et workflows",
+      icon: Bot,
+      href: '/home/greg',
       available: true, // Maintenant disponible
     },
     {
