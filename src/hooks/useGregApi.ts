@@ -145,6 +145,8 @@ export function useGregDocuments(filters: GregDocumentsFilters) {
       if (filters.page) searchParams.set('page', filters.page.toString());
       if (filters.page_size)
         searchParams.set('page_size', filters.page_size.toString());
+      if (filters.categories && filters.categories.length > 0)
+        searchParams.set('categories', filters.categories.join(','));
 
       // Utiliser la route appropriée selon le filtre pending_only
       const endpoint = filters.pending_only

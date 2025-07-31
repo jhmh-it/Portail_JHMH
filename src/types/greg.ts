@@ -53,6 +53,7 @@ export interface GregDocumentsFilters {
   page?: number;
   page_size?: number;
   pending_only?: boolean; // Filtrer seulement les documents en attente
+  categories?: string[]; // Filter by categories
 }
 
 export interface GregDocumentsResponse {

@@ -24,6 +24,7 @@ import {
   DocumentsTable,
   CreateDocumentModal,
   DeleteDocumentModal,
+  CategoryFilter,
 } from './components';
 
 const PAGE_SIZES = [
@@ -41,6 +42,7 @@ export default function GregDocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(true);
   const [pendingOnly, setPendingOnly] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -61,6 +63,8 @@ export default function GregDocumentsPage() {
     useGregDocuments({
       ...filters,
       pending_only: pendingOnly,
+      categories:
+        selectedCategories.length > 0 ? selectedCategories : undefined,
     });
 
   // Fermer la modale de loading quand les données sont chargées
@@ -103,6 +107,7 @@ export default function GregDocumentsPage() {
     });
     setSearchQuery('');
     setPendingOnly(false);
+    setSelectedCategories([]);
   };
 
   const handleCreateSuccess = () => {
@@ -142,7 +147,9 @@ export default function GregDocumentsPage() {
   };
 
   // Check if any filters are active
-  const hasActiveFilters = Boolean(searchQuery || pendingOnly);
+  const hasActiveFilters = Boolean(
+    searchQuery || pendingOnly || selectedCategories.length > 0
+  );
 
   return (
     <DashboardLayout breadcrumbs={breadcrumbs}>
@@ -204,8 +211,20 @@ export default function GregDocumentsPage() {
                 </div>
               </div>
 
-              {/* Pending Only Filter */}
-              <div className="mb-6">
+              {/* Filters Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-6">
+                {/* Category Filter */}
+                <div className="flex flex-col gap-2 col-span-1">
+                  <Label>Catégories</Label>
+                  <CategoryFilter
+                    value={selectedCategories}
+                    onChange={categories => {
+                      setSelectedCategories(categories);
+                      setFilters(prev => ({ ...prev, page: 1 }));
+                    }}
+                  />
+                </div>
+                {/* Pending Only Filter */}
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="pending-only"

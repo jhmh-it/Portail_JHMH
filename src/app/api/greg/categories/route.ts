@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { adminAuth } from '@/lib/firebase-admin';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Check authentication
     const cookieStore = await cookies();
@@ -54,16 +54,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Récupérer les paramètres de requête
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') ?? '1');
-    const pageSize = parseInt(searchParams.get('page_size') ?? '20');
-    const searchQuery = searchParams.get('q');
-    const categoriesParam = searchParams.get('categories');
-    const categories = categoriesParam ? categoriesParam.split(',') : undefined;
-
-    // Appel à l'API externe pour récupérer les documents
-    const apiUrl = `${apiBaseUrl}/api/greg/documents`;
+    // Appel à l'API externe pour récupérer les catégories
+    const apiUrl = `${apiBaseUrl}/api/greg/categories`;
 
     const response = await fetch(apiUrl, {
       method: 'GET',
@@ -76,76 +68,33 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(
-        '[API] Erreur lors de la récupération des documents:',
+        '[API] Erreur lors de la récupération des catégories:',
         errorText
       );
 
       return NextResponse.json(
         {
           success: false,
-          error: 'Impossible de récupérer les documents',
+          error: 'Impossible de récupérer les catégories',
           details: errorText,
         },
         { status: response.status }
       );
     }
 
-    const documents = await response.json();
-
-    // Filtrer côté client si nécessaire (recherche et catégories)
-    let filteredDocuments = documents;
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filteredDocuments = filteredDocuments.filter(
-        (doc: {
-          spreadsheet_name?: string;
-          sheet_name?: string;
-          summary?: string;
-          categories?: string;
-          id?: string;
-        }) =>
-          (doc.spreadsheet_name?.toLowerCase().includes(query) ?? false) ||
-          (doc.sheet_name?.toLowerCase().includes(query) ?? false) ||
-          (doc.summary?.toLowerCase().includes(query) ?? false) ||
-          (doc.categories?.toLowerCase().includes(query) ?? false) ||
-          (doc.id?.toLowerCase().includes(query) ?? false)
-      );
-    }
-
-    // Filtrer par catégories si spécifié
-    if (categories && categories.length > 0) {
-      filteredDocuments = filteredDocuments.filter(
-        (doc: { categories?: string }) => {
-          if (!doc.categories) return false;
-          // Les catégories dans le document peuvent être séparées par des virgules
-          const docCategories = doc.categories.split(',').map(c => c.trim());
-          return categories.some(cat => docCategories.includes(cat));
-        }
-      );
-    }
-
-    // Pagination côté client
-    const total = filteredDocuments.length;
-    const totalPages = Math.ceil(total / pageSize);
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedDocuments = filteredDocuments.slice(startIndex, endIndex);
+    const data = await response.json();
 
     return NextResponse.json({
       success: true,
-      data: paginatedDocuments,
-      total,
-      page,
-      page_size: pageSize,
-      total_pages: totalPages,
+      data: Array.isArray(data) ? data : (data.categories ?? []),
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération des documents:', error);
+    console.error('Erreur lors de la récupération des catégories:', error);
+
     return NextResponse.json(
       {
         success: false,
-        error: 'Erreur lors de la récupération des documents',
+        error: 'Erreur lors de la récupération des catégories',
       },
       { status: 500 }
     );
@@ -205,26 +154,53 @@ export async function POST(request: NextRequest) {
 
     // Récupérer les données du body
     const body = await request.json();
+    const { name, description } = body;
 
-    // Appel à l'API externe pour créer le document
-    const apiUrl = `${apiBaseUrl}/api/greg/documents`;
+    if (!name || typeof name !== 'string') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Le nom de la catégorie est requis',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!description || typeof description !== 'string') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'La description de la catégorie est requise',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Appel à l'API externe pour créer la catégorie
+    const apiUrl = `${apiBaseUrl}/api/greg/categories`;
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-API-KEY': apiKey,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        name: name.trim(),
+        description: description.trim(),
+      }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[API] Erreur lors de la création du document:', errorText);
+      console.error(
+        '[API] Erreur lors de la création de la catégorie:',
+        errorText
+      );
 
       return NextResponse.json(
         {
           success: false,
-          error: 'Impossible de créer le document',
+          error: 'Impossible de créer la catégorie',
           details: errorText,
         },
         { status: response.status }
@@ -238,11 +214,12 @@ export async function POST(request: NextRequest) {
       data,
     });
   } catch (error) {
-    console.error('Erreur lors de la création du document:', error);
+    console.error('Erreur lors de la création de la catégorie:', error);
+
     return NextResponse.json(
       {
         success: false,
-        error: 'Erreur lors de la création du document',
+        error: 'Erreur lors de la création de la catégorie',
       },
       { status: 500 }
     );
