@@ -1,6 +1,7 @@
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
 
 import type { ExternalGuestsResponse } from '@/types/guest';
+import type { ListingDetailsResponse } from '@/types/listing';
 
 // Configuration constants
 const JHMH_API_BASE_URL = process.env.JHMH_API_BASE_URL;
@@ -552,6 +553,33 @@ export async function fetchJhmhGuestById(guestId: string): Promise<{
     };
   } catch (error) {
     console.error('Error fetching JHMH guest by ID:', error);
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN,
+    };
+  }
+}
+
+/**
+ * Service pour récupérer les détails d'un listing spécifique par son ID
+ */
+export async function fetchJhmhListingById(listingId: string): Promise<{
+  success: boolean;
+  data?: ListingDetailsResponse;
+  error?: string;
+}> {
+  try {
+    const response = await jhmhApiClient.get(
+      `/api/guestymirror/listings?listing_id=${listingId}`
+    );
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error('Error fetching JHMH listing by ID:', error);
 
     return {
       success: false,
