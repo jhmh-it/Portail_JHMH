@@ -16,3 +16,6 @@ export * from './greg';
 
 // Nouveaux types accounting
 export * from './accounting';
+
+// Types auth
+export * from './auth';

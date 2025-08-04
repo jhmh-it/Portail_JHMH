@@ -1,27 +1,24 @@
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import {
+  createAuthErrorResponse,
+  createSuccessResponse,
+} from '@/lib/auth-utils';
+import { handleLogout } from '@/services/auth.service';
 
+/**
+ * POST /api/auth/logout
+ * Déconnecte l'utilisateur en supprimant le cookie de session
+ */
 export async function POST() {
   try {
-    const cookieStore = await cookies();
+    const result = await handleLogout();
 
-    // Supprimer le cookie de session avec attributs de sécurité
-    cookieStore.set('session', '', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 0,
-      path: '/',
-    });
-    return NextResponse.json({
-      success: true,
-      message: 'Déconnexion réussie',
-    });
+    if (result.success) {
+      return createSuccessResponse(result);
+    } else {
+      return createAuthErrorResponse(result.error, undefined, undefined, 500);
+    }
   } catch (error) {
-    console.error('Erreur lors de la déconnexion:', error);
-    return NextResponse.json(
-      { success: false, error: 'Erreur lors de la déconnexion' },
-      { status: 500 }
-    );
+    console.error('Erreur lors du traitement de la déconnexion:', error);
+    return createAuthErrorResponse('Erreur serveur', undefined, undefined, 500);
   }
 }
