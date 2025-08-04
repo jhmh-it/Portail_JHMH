@@ -19,3 +19,6 @@ export * from './accounting';
 
 // Types auth
 export * from './auth';
+
+// Types dashboard
+export * from './dashboard';

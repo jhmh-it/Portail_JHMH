@@ -1,128 +1,229 @@
-export interface DatabaseStatistics {
-  databaseInfo: {
-    totalActiveCheckedIns: {
-      count: number;
-      outOf: number;
-      percentage: number;
-    };
-    totalValidBookings: number;
-    totalInvoicedBookings: number;
-    totalFutureBookings: number;
-    includingNoShows: number;
-    lastUpdate: string;
+/**
+ * Types pour les métriques du dashboard
+ */
+
+/**
+ * Réponse principale de l'API dashboard metrics
+ */
+export interface DashboardMetricsResponse {
+  data: {
+    type: 'dashboardMetrics';
+    id: string;
+    attributes: DashboardMetricsAttributes;
   };
-  todayBusiness: {
-    checkInsToday: number;
-    checkOutsToday: number;
+  links: {
+    self: string;
   };
-  currentWeek: {
-    weekIdentifier: string;
-    accommodationHTExcludingCleaning?: number; // Optional pour correspondre à l'API
-    occupancyPercentage: number;
-    adrHTIncludingCleaning?: number; // Optional pour correspondre à l'API
+  meta: {
+    generatedAt: string;
+    version: string;
   };
-  lastWeek: {
-    weekIdentifier: string;
-    accommodationHT?: number; // Optional pour correspondre à l'API
-    occupancyPercentage: number;
-    adrHT?: number; // Optional pour correspondre à l'API
-    adrHTIncludingCleaning?: number; // Optional pour correspondre à l'API
-  };
-  nextWeek: {
-    weekIdentifier: string;
-    accommodationHT?: number; // Optional pour correspondre à l'API
-    occupancyPercentage: number;
-    adrHT?: number; // Optional pour correspondre à l'API
-  };
-  thisMonth: {
-    accommodationHT: number;
-    cleaningHT: number;
-    occupancyRatePercentage: number;
-    adrHT: number;
-    missedSalesTTC?: {
-      amount: number;
-      count: number;
-    };
-    opportunityTTC?: {
-      amount: number;
-      count: number;
-    };
-  };
-  lastMonth: {
-    accommodationHT: number;
-    cleaningHT: number;
-    occupancyRatePercentage: number;
-    adrHT: number;
-    euroPerSquareMeterHT?: number;
-  };
-  nextMonth: {
-    monthIdentifier: string;
-    year: number;
-    accommodationHT: number;
-    cleaningHT: number;
-    occupancyPercentage: number;
-    adrHT: number;
-  };
-  sameMonthLastYear: {
-    accommodationHT: number;
-    cleaningHT: number;
-    occupancyRatePercentage: number;
-    adrHT: number;
-    euroPerSquareMeterHT?: number;
-  };
-  totalRevenues: {
-    totalAccommodationServicesHT: number;
-    totalCleaningHT: number;
-    occupancyPercentage: number;
-    adr: number;
-  };
-  allTimesBookings: {
-    totalAccommodationServicesHTToDate: number;
-    totalCleaningHTToDate: number;
-    adr: number;
-  };
-  revenues: {
-    revenues: {
-      until: {
-        totalAccommodationServicesHT: number;
-        totalCleaningHT: number;
-        occupancyPercentage: number;
-        adrHT: number;
-      };
-      totalAccommodationServicesHT: number;
-      totalCleaningHT: number;
-      totalADR: number;
-    };
-  };
-  yoy2025vs2024AsOfJune30: {
-    value2024: number;
-    value2025: number;
-    percentage: number;
-  };
-  euroPerSquareMeterHTLast12MonthAvg: number;
 }
 
-export interface MonthlyComparison {
+/**
+ * Attributs principaux des métriques dashboard
+ */
+export interface DashboardMetricsAttributes {
+  date: string;
+  actif: string;
+  databaseStatistics: DatabaseStatistics;
+  forecast: Forecast;
+  monthlyComparison: MonthlyComparison;
+}
+
+/**
+ * Statistiques de la base de données
+ */
+export interface DatabaseStatistics {
+  currentWeek: WeekStats;
+  lastWeek: WeekStats;
+  nextWeek: WeekStats;
+  todayBusiness: TodayBusiness;
+  thisMonth: MonthStats;
+  sameMonthLastYear: MonthStats;
+  lastMonth: MonthStats;
+  nextMonth: NextMonthStats;
+  databaseInfo: DatabaseInfo;
+  revenues: YearRevenues;
+  euroPerSquareMeterHTLast12MonthAvg: number;
+  yoy2025vs2024AsOfJune30: YoyComparison;
+  totalRevenues: TotalRevenues;
+  allTimesBookings: AllTimeBookings;
+}
+
+/**
+ * Statistiques hebdomadaires
+ */
+export interface WeekStats {
+  weekIdentifier: string;
+  accommodationHTExcludingCleaning?: number;
+  accommodationHT?: number;
+  occupancyPercentage: number;
+  adrHTIncludingCleaning?: number;
+  adrHT?: number;
+}
+
+/**
+ * Activité du jour
+ */
+export interface TodayBusiness {
+  checkInsToday: number;
+  checkOutsToday: number;
+}
+
+/**
+ * Statistiques mensuelles
+ */
+export interface MonthStats {
+  occupancyRatePercentage: number;
+  accommodationHT: number;
+  cancellableAccommodationHT?: number;
+  cleaningHT: number;
+  adrHT: number;
+  missedSalesTTC?: MissedSales;
+  opportunityTTC?: Opportunity;
+  euroPerSquareMeterHT?: number;
+}
+
+/**
+ * Statistiques du mois prochain
+ */
+export interface NextMonthStats {
   monthIdentifier: string;
   year: number;
+  occupancyPercentage: number;
+  adrHT: number;
+  accommodationHT: number;
+  cleaningHT: number;
+}
+
+/**
+ * Ventes manquées
+ */
+export interface MissedSales {
+  amount: number;
+  count: number;
+}
+
+/**
+ * Opportunités
+ */
+export interface Opportunity {
+  amount: number;
+  count: number;
+}
+
+/**
+ * Informations de la base de données
+ */
+export interface DatabaseInfo {
+  totalValidBookings: number;
+  includingNoShows: number;
+  totalActiveCheckedIns: {
+    count: number;
+    outOf: number;
+    percentage: number;
+  };
+  totalFutureBookings: number;
+  totalInvoicedBookings: number;
+  lastUpdate: string;
+}
+
+/**
+ * Revenus annuels
+ */
+export interface YearRevenues {
+  year: number;
   revenues: {
+    until: {
+      date: string;
+      totalAccommodationServicesHT: number;
+      totalCleaningHT: number;
+      occupancyPercentage: number;
+      adrHT: number;
+    };
+    totalAccommodationServicesHT: number;
+    totalCleaningHT: number;
+    totalADR: number;
+  };
+}
+
+/**
+ * Comparaison année sur année
+ */
+export interface YoyComparison {
+  percentage: number;
+  value2025: number;
+  value2024: number;
+}
+
+/**
+ * Revenus totaux
+ */
+export interface TotalRevenues {
+  year: number;
+  occupancyPercentage: number;
+  adr: number;
+  totalAccommodationServicesHT: number;
+  totalCleaningHT: number;
+}
+
+/**
+ * Réservations historiques
+ */
+export interface AllTimeBookings {
+  adr: number;
+  totalAccommodationServicesHTToDate: number;
+  totalCleaningHTToDate: number;
+}
+
+/**
+ * Prévisions
+ */
+export interface Forecast {
+  year: number;
+  accommodationHT: number;
+  realized2025: number;
+  modifiedOpportunity2025: number;
+  totalModifiedMaxed2025: number;
+  proRataTemporis2025: number;
+  extremeMinimum: number;
+  mixedModelForecast: {
+    occupancyPercentage: number;
+    value: number;
+  };
+  maximums: {
+    monthIdentifier: string;
+    year: number;
+    maxOccupationPercentage: number;
+    maxTheoreticalAccommodation: number;
+  };
+}
+
+/**
+ * Comparaison mensuelle
+ */
+export interface MonthlyComparison {
+  year: number;
+  monthIdentifier: string;
+  revenues: {
+    changePercentage: number;
     thisMonthAccommodationHT: number;
     thisMonthCancellableAccommodationHT: number;
     lastYearSameMonthAccommodationHT: number;
     lastMonthAccommodationHT: number;
-    changePercentage: number;
   };
   cleaning: {
+    changePercentage: number;
     thisMonthHT: number;
     lastYearSameMonthHT: number;
     lastMonthHT: number;
-    changePercentage: number;
   };
   adrHT: {
+    changePercentage: number;
     thisMonth: number;
     lastYearSameMonth: number;
     lastMonth: number;
-    changePercentage: number;
   };
   sqmPriceHT: {
     last12MonthAvgPerShab: number;
@@ -137,67 +238,73 @@ export interface MonthlyComparison {
   };
 }
 
-export interface ForecastData {
-  accommodationHT: number;
-  realized2025: number;
-  modifiedOpportunity2025: number;
-  totalModifiedMaxed2025: number;
-  proRataTemporis2025: number;
-  maximums: {
-    monthIdentifier: string;
-    year: number;
-    maxTheoreticalAccommodation: number;
-    maxOccupationPercentage: number;
-  };
-  mixedModelForecast: {
-    occupancyPercentage: number;
-  };
+/**
+ * Paramètres de requête pour les métriques dashboard
+ */
+export interface DashboardMetricsQuery {
+  date: string;
+  actif?: string;
 }
 
-export interface DashboardMetrics {
-  databaseStatistics: DatabaseStatistics;
-  monthlyComparison: MonthlyComparison;
-  forecast: ForecastData;
+/**
+ * Liste des actifs valides
+ */
+export const VALID_ACTIFS = ['global', '14M', '17C', '23A', '45B'] as const;
+
+/**
+ * Type pour les actifs valides
+ */
+export type ValidActif = (typeof VALID_ACTIFS)[number];
+
+// Types de compatibilité pour les composants existants
+/** @deprecated Utiliser DashboardMetricsAttributes à la place */
+export type DashboardMetrics = DashboardMetricsAttributes;
+
+/** @deprecated Utiliser DashboardMetricsAttributes à la place */
+export interface Actif {
+  id: string;
+  label: string;
+  type: string;
 }
 
+/** @deprecated */
+export interface FilterState {
+  date: string;
+  actif: string;
+}
+
+/** @deprecated */
 export interface MetricCardProps {
   title: string;
-  value: number | string;
-  format?: 'currency' | 'percentage' | 'number';
-  subtitle?: string;
-  size?: 'sm' | 'md' | 'lg';
+  value: string | number;
   trend?: {
     value: number;
-    label: string;
-    type: 'positive' | 'negative' | 'neutral';
+    isPositive: boolean;
   };
-  icon?: React.ComponentType<{ className?: string }>;
+  size?: 'sm' | 'md' | 'lg';
 }
 
+/** @deprecated */
 export interface ComparisonRowData {
   label: string;
   current: number;
   previous: number;
-  format: 'currency' | 'percentage' | 'number';
-  changeType?: 'higher_better' | 'lower_better' | 'neutral';
+  change: number;
 }
 
-export interface FilterState {
-  selectedDate: Date;
-  selectedActif: string;
+/**
+ * Configuration pour la génération de données mock
+ */
+export interface MockDataConfig {
+  actif: string;
+  factor: number;
 }
 
-// Actif type pour correspondre à l'API existante
-export interface Actif {
-  id: string;
-  label: string;
-  type: 'global' | 'property' | 'zone'; // Correspondre aux types de l'API
-}
-
-export interface DashboardApiResponse {
-  success: boolean;
-  data: {
-    attributes: DashboardMetrics;
-  };
-  timestamp: string;
+/**
+ * Réponse d'erreur de l'API dashboard
+ */
+export interface DashboardErrorResponse {
+  error: string;
+  message?: string;
+  details?: unknown;
 }
