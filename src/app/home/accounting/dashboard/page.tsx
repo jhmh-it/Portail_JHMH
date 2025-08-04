@@ -41,16 +41,23 @@ export default function AccountingDashboardPage() {
     error: actifsError,
   } = useActifs();
 
-  // Extract actifs from data and convert to dashboard format
+  // Extract unique sites from actifs listings for dashboard format
   const actifs = React.useMemo(() => {
     if (!actifsData) return [];
 
-    // Convert actifs listings to dashboard actifs format
-    return actifsData.map((actif: ActifListing) => ({
-      id: actif.code_site,
-      label: actif.code_site,
-      type: 'property' as const,
-    }));
+    // Get unique sites from actifs listings
+    const uniqueSites = new Map();
+    actifsData.forEach((actif: ActifListing) => {
+      if (!uniqueSites.has(actif.code_site)) {
+        uniqueSites.set(actif.code_site, {
+          id: actif.code_site,
+          label: actif.code_site,
+          type: 'property' as const,
+        });
+      }
+    });
+
+    return Array.from(uniqueSites.values());
   }, [actifsData]);
 
   // Pré-sélectionner le premier actif lorsque les actifs sont chargés
