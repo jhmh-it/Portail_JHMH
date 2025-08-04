@@ -178,7 +178,11 @@ export function formatPercentage(value: number): string {
  * Formate une valeur générique
  * @deprecated Utiliser des formateurs spécifiques
  */
-export function formatValue(value: number | string, type = 'number'): string {
+export function formatValue(
+  value: number | string,
+  type = 'number',
+  ..._args: unknown[]
+): string {
   if (typeof value === 'string') return value;
 
   switch (type) {
@@ -208,7 +212,8 @@ export function getSafeValue(value: unknown, defaultValue = 0): number {
  */
 export function calculateChangePercentage(
   current: number,
-  previous: number
+  previous: number,
+  ..._args: unknown[]
 ): number {
   if (previous === 0) return 0;
   return ((current - previous) / previous) * 100;
@@ -218,7 +223,10 @@ export function calculateChangePercentage(
  * Récupère la classe CSS selon la performance
  * @deprecated Utiliser des composants stylés
  */
-export function getPerformanceColorClass(value: number): string {
+export function getPerformanceColorClass(
+  value: number,
+  ..._args: unknown[]
+): string {
   if (value > 0) return 'text-green-600';
   if (value < 0) return 'text-red-600';
   return 'text-gray-600';
@@ -238,7 +246,8 @@ export function getComparisonColorClass(isPositive: boolean): string {
  */
 export function getTrendIcon(
   current: number,
-  previous: number
+  previous: number,
+  ..._args: unknown[]
 ): 'up' | 'down' | 'stable' {
   const diff = current - previous;
   if (Math.abs(diff) < 0.01) return 'stable';

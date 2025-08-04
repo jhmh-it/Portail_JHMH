@@ -271,15 +271,22 @@ export interface Actif {
 export interface FilterState {
   date: string;
   actif: string;
+  selectedDate: Date;
+  selectedActif: string;
 }
 
 /** @deprecated */
 export interface MetricCardProps {
   title: string;
   value: string | number;
+  format?: 'number' | 'currency' | 'percentage';
+  subtitle?: string;
+  icon?: React.ComponentType;
   trend?: {
     value: number;
     isPositive: boolean;
+    label?: string;
+    type?: 'positive' | 'negative';
   };
   size?: 'sm' | 'md' | 'lg';
 }
@@ -290,6 +297,8 @@ export interface ComparisonRowData {
   current: number;
   previous: number;
   change: number;
+  format?: 'number' | 'currency' | 'percentage';
+  changeType?: 'positive' | 'negative' | 'neutral';
 }
 
 /**
