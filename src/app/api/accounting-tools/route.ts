@@ -1,35 +1,65 @@
 import { NextResponse } from 'next/server';
 
-export async function GET() {
-  try {
-    // Simulation d'une API avec données mock
-    const accountingTools = [
-      {
-        id: 'dashboard',
-        name: 'Dashboard',
-        description: "Vue d'ensemble des performances financières",
-        icon: 'BarChart3',
-        href: '/home/accounting/dashboard',
-        category: 'analytics',
-      },
-    ];
+import type {
+  AccountingToolAPIResponse,
+  AccountingToolsApiResponse,
+  AccountingToolsApiError,
+} from '@/types/accounting';
 
-    // Simulation d'un délai réseau
+/**
+ * Données mock pour les outils comptables
+ * TODO: Remplacer par un appel à une vraie API quand disponible
+ */
+const MOCK_ACCOUNTING_TOOLS: AccountingToolAPIResponse[] = [
+  {
+    id: 'dashboard',
+    name: 'Dashboard',
+    description: "Vue d'ensemble des performances financières",
+    icon: 'BarChart3',
+    href: '/home/accounting/dashboard',
+    category: 'analytics',
+  },
+];
+
+/**
+ * GET /api/accounting-tools
+ * Récupère la liste des outils comptables disponibles
+ */
+export async function GET(): Promise<
+  NextResponse<AccountingToolsApiResponse | AccountingToolsApiError>
+> {
+  try {
+    // Simulation d'un délai réseau pour mimiser une vraie API
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    return NextResponse.json({
+    const response: AccountingToolsApiResponse = {
       success: true,
-      data: accountingTools,
+      data: MOCK_ACCOUNTING_TOOLS,
       timestamp: new Date().toISOString(),
+    };
+
+    return NextResponse.json(response, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=86400',
+      },
     });
   } catch (error) {
     console.error('Error fetching accounting tools:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch accounting tools',
+
+    const errorResponse: AccountingToolsApiError = {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch accounting tools',
+    };
+
+    return NextResponse.json(errorResponse, {
+      status: 500,
+      headers: {
+        'Cache-Control': 'no-cache',
       },
-      { status: 500 }
-    );
+    });
   }
 }

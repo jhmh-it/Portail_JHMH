@@ -1,84 +1,83 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery, type QueryClient } from '@tanstack/react-query';
 
-interface AccountingTool {
-  id: string;
-  title: string;
-  url: string;
-  description: string;
-}
+import { fetchAccountingTools } from '@/services/accounting.service';
+import type { AccountingTool } from '@/types/accounting';
 
-interface AccountingToolAPIResponse {
-  id: string;
-  name: string;
-  href: string;
-  description: string;
-  icon: string;
-  category: string;
-}
+/**
+ * Clés de requête pour TanStack Query
+ */
+export const accountingQueryKeys = {
+  /** Clé pour la liste des outils comptables */
+  tools: () => ['accounting', 'tools'] as const,
+} as const;
 
-interface UseAccountingToolsReturn {
+/**
+ * Interface de retour du hook useAccountingTools
+ */
+export interface UseAccountingToolsReturn {
+  /** Liste des outils comptables */
   accountingTools: AccountingTool[];
+  /** Indicateur de chargement */
   isLoading: boolean;
+  /** Message d'erreur si présent */
   error: string | null;
+  /** Fonction pour rafraîchir les données */
   refetch: () => Promise<void>;
 }
 
+/**
+ * Hook pour récupérer les outils comptables
+ * Utilise TanStack Query pour le cache et la gestion d'état
+ */
 export function useAccountingTools(): UseAccountingToolsReturn {
-  const [accountingTools, setAccountingTools] = useState<AccountingTool[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchAccountingTools = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/accounting-tools');
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const accountingToolsData = await response.json();
-
-      // L'API retourne un objet avec {success, data, timestamp}
-      if (
-        accountingToolsData.success &&
-        Array.isArray(accountingToolsData.data)
-      ) {
-        // Mapper les données de l'API vers le format attendu par la sidebar
-        const mappedTools = accountingToolsData.data.map(
-          (tool: AccountingToolAPIResponse) => ({
-            id: tool.id,
-            title: tool.name, // name -> title
-            url: tool.href, // href -> url
-            description: tool.description,
-          })
-        );
-        setAccountingTools(mappedTools);
-      } else {
-        throw new Error('Invalid API response format');
-      }
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      console.error('Error fetching accounting tools:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAccountingTools();
-  }, []);
+  const {
+    data: accountingTools = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: accountingQueryKeys.tools(),
+    queryFn: () => fetchAccountingTools({ revalidate: 300 }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
 
   return {
     accountingTools,
     isLoading,
-    error,
-    refetch: fetchAccountingTools,
+    error: error?.message ?? null,
+    refetch: async () => {
+      await refetch();
+    },
   };
+}
+
+/**
+ * Fonction utilitaire pour précharger les outils comptables
+ * À utiliser dans les Server Components ou lors de la navigation
+ */
+export async function prefetchAccountingTools(
+  queryClient: QueryClient
+): Promise<void> {
+  await queryClient.prefetchQuery({
+    queryKey: accountingQueryKeys.tools(),
+    queryFn: () => fetchAccountingTools({ revalidate: 300 }),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Fonction utilitaire pour invalider le cache des outils comptables
+ * À utiliser après des modifications
+ */
+export async function invalidateAccountingTools(
+  queryClient: QueryClient
+): Promise<void> {
+  await queryClient.invalidateQueries({
+    queryKey: accountingQueryKeys.tools(),
+  });
 }

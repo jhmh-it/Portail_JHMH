@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useActifs } from '@/hooks/useActifs';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { useDashboardState } from '@/hooks/useDashboardState';
-import type { JhmhActif } from '@/lib/external-api';
+import type { ActifListing } from '@/types/actifs';
 import type { DashboardMetrics } from '@/types/dashboard';
 
 /**
@@ -45,11 +45,11 @@ export default function AccountingDashboardPage() {
   const actifs = React.useMemo(() => {
     if (!actifsData) return [];
 
-    // Convert simple site actifs to dashboard actifs format
-    return actifsData.map((actif: JhmhActif) => ({
-      id: actif.id,
-      label: actif.label,
-      type: actif.type,
+    // Convert actifs listings to dashboard actifs format
+    return actifsData.map((actif: ActifListing) => ({
+      id: actif.code_site,
+      label: actif.code_site,
+      type: 'property' as const,
     }));
   }, [actifsData]);
 

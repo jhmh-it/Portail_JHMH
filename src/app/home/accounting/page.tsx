@@ -15,10 +15,12 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAccountingTools } from '@/hooks/useAccountingTools';
 
-// Icônes pour chaque outil
+// Icônes pour chaque outil - typé avec les icônes supportées
 const toolIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   dashboard: BarChart3,
-};
+  BarChart3: BarChart3,
+  Calculator: Calculator,
+} as const;
 
 export default function AccountingPage() {
   const { accountingTools, isLoading, error } = useAccountingTools();
