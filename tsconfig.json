@@ -1,28 +1,73 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    // Target moderne pour Next.js 15 et meilleures performances
+    "target": "ES2020",
     "lib": ["dom", "dom.iterable", "esnext"],
+
+    // Configuration JavaScript
     "allowJs": true,
     "skipLibCheck": true,
+
+    // Mode strict TypeScript - équilibré pour la codebase existante
     "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Configuration du module
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+
+    // Configuration JSX pour Next.js
     "jsx": "preserve",
+
+    // Performance de compilation
     "incremental": true,
+
+    // Plugin Next.js
     "plugins": [
       {
-        "name": "next"
-      }
+        "name": "next",
+      },
     ],
+
+    // Configuration des alias
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["./src/*"],
+      "@/ui/*": ["./src/components/ui/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/services/*": ["./src/services/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/stores/*": ["./src/stores/*"],
+      "@/providers/*": ["./src/providers/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/public/*": ["./public/*"],
+      "@/validation/*": ["./src/lib/validation/*"],
+    },
   },
-  "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "src/**/*",
+    "next.config.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "dist",
+    "build",
+    "coverage",
+    "*.config.js",
+    "*.config.ts",
+  ],
 }
