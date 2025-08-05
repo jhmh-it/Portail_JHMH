@@ -2,7 +2,9 @@
 
 ## Vue d'ensemble
 
-Cette documentation est conçue pour faciliter la collaboration entre développeurs et agents IA (comme Cursor) en fournissant un contexte complet sur l'architecture, les conventions et les processus du projet.
+Cette documentation est conçue pour faciliter la collaboration entre
+développeurs et agents IA (comme Cursor) en fournissant un contexte complet sur
+l'architecture, les conventions et les processus du projet.
 
 ## 🚀 Déploiement
 
@@ -16,31 +18,40 @@ Le projet est déployé automatiquement sur **Vercel** :
 
 ### Restriction de domaine
 
-L'authentification Google est restreinte exclusivement aux utilisateurs avec des emails `@jhmh.com`. Cette restriction est gérée par l'API Next.js dans `/api/auth/login`.
+L'authentification Google est restreinte exclusivement aux utilisateurs avec des
+emails `@jhmh.com`. Cette restriction est gérée par l'API Next.js dans
+`/api/auth/login`.
 
 ## 📖 Table des matières
 
 ### 🏗️ Architecture et Structure
 
-- [Architecture du projet](./docs/ARCHITECTURE.md) - Vue d'ensemble de l'architecture technique
-- [Structure des dossiers](./docs/FOLDER_STRUCTURE.md) - Organisation détaillée du code
+- [Architecture du projet](./docs/ARCHITECTURE.md) - Vue d'ensemble de
+  l'architecture technique
+- [Structure des dossiers](./docs/FOLDER_STRUCTURE.md) - Organisation détaillée
+  du code
 
 ### 💻 Développement
 
 - [Guide de développement](./docs/DEVELOPMENT.md) - Processus et méthodologie
 - [Guide de style](./docs/STYLE_GUIDE.md) - Conventions de code et formatage
-- [Conventions de commits](./docs/COMMITS.md) - Standards pour les messages de commit
-- [Guide de Tests](./docs/TESTING_SETUP.md) - Configuration et stratégie de tests
+- [Conventions de commits](./docs/COMMITS.md) - Standards pour les messages de
+  commit
+- [Guide de Tests](./docs/TESTING_SETUP.md) - Configuration et stratégie de
+  tests
 
 ### 🤖 Collaboration IA
 
-- [Guide pour agents IA](./docs/AI_AGENT_GUIDE.md) - Instructions spécifiques pour Cursor et autres LLMs
-- [Contexte du projet](./docs/PROJECT_CONTEXT.md) - Informations essentielles pour comprendre le projet
+- [Guide pour agents IA](./docs/AI_AGENT_GUIDE.md) - Instructions spécifiques
+  pour Cursor et autres LLMs
+- [Contexte du projet](./docs/PROJECT_CONTEXT.md) - Informations essentielles
+  pour comprendre le projet
 
 ### 🔧 Configuration
 
 - [Variables d'environnement](./docs/ENVIRONMENT.md) - Configuration requise
-- [Secrets GitHub Actions](./docs/GITHUB_SECRETS_CONFIG.md) - Configuration CI/CD
+- [Secrets GitHub Actions](./docs/GITHUB_SECRETS_CONFIG.md) - Configuration
+  CI/CD
 
 ## 🚀 Démarrage rapide
 
@@ -82,14 +93,16 @@ L'authentification Google est restreinte exclusivement aux utilisateurs avec des
 ## 📌 Principes clés
 
 - **Documentation vivante** : Mise à jour à chaque changement significatif
-- **Contexte complet** : Toute information nécessaire pour comprendre et modifier le code
+- **Contexte complet** : Toute information nécessaire pour comprendre et
+  modifier le code
 - **Orientée IA** : Structurée pour être facilement comprise par les LLMs
 - **Pratique** : Exemples concrets et commandes prêtes à l'emploi
 - **Sécurité** : Contrôle d'accès strict avec validation de domaine
 
 ## 🔄 Maintenance
 
-Cette documentation doit être maintenue activement. Lors de tout changement majeur :
+Cette documentation doit être maintenue activement. Lors de tout changement
+majeur :
 
 1. Mettez à jour les fichiers pertinents
 2. Vérifiez la cohérence avec le code actuel
