@@ -1,19 +1,25 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import {
+  PROTECTED_ROUTES,
+  PUBLIC_ROUTES,
+  REDIRECT_URLS,
+  SESSION_COOKIE_NAME,
+  DEBUG_MODE,
+} from '@/lib/middleware/constants';
+
 /**
  * Middleware d'authentification et de redirection
- * Utilise les cookies de session pour déterminer l'état d'authentification
+ * Gère la protection des routes et les redirections selon l'état d'authentification
  */
 
 /**
- * Routes protégées qui nécessitent une authentification
+ * Vérifie si l'utilisateur est authentifié
  */
-const PROTECTED_ROUTES = ['/home'] as const;
-
-/**
- * Routes publiques qui n'ont pas besoin d'authentification
- */
-const PUBLIC_ROUTES = ['/login', '/signup'] as const;
+function isAuthenticated(request: NextRequest): boolean {
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
+  return Boolean(sessionCookie?.value);
+}
 
 /**
  * Vérifie si une route est protégée
@@ -30,42 +36,29 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 /**
- * Vérifie si l'utilisateur est authentifié basé sur la présence du cookie de session
+ * Crée une URL de redirection avec paramètre de retour optionnel
  */
-function isAuthenticated(request: NextRequest): boolean {
-  const sessionCookie = request.cookies.get('session');
-  return Boolean(sessionCookie?.value);
+function createRedirectUrl(
+  request: NextRequest,
+  target: string,
+  returnPath?: string
+): URL {
+  const url = new URL(target, request.url);
+  if (returnPath && returnPath !== '/') {
+    url.searchParams.set('redirect', returnPath);
+  }
+  return url;
 }
 
 /**
- * Crée une URL de redirection vers login avec le chemin de retour
- */
-function createLoginRedirectUrl(request: NextRequest, returnPath: string): URL {
-  const loginUrl = new URL('/login', request.url);
-  loginUrl.searchParams.set('redirect', returnPath);
-  return loginUrl;
-}
-
-/**
- * Crée une URL de redirection vers home
- */
-function createHomeRedirectUrl(request: NextRequest): URL {
-  return new URL('/home', request.url);
-}
-
-/**
- * Logge les événements de middleware de manière cohérente
+ * Log les événements du middleware en développement
  */
 function logMiddlewareEvent(
-  event:
-    | 'redirect_to_login'
-    | 'redirect_to_home'
-    | 'access_granted'
-    | 'redirect_root',
+  event: string,
   pathname: string,
   authenticated: boolean
 ): void {
-  if (process.env.NODE_ENV === 'development') {
+  if (DEBUG_MODE) {
     console.warn(`[Middleware] ${event}: ${pathname} (auth: ${authenticated})`);
   }
 }
@@ -76,30 +69,46 @@ export function middleware(request: NextRequest) {
 
   // Gestion de la page d'accueil
   if (pathname === '/') {
-    if (authenticated) {
-      logMiddlewareEvent('redirect_root', pathname, authenticated);
-      return NextResponse.redirect(createHomeRedirectUrl(request));
-    } else {
-      logMiddlewareEvent('redirect_root', pathname, authenticated);
-      return NextResponse.redirect(createLoginRedirectUrl(request, '/'));
-    }
+    const redirectTo = authenticated ? REDIRECT_URLS.home : REDIRECT_URLS.login;
+    logMiddlewareEvent('redirect_root', pathname, authenticated);
+    return NextResponse.redirect(createRedirectUrl(request, redirectTo));
   }
 
   // Redirection des utilisateurs authentifiés tentant d'accéder aux pages publiques
   if (isPublicRoute(pathname) && authenticated) {
     logMiddlewareEvent('redirect_to_home', pathname, authenticated);
-    return NextResponse.redirect(createHomeRedirectUrl(request));
+    return NextResponse.redirect(
+      createRedirectUrl(request, REDIRECT_URLS.home)
+    );
   }
 
   // Protection des routes nécessitant une authentification
   if (isProtectedRoute(pathname) && !authenticated) {
     logMiddlewareEvent('redirect_to_login', pathname, authenticated);
-    return NextResponse.redirect(createLoginRedirectUrl(request, pathname));
+    return NextResponse.redirect(
+      createRedirectUrl(request, REDIRECT_URLS.login, pathname)
+    );
   }
 
-  // Accès autorisé
+  // Accès autorisé - Ajouter les headers de sécurité
+  const response = NextResponse.next();
+
+  // Headers de sécurité basiques
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // Cache-Control pour les contenus authentifiés
+  if (authenticated) {
+    response.headers.set(
+      'Cache-Control',
+      'private, no-cache, no-store, must-revalidate'
+    );
+  }
+
   logMiddlewareEvent('access_granted', pathname, authenticated);
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
@@ -110,7 +119,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - fichiers statiques (.png, .jpg, etc.)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
