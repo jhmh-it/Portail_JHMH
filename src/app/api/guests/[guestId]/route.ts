@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { fetchJhmhGuestById } from '@/lib/external-api';
+import { fetchJhmhGuestById } from '@/app/home/exploitation/guests/services/guests.service';
 
 /**
  * GET /api/guests/[guestId]

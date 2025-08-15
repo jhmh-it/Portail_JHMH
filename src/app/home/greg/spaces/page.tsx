@@ -15,9 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useGregSpaces } from '@/hooks/useGregApi';
 import { useLoadingStore } from '@/stores/loading-store';
-import type { GregSpacesFilters } from '@/types/greg';
+
+import { useGregSpaces } from '../hooks';
+import type { GregSpacesFilters, GregSpace } from '../types';
 
 import { SpacesTable, CreateSpaceModal, DeleteSpaceModal } from './components';
 
@@ -39,16 +40,8 @@ export default function GregSpacesPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [editingSpace, setEditingSpace] = useState<{
-    space_id: string;
-    space_name: string;
-    type: string;
-    notes?: string;
-  } | null>(null);
-  const [deletingSpace, setDeletingSpace] = useState<{
-    space_id: string;
-    space_name: string;
-  } | null>(null);
+  const [editingSpace, setEditingSpace] = useState<GregSpace | null>(null);
+  const [deletingSpace, setDeletingSpace] = useState<GregSpace | null>(null);
   const { hideLoading } = useLoadingStore();
 
   const { data, isLoading, isFetching, error, refetch, isSuccess } =
@@ -103,12 +96,7 @@ export default function GregSpacesPage() {
     refetch();
   };
 
-  const handleEdit = (space: {
-    space_id: string;
-    space_name: string;
-    type: string;
-    notes?: string;
-  }) => {
+  const handleEdit = (space: GregSpace) => {
     setEditingSpace(space);
     setShowEditModal(true);
   };
@@ -119,7 +107,7 @@ export default function GregSpacesPage() {
     setEditingSpace(null);
   };
 
-  const handleDelete = (space: { space_id: string; space_name: string }) => {
+  const handleDelete = (space: GregSpace) => {
     setDeletingSpace(space);
     setShowDeleteModal(true);
   };
@@ -139,9 +127,9 @@ export default function GregSpacesPage() {
         {/* Header */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <MapPin className="h-8 w-8 text-primary" />
+            <MapPin className="text-primary h-8 w-8" />
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-navy">
+              <h1 className="text-navy text-3xl font-bold tracking-tight">
                 Espaces
               </h1>
               <p className="text-muted-foreground">
@@ -155,7 +143,7 @@ export default function GregSpacesPage() {
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-medium flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base font-medium">
                 <Filter className="h-4 w-4" />
                 Filtres de recherche
               </CardTitle>
@@ -175,18 +163,18 @@ export default function GregSpacesPage() {
               {/* Search Bar */}
               <div className="mb-6">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                   <Input
                     placeholder="Rechercher par nom d'espace, ID ou notes..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                    className="pl-10 pr-28 h-11 bg-muted/50 border-muted-foreground/20 focus:bg-background"
+                    className="bg-muted/50 border-muted-foreground/20 focus:bg-background h-11 pr-28 pl-10"
                   />
                   <Button
                     onClick={handleSearch}
                     size="sm"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8"
+                    className="absolute top-1/2 right-2 h-8 -translate-y-1/2 transform"
                   >
                     Rechercher
                   </Button>
@@ -194,7 +182,7 @@ export default function GregSpacesPage() {
               </div>
 
               {/* Controls row */}
-              <div className="flex items-end justify-between gap-4 pt-2 border-t">
+              <div className="flex items-end justify-between gap-4 border-t pt-2">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">
                     Résultats par page
@@ -203,7 +191,7 @@ export default function GregSpacesPage() {
                     value={filters.page_size?.toString() ?? '20'}
                     onValueChange={handlePageSizeChange}
                   >
-                    <SelectTrigger className="w-[140px] h-10">
+                    <SelectTrigger className="h-10 w-[140px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -224,7 +212,7 @@ export default function GregSpacesPage() {
                       onClick={handleClearFilters}
                       className="h-10"
                     >
-                      <X className="h-4 w-4 mr-2" />
+                      <X className="mr-2 h-4 w-4" />
                       Réinitialiser
                     </Button>
                   )}
@@ -235,7 +223,7 @@ export default function GregSpacesPage() {
                     className="h-10"
                   >
                     <RefreshCw
-                      className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`}
+                      className={`mr-2 h-4 w-4 ${isFetching ? 'animate-spin' : ''}`}
                     />
                     {isFetching ? 'Actualisation...' : 'Actualiser'}
                   </Button>
@@ -246,22 +234,22 @@ export default function GregSpacesPage() {
         </Card>
 
         {/* Results */}
-        <Card className="shadow-sm overflow-visible">
-          <CardHeader className="pb-4 flex flex-row items-center justify-between">
+        <Card className="overflow-visible shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
             <CardTitle className="text-base font-medium">
               Résultats
               {isSuccess && data && (
-                <span className="text-sm font-normal text-muted-foreground ml-2">
+                <span className="text-muted-foreground ml-2 text-sm font-normal">
                   ({data.total} espace{data.total > 1 ? 's' : ''})
                 </span>
               )}
             </CardTitle>
             <Button onClick={() => setShowCreateModal(true)} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Nouvel Espace
             </Button>
           </CardHeader>
-          <CardContent className="pt-0 px-6 pb-8 overflow-visible">
+          <CardContent className="overflow-visible px-6 pt-0 pb-8">
             <SpacesTable
               data={data}
               isLoading={isLoading}
@@ -289,7 +277,17 @@ export default function GregSpacesPage() {
             open={showEditModal}
             onOpenChange={setShowEditModal}
             onSuccess={handleEditSuccess}
-            editData={editingSpace}
+            editData={
+              editingSpace
+                ? {
+                    space_id: editingSpace.space_id ?? '',
+                    space_name:
+                      editingSpace.space_name ?? editingSpace.name ?? '',
+                    type: editingSpace.type ?? 'UNKNOWN',
+                    notes: editingSpace.description,
+                  }
+                : undefined
+            }
             mode="edit"
           />
         )}
@@ -299,7 +297,10 @@ export default function GregSpacesPage() {
           <DeleteSpaceModal
             open={showDeleteModal}
             onOpenChange={setShowDeleteModal}
-            spaceData={deletingSpace}
+            spaceData={{
+              space_id: deletingSpace.space_id ?? '',
+              space_name: deletingSpace.space_name ?? deletingSpace.name ?? '',
+            }}
             onSuccess={handleDeleteSuccess}
           />
         )}

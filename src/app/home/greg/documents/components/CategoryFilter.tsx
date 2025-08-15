@@ -38,8 +38,12 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
-import { useGregCategories, type Category } from '@/hooks/useGregCategories';
 import { cn } from '@/lib/utils';
+
+import {
+  useGregCategories,
+  type Category,
+} from '../../hooks/useGregCategories';
 
 interface CategoryFilterProps {
   value: string[];
@@ -162,9 +166,9 @@ export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
                       key={category.id}
                       value={category.name}
                       onSelect={() => handleSelect(category.name)}
-                      className="cursor-pointer justify-between group py-3"
+                      className="group cursor-pointer justify-between py-3"
                     >
-                      <div className="flex items-center flex-1">
+                      <div className="flex flex-1 items-center">
                         <Check
                           className={cn(
                             'mr-2 h-4 w-4',
@@ -175,7 +179,7 @@ export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
                         />
                         <div className="flex-1">
                           <div className="font-medium">{category.name}</div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-muted-foreground text-sm">
                             {category.description}
                           </div>
                         </div>
@@ -183,7 +187,7 @@ export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
                         onClick={e => handleDeleteClick(e, category)}
                       >
                         <X className="h-3 w-3" />
@@ -261,7 +265,10 @@ export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="cursor-pointer bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

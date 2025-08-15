@@ -430,4 +430,5 @@ export function PageLayout({ children }: Props) {
 
 ---
 
-**Note** : Ces règles garantissent une interface cohérente, accessible et performante. Toujours tester sur mobile et desktop avant validation.
+**Note** : Ces règles garantissent une interface cohérente, accessible et
+performante. Toujours tester sur mobile et desktop avant validation.

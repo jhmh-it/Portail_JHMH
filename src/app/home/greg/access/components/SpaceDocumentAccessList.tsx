@@ -39,8 +39,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useGregDocuments, useGregSpaces } from '@/hooks/useGregApi';
 import { useUser } from '@/hooks/useUser';
+
+import { useGregDocuments, useGregSpaces } from '../../hooks';
+import type { GregSpace, GregDocument } from '../../types';
 
 interface SpaceDocumentAccess {
   space_id: string;
@@ -78,7 +80,7 @@ export function SpaceDocumentAccessList({
   const { data: user } = useUser();
 
   // Fetch documents and spaces for mapping
-  const { data: documentsData } = useGregDocuments({ page: 1, page_size: 100 });
+  const { data: documentsData } = useGregDocuments({});
   const { data: spacesData } = useGregSpaces({ page: 1, page_size: 100 });
 
   // Timeout de sécurité pour éviter le blocage du loading si user reste indéfini
@@ -178,17 +180,21 @@ export function SpaceDocumentAccessList({
 
   // Filter access list based on search and filters
   const filteredAccessList = accessList.filter(access => {
-    const space = spacesData?.data?.find(s => s.space_id === access.space_id);
-    const document = documentsData?.data?.find(
-      d => d.id === access.document_id
-    );
+    const space = Array.isArray(spacesData?.data)
+      ? spacesData.data.find((s: GregSpace) => s.space_id === access.space_id)
+      : undefined;
+    const document = Array.isArray(documentsData?.data)
+      ? documentsData.data.find(
+          (d: GregDocument) => d.id === access.document_id
+        )
+      : undefined;
 
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       if (
         !space?.space_name.toLowerCase().includes(query) &&
-        !document?.spreadsheet_name.toLowerCase().includes(query) &&
+        !document?.spreadsheet_name?.toLowerCase().includes(query) &&
         !access.space_id.toLowerCase().includes(query) &&
         !access.document_id.toLowerCase().includes(query)
       ) {
@@ -278,16 +284,16 @@ export function SpaceDocumentAccessList({
           <Button
             size="sm"
             onClick={onCreateNew}
-            className="cursor-pointer bg-[#0d1b3c] hover:bg-[#0d1b3c]/90 text-white"
+            className="cursor-pointer bg-[#0d1b3c] text-white hover:bg-[#0d1b3c]/90"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             Nouvel accès
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {filteredAccessList.length === 0 ? (
-          <div className="text-center py-8">
+          <div className="py-8 text-center">
             <p className="text-muted-foreground mb-4">
               {searchQuery || Object.values(filters).some(v => v !== 'all')
                 ? 'Aucun accès trouvé avec ces critères'
@@ -310,12 +316,16 @@ export function SpaceDocumentAccessList({
               </TableHeader>
               <TableBody>
                 {filteredAccessList.map(access => {
-                  const space = spacesData?.data?.find(
-                    s => s.space_id === access.space_id
-                  );
-                  const document = documentsData?.data?.find(
-                    d => d.id === access.document_id
-                  );
+                  const space = Array.isArray(spacesData?.data)
+                    ? spacesData.data.find(
+                        (s: GregSpace) => s.space_id === access.space_id
+                      )
+                    : undefined;
+                  const document = Array.isArray(documentsData?.data)
+                    ? documentsData.data.find(
+                        (d: GregDocument) => d.id === access.document_id
+                      )
+                    : undefined;
 
                   return (
                     <TableRow key={`${access.space_id}-${access.document_id}`}>
@@ -325,7 +335,7 @@ export function SpaceDocumentAccessList({
                             {space?.space_name ?? 'Inconnu'}
                           </p>
                           {space?.type && (
-                            <Badge variant="outline" className="text-xs w-fit">
+                            <Badge variant="outline" className="w-fit text-xs">
                               {space.type === 'ROOM' ? 'Groupe' : 'DM'}
                             </Badge>
                           )}
@@ -339,7 +349,7 @@ export function SpaceDocumentAccessList({
                           {document?.pending_for_review && (
                             <Badge
                               variant="secondary"
-                              className="text-xs w-fit"
+                              className="w-fit text-xs"
                             >
                               En attente
                             </Badge>
@@ -347,7 +357,7 @@ export function SpaceDocumentAccessList({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground flex items-center gap-2 text-sm">
                           <Calendar className="h-3 w-3" />
                           {new Date(access.granted_at).toLocaleDateString(
                             'fr-FR'
@@ -369,7 +379,7 @@ export function SpaceDocumentAccessList({
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="cursor-pointer">
-                              <Edit className="h-4 w-4 mr-2" />
+                              <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
@@ -382,7 +392,7 @@ export function SpaceDocumentAccessList({
                                 )
                               }
                             >
-                              <Trash2 className="h-4 w-4 mr-2" />
+                              <Trash2 className="mr-2 h-4 w-4" />
                               Supprimer
                             </DropdownMenuItem>
                           </DropdownMenuContent>

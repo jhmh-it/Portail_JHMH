@@ -101,14 +101,14 @@ export function MetricCard({
   };
 
   return (
-    <Card className={cn('hover:shadow-md transition-shadow', className)}>
+    <Card className={cn('transition-shadow hover:shadow-md', className)}>
       <CardContent className={cn(sizeClasses[size])}>
         <div className="flex flex-col gap-3">
           {/* Header avec titre et icône */}
           <div className="flex items-center justify-between">
             <CardTitle
               className={cn(
-                'font-medium text-muted-foreground',
+                'text-muted-foreground font-medium',
                 size === 'sm' && 'text-sm',
                 size === 'md' && 'text-sm',
                 size === 'lg' && 'text-base'
@@ -131,7 +131,7 @@ export function MetricCard({
           {/* Valeur principale */}
           <div
             className={cn(
-              'font-bold text-navy',
+              'text-navy font-bold',
               size === 'sm' && 'text-xl',
               size === 'md' && 'text-2xl',
               size === 'lg' && 'text-3xl'
@@ -171,7 +171,7 @@ export function MetricCard({
                   </span>
                 </Badge>
                 {change.label && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     {change.label}
                     {change.period && ` (${change.period})`}
                   </span>

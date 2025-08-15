@@ -313,4 +313,5 @@ touch src/hooks/useNewFeature.ts
 
 ---
 
-**Note** : Cette structure est évolutive. Adaptez-la selon les besoins du projet tout en maintenant la cohérence.
+**Note** : Cette structure est évolutive. Adaptez-la selon les besoins du projet
+tout en maintenant la cohérence.

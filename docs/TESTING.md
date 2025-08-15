@@ -4,7 +4,8 @@
 
 ### Principes fondamentaux
 
-1. **Test Pyramid** : Beaucoup de tests unitaires, moins d'intégration, peu d'E2E
+1. **Test Pyramid** : Beaucoup de tests unitaires, moins d'intégration, peu
+   d'E2E
 2. **TDD encouragé** : Écrire les tests avant le code quand possible
 3. **Coverage raisonnable** : Viser 80% de couverture, 100% sur le code critique
 4. **Tests maintenables** : Préférer la clarté à la concision
@@ -457,4 +458,5 @@ jobs:
 
 ---
 
-**Note** : Les tests sont un investissement. Écrivez des tests qui vous donnent confiance sans ralentir le développement.
+**Note** : Les tests sont un investissement. Écrivez des tests qui vous donnent
+confiance sans ralentir le développement.

@@ -1,10 +1,10 @@
 'use client';
 
-import { format } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { getAuth } from 'firebase/auth';
 import {
-  ChevronLeft,
+  ArrowLeft,
   Bell,
   Edit,
   Trash2,
@@ -15,7 +15,10 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Copy,
+  MapPin,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -24,14 +27,14 @@ import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useUser } from '@/hooks/useUser';
 import { useLoadingStore } from '@/stores/loading-store';
 
@@ -47,6 +50,11 @@ interface ReminderDetails {
   priority?: string;
   due_date?: string;
   assigned_to?: string;
+  assigned_to_name?: string;
+  source_space_id?: string;
+  source_space_name?: string;
+  target_space_id?: string;
+  target_space_name?: string;
   notes?: string;
   created_at?: string;
   updated_at?: string;
@@ -62,6 +70,7 @@ export default function ReminderDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [_copied, setCopied] = useState(false);
 
   const { data: user } = useUser();
   const { hideLoading } = useLoadingStore();
@@ -70,7 +79,6 @@ export default function ReminderDetailsPage() {
     { label: 'Accueil', href: '/home' },
     { label: 'Greg', href: '/home/greg' },
     { label: 'Rappels', href: '/home/greg/reminders' },
-    { label: reminder?.title ?? reminderId },
   ];
 
   useEffect(() => {
@@ -98,9 +106,125 @@ export default function ReminderDetailsPage() {
           throw new Error('Erreur lors de la récupération du rappel');
         }
 
-        const data = await response.json();
-        setReminder(data);
+        const result = await response.json();
+        const raw = result?.data ?? result;
+        const normalizeStatus = (s?: string) => {
+          const v = (s ?? '').toLowerCase();
+          if (v === 'done' || v === 'completed') return 'COMPLETED';
+          if (v === 'cancelled' || v === 'canceled') return 'CANCELLED';
+          if (v === 'in_progress' || v === 'in-progress') return 'IN_PROGRESS';
+          if (v === 'pending') return 'PENDING';
+          return s?.toUpperCase();
+        };
+        const firstLine: string | undefined =
+          typeof raw?.message === 'string'
+            ? (raw.message as string).split('\n')[0]?.trim()
+            : undefined;
+        const mapped: ReminderDetails = {
+          reminder_id: raw?.reminder_id ?? raw?.id ?? reminderId,
+          title: raw?.title ?? firstLine ?? undefined,
+          description:
+            raw?.description ??
+            (typeof raw?.message === 'string' ? raw.message : undefined),
+          type: raw?.type ?? undefined,
+          status: normalizeStatus(raw?.status),
+          priority: raw?.priority ?? undefined,
+          due_date: raw?.due_date ?? raw?.remind_at ?? undefined,
+          assigned_to: raw?.assigned_to ?? raw?.user_id ?? undefined,
+          source_space_id: raw?.source_space_id ?? undefined,
+          target_space_id: raw?.target_space_id ?? undefined,
+          notes: raw?.notes ?? undefined,
+          created_at: raw?.created_at ?? undefined,
+          updated_at: raw?.updated_at ?? undefined,
+        };
+        setReminder(mapped);
         setError(null);
+
+        // Fetch user name if assigned_to exists
+        if (mapped.assigned_to) {
+          try {
+            const userResponse = await fetch(
+              `/api/greg/users/${mapped.assigned_to.replace(/^users\//, '')}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${idToken}`,
+                },
+              }
+            );
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              const userName = userData?.data?.name ?? userData?.name;
+              if (userName) {
+                setReminder(prev =>
+                  prev ? { ...prev, assigned_to_name: userName } : prev
+                );
+              }
+            }
+          } catch (err) {
+            console.error(
+              "Erreur lors de la récupération du nom de l'utilisateur:",
+              err
+            );
+          }
+        }
+
+        // Fetch source space name if exists
+        if (mapped.source_space_id) {
+          try {
+            const spaceResponse = await fetch(
+              `/api/greg/spaces/${mapped.source_space_id.replace(/^spaces\//, '')}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${idToken}`,
+                },
+              }
+            );
+            if (spaceResponse.ok) {
+              const spaceData = await spaceResponse.json();
+              const spaceName =
+                spaceData?.data?.space_name ?? spaceData?.space_name;
+              if (spaceName) {
+                setReminder(prev =>
+                  prev ? { ...prev, source_space_name: spaceName } : prev
+                );
+              }
+            }
+          } catch (err) {
+            console.error(
+              "Erreur lors de la récupération du nom de l'espace source:",
+              err
+            );
+          }
+        }
+
+        // Fetch target space name if exists
+        if (mapped.target_space_id) {
+          try {
+            const spaceResponse = await fetch(
+              `/api/greg/spaces/${mapped.target_space_id.replace(/^spaces\//, '')}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${idToken}`,
+                },
+              }
+            );
+            if (spaceResponse.ok) {
+              const spaceData = await spaceResponse.json();
+              const spaceName =
+                spaceData?.data?.space_name ?? spaceData?.space_name;
+              if (spaceName) {
+                setReminder(prev =>
+                  prev ? { ...prev, target_space_name: spaceName } : prev
+                );
+              }
+            }
+          } catch (err) {
+            console.error(
+              "Erreur lors de la récupération du nom de l'espace cible:",
+              err
+            );
+          }
+        }
       } catch (error: unknown) {
         console.error('Erreur:', error);
         setError(
@@ -130,41 +254,61 @@ export default function ReminderDetailsPage() {
 
   const handleDeleteSuccess = () => {
     setShowDeleteModal(false);
-    toast.success('Rappel supprimé avec succès');
+    toast.success('Rappel supprimé avec succès', {
+      style: { color: 'green' },
+      icon: '✓',
+    });
     router.push('/home/greg/reminders');
   };
 
+  const toSafeDate = (input?: string): Date | null => {
+    if (!input || typeof input !== 'string') return null;
+    const d = new Date(input);
+    if (isValid(d)) return d;
+    const p = parseISO(input);
+    if (isValid(p)) return p;
+    const n = Number(input);
+    if (Number.isFinite(n)) {
+      const ms = n > 1e12 ? n : n * 1000;
+      const dn = new Date(ms);
+      if (isValid(dn)) return dn;
+    }
+    return null;
+  };
+
   const formatDateTime = (dateString: string) => {
-    return format(new Date(dateString), 'dd MMMM yyyy à HH:mm', { locale: fr });
+    const d = toSafeDate(dateString);
+    return d ? format(d, 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-';
   };
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd MMMM yyyy', { locale: fr });
+    const d = toSafeDate(dateString);
+    return d ? format(d, 'dd MMMM yyyy', { locale: fr }) : '-';
   };
 
   const getPriorityBadge = (priority?: string) => {
     switch (priority?.toUpperCase()) {
       case 'URGENT':
         return (
-          <Badge className="bg-red-100 text-red-800 border-red-200">
+          <Badge className="border-red-200 bg-red-100 text-red-800">
             Urgent
           </Badge>
         );
       case 'HIGH':
         return (
-          <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+          <Badge className="border-orange-200 bg-orange-100 text-orange-800">
             Haute
           </Badge>
         );
       case 'MEDIUM':
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+          <Badge className="border-yellow-200 bg-yellow-100 text-yellow-800">
             Moyenne
           </Badge>
         );
       case 'LOW':
         return (
-          <Badge className="bg-green-100 text-green-800 border-green-200">
+          <Badge className="border-green-200 bg-green-100 text-green-800">
             Faible
           </Badge>
         );
@@ -201,6 +345,20 @@ export default function ReminderDetailsPage() {
     }
   };
 
+  const handleCopyId = async () => {
+    if (reminder?.reminder_id) {
+      try {
+        await navigator.clipboard.writeText(reminder.reminder_id);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        toast.success('ID copié dans le presse-papier', {
+          style: { color: 'green' },
+          icon: '✓',
+        });
+      } catch {}
+    }
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout breadcrumbs={breadcrumbs}>
@@ -208,7 +366,7 @@ export default function ReminderDetailsPage() {
           <Card>
             <CardHeader>
               <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-32 mt-2" />
+              <Skeleton className="mt-2 h-4 w-32" />
             </CardHeader>
             <CardContent className="space-y-4">
               <Skeleton className="h-20 w-full" />
@@ -256,7 +414,7 @@ export default function ReminderDetailsPage() {
                 onClick={() => router.push('/home/greg/reminders')}
                 className="mt-4 cursor-pointer"
               >
-                <ChevronLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Retour aux rappels
               </Button>
             </CardContent>
@@ -270,155 +428,229 @@ export default function ReminderDetailsPage() {
     <DashboardLayout breadcrumbs={breadcrumbs}>
       <div className="flex flex-col gap-6 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/home/greg/reminders')}
-              className="cursor-pointer"
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              Retour aux rappels
-            </Button>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Bell className="text-primary h-8 w-8" />
+            <div className="min-w-0">
+              {isLoading ? (
+                <>
+                  <Skeleton className="mb-1 h-7 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                </>
+              ) : (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <h1
+                        className="hover:text-primary/80 cursor-pointer text-2xl font-bold tracking-tight break-words transition-colors"
+                        onClick={handleCopyId}
+                      >
+                        {reminder?.title ?? `Rappel ${reminder?.reminder_id}`}
+                      </h1>
+                    </TooltipTrigger>
+                    <TooltipContent className="flex items-center gap-2">
+                      <Copy className="h-3 w-3" />
+                      <span>{reminder?.reminder_id}</span>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowEditModal(true)}
-              className="cursor-pointer"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Modifier
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteModal(true)}
-              className="cursor-pointer"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Supprimer
-            </Button>
-          </div>
+          {!isLoading && (
+            <div className="flex shrink-0 items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEditModal(true)}
+                className="cursor-pointer"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Modifier
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="cursor-pointer text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Supprimer
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Reminder Details */}
-        <Card className="shadow-sm">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-orange-700">
-                  <Bell className="h-5 w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-2xl">
-                    {reminder.title ?? `Rappel ${reminder.reminder_id}`}
-                  </CardTitle>
-                  <CardDescription className="mt-2">
-                    ID: {reminder.reminder_id}
-                  </CardDescription>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
+        {/* Reminder Details Card */}
+        {!isLoading && reminder && (
+          <Card className="relative shadow-sm">
+            {/* Status Badge - Top Right Corner */}
+            <div className="absolute top-4 right-4 z-10">
+              <Badge
+                variant={(() => {
+                  if (reminder.status === 'COMPLETED') return 'default';
+                  if (reminder.status === 'CANCELLED') return 'destructive';
+                  if (reminder.status === 'IN_PROGRESS') return 'secondary';
+                  return 'outline';
+                })()}
+                className={(() => {
+                  if (reminder.status === 'COMPLETED')
+                    return 'border-green-200 bg-green-100 text-green-800';
+                  if (reminder.status === 'CANCELLED')
+                    return 'border-red-200 bg-red-100 text-red-800';
+                  if (reminder.status === 'IN_PROGRESS')
+                    return 'border-blue-200 bg-blue-100 text-blue-800';
+                  return 'border-amber-200 bg-amber-100 text-amber-800';
+                })()}
+              >
                 {getStatusIcon(reminder.status)}
-                <span className="font-medium">
-                  {getStatusText(reminder.status)}
-                </span>
-              </div>
+                <span className="ml-1.5">{getStatusText(reminder.status)}</span>
+              </Badge>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Description */}
-            {reminder.description && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  Description
-                </h3>
-                <p className="text-sm">{reminder.description}</p>
-              </div>
-            )}
-
-            {/* Main Information */}
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-3">
-                {reminder.type && (
-                  <div className="flex items-start gap-3">
-                    <Tag className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Type</p>
-                      <p className="text-sm text-muted-foreground">
-                        {reminder.type}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {reminder.priority && (
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Priorité</p>
-                      <div className="mt-1">
-                        {getPriorityBadge(reminder.priority)}
+            <CardHeader>
+              <CardTitle>Informations du rappel</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Main Information Grid */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  {reminder.priority && (
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="text-muted-foreground mt-0.5 h-5 w-5" />
+                      <div>
+                        <p className="text-sm font-medium">Priorité</p>
+                        <div className="mt-1">
+                          {getPriorityBadge(reminder.priority)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
 
-              <div className="space-y-3">
-                {reminder.due_date && (
-                  <div className="flex items-start gap-3">
-                    <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        Date d&apos;échéance
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDate(reminder.due_date)}
-                      </p>
+                  {reminder.type && (
+                    <div className="flex items-start gap-3">
+                      <Tag className="text-muted-foreground mt-0.5 h-5 w-5" />
+                      <div>
+                        <p className="text-sm font-medium">Type</p>
+                        <p className="mt-0.5 text-sm font-medium text-gray-600">
+                          {reminder.type}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {reminder.assigned_to && (
-                  <div className="flex items-start gap-3">
-                    <User className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Assigné à</p>
-                      <p className="text-sm text-muted-foreground">
-                        {reminder.assigned_to}
-                      </p>
+                  )}
+
+                  {reminder.due_date && (
+                    <div className="flex items-start gap-3">
+                      <Calendar className="text-muted-foreground mt-0.5 h-5 w-5" />
+                      <div>
+                        <p className="text-sm font-medium">Date de rappel</p>
+                        <p className="mt-0.5 text-sm font-medium text-gray-600">
+                          {formatDate(reminder.due_date)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
+                  )}
+                </div>
 
-            {/* Notes */}
-            {reminder.notes && (
-              <div className="space-y-2 pt-4 border-t">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  Notes
-                </h3>
-                <p className="text-sm">{reminder.notes}</p>
-              </div>
-            )}
+                {/* Right Column */}
+                <div className="space-y-4">
+                  {reminder.assigned_to && (
+                    <div className="flex items-start gap-3">
+                      <User className="text-muted-foreground mt-0.5 h-5 w-5" />
+                      <div>
+                        <p className="text-sm font-medium">Assigné à</p>
+                        <p className="mt-0.5 text-sm">
+                          <Link
+                            href={`/home/greg/users/${reminder.assigned_to.replace(/^users\//, '')}`}
+                            className="font-medium text-blue-600 hover:underline"
+                          >
+                            {reminder.assigned_to_name ?? reminder.assigned_to}
+                          </Link>
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-            {/* Timestamps */}
-            <div className="pt-4 border-t space-y-1">
-              {reminder.created_at && (
-                <p className="text-xs text-muted-foreground">
-                  Créé le {formatDateTime(reminder.created_at)}
-                </p>
+                  {reminder.source_space_id && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="text-muted-foreground mt-0.5 h-5 w-5" />
+                      <div>
+                        <p className="text-sm font-medium">Espace source</p>
+                        {reminder.source_space_id.startsWith('spaces/') ? (
+                          <p className="mt-0.5 text-sm">
+                            <Link
+                              href={`/home/greg/spaces/${reminder.source_space_id.replace(/^spaces\//, '')}`}
+                              className="font-medium break-all text-blue-600 hover:underline"
+                            >
+                              {reminder.source_space_name ??
+                                reminder.source_space_id}
+                            </Link>
+                          </p>
+                        ) : (
+                          <p className="mt-0.5 text-sm font-medium break-all text-gray-600">
+                            {reminder.source_space_name ??
+                              reminder.source_space_id}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {reminder.target_space_id && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="text-muted-foreground mt-0.5 h-5 w-5" />
+                      <div>
+                        <p className="text-sm font-medium">Espace cible</p>
+                        {reminder.target_space_id.startsWith('spaces/') ? (
+                          <p className="mt-0.5 text-sm">
+                            <Link
+                              href={`/home/greg/spaces/${reminder.target_space_id.replace(/^spaces\//, '')}`}
+                              className="font-medium break-all text-blue-600 hover:underline"
+                            >
+                              {reminder.target_space_name ??
+                                reminder.target_space_id}
+                            </Link>
+                          </p>
+                        ) : (
+                          <p className="mt-0.5 text-sm font-medium break-all text-gray-600">
+                            {reminder.target_space_name ??
+                              reminder.target_space_id}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Notes */}
+              {reminder.notes && (
+                <div className="space-y-2 border-t pt-4">
+                  <h3 className="text-muted-foreground text-sm font-medium">
+                    Notes
+                  </h3>
+                  <p className="text-sm">{reminder.notes}</p>
+                </div>
               )}
-              {reminder.updated_at &&
-                reminder.updated_at !== reminder.created_at && (
-                  <p className="text-xs text-muted-foreground">
-                    Dernière modification le{' '}
-                    {formatDateTime(reminder.updated_at)}
+
+              {/* Timestamps */}
+              <div className="space-y-1 border-t pt-4">
+                {reminder.created_at && (
+                  <p className="text-muted-foreground text-xs">
+                    Créé le {formatDateTime(reminder.created_at)}
                   </p>
                 )}
-            </div>
-          </CardContent>
-        </Card>
+                {reminder.updated_at &&
+                  reminder.updated_at !== reminder.created_at && (
+                    <p className="text-muted-foreground text-xs">
+                      Dernière modification le{' '}
+                      {formatDateTime(reminder.updated_at)}
+                    </p>
+                  )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Modals */}
         {reminder && (
@@ -427,10 +659,10 @@ export default function ReminderDetailsPage() {
               open={showEditModal}
               onOpenChange={setShowEditModal}
               reminder={{
-                id: reminder.reminder_id,
+                id: reminder.reminder_id.replace('reminders/', ''), // Remove prefix if present
                 message: reminder.description ?? '',
                 user_id: reminder.assigned_to ?? '',
-                target_space_id: '',
+                target_space_id: reminder.target_space_id ?? '',
                 status: reminder.status ?? 'PENDING',
                 remind_at: reminder.due_date ?? new Date().toISOString(),
                 created_at: reminder.created_at ?? new Date().toISOString(),
@@ -448,7 +680,7 @@ export default function ReminderDetailsPage() {
                   reminder.description ??
                   `Rappel ${reminder.reminder_id}`,
                 user_id: reminder.assigned_to ?? '',
-                target_space_id: '',
+                target_space_id: reminder.target_space_id ?? '',
                 status: reminder.status ?? 'PENDING',
                 remind_at: reminder.due_date ?? new Date().toISOString(),
                 created_at: reminder.created_at ?? new Date().toISOString(),

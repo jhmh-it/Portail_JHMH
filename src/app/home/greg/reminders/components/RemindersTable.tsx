@@ -52,6 +52,7 @@ interface Space {
 interface Props {
   reminders: Reminder[];
   spaces: Space[];
+  userNames?: Record<string, string>;
   onRowClick: (reminder: Reminder) => void;
   onEdit: (reminder: Reminder) => void;
   onDelete: (reminder: Reminder) => void;
@@ -60,6 +61,7 @@ interface Props {
 export function RemindersTable({
   reminders,
   spaces,
+  userNames,
   onRowClick,
   onEdit,
   onDelete,
@@ -81,13 +83,13 @@ export function RemindersTable({
     switch (status?.toUpperCase()) {
       case 'PENDING':
         return (
-          <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+          <Badge className="border-amber-200 bg-amber-100 text-amber-800">
             En attente
           </Badge>
         );
       case 'COMPLETED':
         return (
-          <Badge className="bg-green-100 text-green-800 border-green-200">
+          <Badge className="border-green-200 bg-green-100 text-green-800">
             Terminé
           </Badge>
         );
@@ -104,7 +106,7 @@ export function RemindersTable({
         <TableHeader>
           <TableRow>
             <TableHead>Message</TableHead>
-            <TableHead>Espace cible</TableHead>
+            <TableHead>Espace du rappel</TableHead>
             <TableHead>Utilisateur</TableHead>
             <TableHead>Date de rappel</TableHead>
             <TableHead>Statut</TableHead>
@@ -115,40 +117,37 @@ export function RemindersTable({
           {reminders.map(reminder => (
             <TableRow
               key={reminder.id}
-              className="cursor-pointer hover:bg-muted/50"
+              className="hover:bg-muted/50 hover:shadow-primary/15 hover:border-primary/30 relative cursor-pointer transition-all duration-200 hover:z-10 hover:shadow-lg"
               onClick={() => onRowClick(reminder)}
             >
               <TableCell>
-                <div className="flex items-start gap-2 max-w-xs">
-                  <Bell className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                  <p className="font-medium line-clamp-2">{reminder.message}</p>
+                <div className="flex max-w-xs items-start gap-2">
+                  <Bell className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0" />
+                  <p className="line-clamp-2 font-medium">{reminder.message}</p>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-3 w-3 text-muted-foreground" />
+                  <MapPin className="text-muted-foreground h-3 w-3" />
                   <div>
                     <p className="font-medium">
                       {getSpaceName(reminder.target_space_id)}
                     </p>
-                    {reminder.source_space_id && (
-                      <p className="text-xs text-muted-foreground">
-                        depuis {getSpaceName(reminder.source_space_id)}
-                      </p>
-                    )}
                   </div>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2 text-sm">
-                  <User className="h-3 w-3 text-muted-foreground" />
-                  <span className="font-mono text-xs">{reminder.user_id}</span>
+                  <User className="text-muted-foreground h-3 w-3" />
+                  <span className="text-sm">
+                    {userNames?.[reminder.user_id] ?? 'Utilisateur'}
+                  </span>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="space-y-1">
                   <p className="text-sm">{formatDate(reminder.remind_at)}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {formatTime(reminder.remind_at)}
                   </p>
                 </div>
@@ -176,7 +175,7 @@ export function RemindersTable({
                         onRowClick(reminder);
                       }}
                     >
-                      <Eye className="h-4 w-4 mr-2" />
+                      <Eye className="mr-2 h-4 w-4" />
                       Voir les détails
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -186,7 +185,7 @@ export function RemindersTable({
                         onEdit(reminder);
                       }}
                     >
-                      <Edit className="h-4 w-4 mr-2" />
+                      <Edit className="mr-2 h-4 w-4" />
                       Modifier
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -197,7 +196,7 @@ export function RemindersTable({
                         onDelete(reminder);
                       }}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="mr-2 h-4 w-4" />
                       Supprimer
                     </DropdownMenuItem>
                   </DropdownMenuContent>

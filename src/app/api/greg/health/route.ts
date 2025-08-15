@@ -1,104 +1,141 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+import {
+  createGregErrorResponse,
+  createGregSuccessResponse,
+  createGregService,
+} from '@/app/home/greg/services/greg.service';
+import { logGregApiError, logApiCall } from '@/lib/api-logger';
 import { adminAuth } from '@/lib/firebase-admin';
 
-export async function GET() {
-  try {
-    // Check authentication
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+async function verifyAuthentication() {
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  const sessionCookie = (await cookieStore).get('session');
 
-    if (!sessionCookie?.value) {
+  if (!sessionCookie?.value) {
+    return { error: 'Non autorisé', status: 401 };
+  }
+
+  if (!adminAuth) {
+    return { error: 'Service temporairement indisponible', status: 503 };
+  }
+
+  try {
+    await adminAuth.verifyIdToken(sessionCookie.value);
+    return { success: true };
+  } catch {
+    return { error: 'Session invalide', status: 401 };
+  }
+}
+
+export async function GET() {
+  const startTime = Date.now();
+
+  try {
+    // Vérifier l'authentification
+    const authResult = await verifyAuthentication();
+    if ('error' in authResult) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: '/api/greg/health',
+        method: 'GET',
+        success: false,
+        statusCode: authResult.status,
+        duration,
+        error: authResult.error,
+      });
+
       return NextResponse.json(
-        { success: false, error: 'Non autorisé' },
-        { status: 401 }
+        createGregErrorResponse(
+          authResult.error ?? "Erreur d'authentification",
+          'ACCESS_DENIED'
+        ),
+        { status: authResult.status }
       );
     }
 
-    // Vérifier que Firebase Admin est disponible
-    if (!adminAuth) {
+    // Obtenir le service Greg
+    const gregService = createGregService();
+    if (!gregService) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: '/api/greg/health',
+        method: 'GET',
+        success: false,
+        statusCode: 503,
+        duration,
+        error: 'Service Greg indisponible',
+      });
+
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Service temporairement indisponible',
-          code: 'AUTH_UNAVAILABLE',
-        },
+        createGregErrorResponse(
+          'Service Greg indisponible',
+          'API_CONFIG_MISSING'
+        ),
         { status: 503 }
       );
     }
 
-    // Verify the session token
-    try {
-      await adminAuth.verifyIdToken(sessionCookie.value);
-    } catch {
-      return NextResponse.json(
-        { success: false, error: 'Session invalide' },
-        { status: 401 }
-      );
-    }
+    // Appel à l'API externe Greg
+    const result = await gregService.getHealth();
 
-    // Configuration API
-    const apiBaseUrl = process.env.JHMH_API_BASE_URL;
-    const apiKey = process.env.JHMH_API_KEY;
+    if (!result.success) {
+      const duration = Date.now() - startTime;
+      const errorMsg =
+        result.error ?? 'Impossible de vérifier la santé du service Greg';
 
-    if (!apiBaseUrl || !apiKey) {
-      console.error('[API] Configuration API manquante');
+      logGregApiError('getHealth', '/health', errorMsg);
+      logApiCall({
+        endpoint: '/api/greg/health',
+        method: 'GET',
+        success: false,
+        statusCode: 500,
+        duration,
+        error: errorMsg,
+      });
+
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Configuration API manquante',
-          code: 'API_CONFIG_MISSING',
-        },
+        createGregErrorResponse(errorMsg, 'EXTERNAL_API_ERROR'),
         { status: 500 }
       );
     }
 
-    // Call external Greg health API
-    const apiUrl = `${apiBaseUrl}/api/greg/health`;
-
-    const response = await fetch(apiUrl, {
+    const duration = Date.now() - startTime;
+    logApiCall({
+      endpoint: '/api/greg/health',
       method: 'GET',
-      headers: {
-        'X-API-KEY': apiKey,
-        'Content-Type': 'application/json',
-      },
+      success: true,
+      statusCode: 200,
+      duration,
+      responseSize: JSON.stringify(result.data).length,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        '[API] Erreur lors de la vérification de la santé Greg:',
-        errorText
-      );
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Service Greg indisponible',
-          details: errorText,
-        },
-        { status: response.status }
-      );
-    }
-
-    const healthData = await response.json();
-
-    return NextResponse.json({
-      success: true,
-      data: healthData,
+    return NextResponse.json(createGregSuccessResponse(result.data), {
+      status: 200,
     });
   } catch (error) {
-    console.error(
-      '[API] Erreur lors de la vérification de la santé Greg:',
-      error
-    );
+    const duration = Date.now() - startTime;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur interne du serveur';
+
+    logGregApiError('getHealth', '/health', error);
+    logApiCall({
+      endpoint: '/api/greg/health',
+      method: 'GET',
+      success: false,
+      statusCode: 500,
+      duration,
+      error: errorMessage,
+    });
+
+    console.error('[Greg Health GET] Erreur:', {
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Erreur interne du serveur',
-        message: error instanceof Error ? error.message : 'Erreur inconnue',
-      },
+      createGregErrorResponse('Erreur interne du serveur', 'UNKNOWN_ERROR'),
       { status: 500 }
     );
   }

@@ -2,10 +2,14 @@
 
 ## Vue d'ensemble
 
-La page de gestion des accès permet de contrôler les permissions entre les espaces et les documents dans le système Greg. Elle offre une interface unifiée pour gérer deux types d'accès :
+La page de gestion des accès permet de contrôler les permissions entre les
+espaces et les documents dans le système Greg. Elle offre une interface unifiée
+pour gérer deux types d'accès :
 
-1. **Accès Documents-Espaces** : Définit quels espaces peuvent accéder à quels documents
-2. **Accès Historiques entre Espaces** : Permet à certains espaces d'accéder à l'historique d'autres espaces
+1. **Accès Documents-Espaces** : Définit quels espaces peuvent accéder à quels
+   documents
+2. **Accès Historiques entre Espaces** : Permet à certains espaces d'accéder à
+   l'historique d'autres espaces
 
 ## Architecture
 
@@ -37,7 +41,8 @@ src/app/api/greg/
 
 ### 1. Visualisation des accès
 
-- **Vue en tableau** : Affichage clair des accès avec espaces, documents, dates et notes
+- **Vue en tableau** : Affichage clair des accès avec espaces, documents, dates
+  et notes
 - **Recherche globale** : Recherche par nom d'espace, document, ID ou notes
 - **Filtres avancés** :
   - Type d'espace (Groupes/DMs)
@@ -68,8 +73,10 @@ src/app/api/greg/
 - `GET /api/greg/space-document-access` - Liste tous les accès
 - `POST /api/greg/space-document-access` - Créer un nouvel accès
 - `DELETE /api/greg/space-document-access` - Supprimer un accès
-- `GET /api/greg/space-document-access/document/{id}` - Espaces ayant accès à un document
-- `GET /api/greg/space-document-access/space/{id}` - Documents accessibles par un espace
+- `GET /api/greg/space-document-access/document/{id}` - Espaces ayant accès à un
+  document
+- `GET /api/greg/space-document-access/space/{id}` - Documents accessibles par
+  un espace
 
 ### Accès Historiques
 
@@ -77,7 +84,8 @@ src/app/api/greg/
 - `POST /api/greg/space-history-access` - Créer un nouvel accès
 - `PUT /api/greg/space-history-access` - Mettre à jour un accès (note)
 - `DELETE /api/greg/space-history-access` - Supprimer un accès
-- `GET /api/greg/space-history-access/{space_id}` - Accès historiques pour un espace
+- `GET /api/greg/space-history-access/{space_id}` - Accès historiques pour un
+  espace
 
 ## Patterns de code
 

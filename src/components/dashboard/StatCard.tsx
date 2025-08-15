@@ -70,30 +70,30 @@ export function StatCard({
     : 0;
 
   return (
-    <Card className={cn('hover:shadow-md transition-shadow', className)}>
+    <Card className={cn('transition-shadow hover:shadow-md', className)}>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center justify-between text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-muted-foreground flex items-center justify-between text-sm font-medium">
           <span>{title}</span>
           {Icon && <Icon className="h-4 w-4" />}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-3">
-          <div className="text-2xl font-bold text-navy">
+          <div className="text-navy text-2xl font-bold">
             {formatValue(value)}
           </div>
 
           {subtitle && (
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
+            <p className="text-muted-foreground text-sm">{subtitle}</p>
           )}
 
           {progress && (
             <div className="space-y-2">
-              <div className="flex justify-between text-xs text-muted-foreground">
+              <div className="text-muted-foreground flex justify-between text-xs">
                 <span>{progress.label ?? 'Progression'}</span>
                 <span>{progressPercentage.toFixed(1)}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="h-2 w-full rounded-full bg-gray-200">
                 <div
                   className="bg-navy h-2 rounded-full transition-all duration-300"
                   style={{ width: `${Math.min(progressPercentage, 100)}%` }}
@@ -104,7 +104,7 @@ export function StatCard({
 
           {comparison && (
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {comparison.label}
               </span>
               <Badge className={cn('text-xs', getTrendColor())}>

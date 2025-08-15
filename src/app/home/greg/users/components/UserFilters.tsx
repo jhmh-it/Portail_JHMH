@@ -33,8 +33,8 @@ export function UserFilters({ filters, onFiltersChange, onClose }: Props) {
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-card animate-in slide-in-from-top-2">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-card animate-in slide-in-from-top-2 rounded-lg border p-4">
+      <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Filtres avancés</h3>
         <Button
           variant="ghost"
@@ -46,8 +46,8 @@ export function UserFilters({ filters, onFiltersChange, onClose }: Props) {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-        <div className="flex-1 min-w-0 max-w-[200px]">
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end">
+        <div className="max-w-[200px] min-w-0 flex-1">
           <Label htmlFor="source-filter" className="text-xs">
             Source préférée
           </Label>
@@ -57,7 +57,7 @@ export function UserFilters({ filters, onFiltersChange, onClose }: Props) {
           >
             <SelectTrigger
               id="source-filter"
-              className="h-8 text-sm cursor-pointer mt-1"
+              className="mt-1 h-8 cursor-pointer text-sm"
             >
               <SelectValue placeholder="Toutes les sources" />
             </SelectTrigger>
@@ -81,7 +81,7 @@ export function UserFilters({ filters, onFiltersChange, onClose }: Props) {
           </Select>
         </div>
 
-        <div className="flex-1 min-w-0 max-w-[200px]">
+        <div className="max-w-[200px] min-w-0 flex-1">
           <Label htmlFor="verbose-filter" className="text-xs">
             Mode verbose
           </Label>
@@ -91,7 +91,7 @@ export function UserFilters({ filters, onFiltersChange, onClose }: Props) {
           >
             <SelectTrigger
               id="verbose-filter"
-              className="h-8 text-sm cursor-pointer mt-1"
+              className="mt-1 h-8 cursor-pointer text-sm"
             >
               <SelectValue placeholder="Tous les modes" />
             </SelectTrigger>

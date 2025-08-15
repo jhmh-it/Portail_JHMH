@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { getAuth } from 'firebase/auth';
 import { CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -200,7 +201,7 @@ export function CreateReminderModal({
                   <FormLabel>Espace cible</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value ?? undefined}
                   >
                     <FormControl>
                       <SelectTrigger className="cursor-pointer">
@@ -236,7 +237,7 @@ export function CreateReminderModal({
                   <FormLabel>Espace source (optionnel)</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value ?? undefined}
                   >
                     <FormControl>
                       <SelectTrigger className="cursor-pointer">
@@ -244,7 +245,7 @@ export function CreateReminderModal({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="" className="cursor-pointer">
+                      <SelectItem value="none" className="cursor-pointer">
                         Aucun
                       </SelectItem>
                       {spaces.map(space => (
@@ -313,12 +314,14 @@ export function CreateReminderModal({
                           <Button
                             variant="outline"
                             className={cn(
-                              'w-full pl-3 text-left font-normal cursor-pointer',
+                              'w-full cursor-pointer pl-3 text-left font-normal',
                               !field.value && 'text-muted-foreground'
                             )}
                           >
                             {field.value ? (
-                              format(field.value, 'dd MMMM yyyy')
+                              format(field.value, 'dd MMMM yyyy', {
+                                locale: fr,
+                              })
                             ) : (
                               <span>Sélectionner une date</span>
                             )}

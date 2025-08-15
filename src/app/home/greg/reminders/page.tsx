@@ -26,9 +26,11 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGregSpaces } from '@/hooks/useGregApi';
 import { useUser } from '@/hooks/useUser';
 import { useLoadingStore } from '@/stores/loading-store';
+
+import { useGregSpaces } from '../hooks';
+import type { GregSpace } from '../types';
 
 import { CreateReminderModal } from './components/CreateReminderModal';
 import { DeleteReminderModal } from './components/DeleteReminderModal';
@@ -65,6 +67,7 @@ export default function RemindersPage() {
     status: 'all',
     userId: 'all',
   });
+  const [userNamesMap, setUserNamesMap] = useState<Record<string, string>>({});
 
   const router = useRouter();
   const { data: user } = useUser();
@@ -133,8 +136,47 @@ export default function RemindersPage() {
         throw new Error('Erreur lors de la récupération des rappels');
       }
 
-      const data = await response.json();
-      setReminders(data);
+      const raw = await response.json();
+      let list: Reminder[] = [];
+      if (Array.isArray(raw?.data)) {
+        list = raw.data as Reminder[];
+      } else if (Array.isArray(raw)) {
+        list = raw as Reminder[];
+      } else if (raw?.success && Array.isArray(raw?.data?.data)) {
+        list = raw.data.data as Reminder[];
+      }
+
+      // Deduplicate by id, keep the most recent (by updated_at then remind_at)
+      const toTime = (d?: string) => {
+        if (!d) return 0;
+        const t = new Date(d).getTime();
+        return Number.isFinite(t) ? t : 0;
+      };
+
+      const idToReminder = new Map<string, Reminder>();
+      for (const r of list) {
+        const existing = idToReminder.get(r.id);
+        if (!existing) {
+          idToReminder.set(r.id, r);
+          continue;
+        }
+        const existingTime = Math.max(
+          toTime(existing.updated_at),
+          toTime(existing.remind_at)
+        );
+        const currentTime = Math.max(toTime(r.updated_at), toTime(r.remind_at));
+        if (currentTime >= existingTime) {
+          idToReminder.set(r.id, r);
+        }
+      }
+
+      const deduped = Array.from(idToReminder.values()).sort((a, b) => {
+        const ta = Math.max(toTime(a.updated_at), toTime(a.remind_at));
+        const tb = Math.max(toTime(b.updated_at), toTime(b.remind_at));
+        return tb - ta;
+      });
+
+      setReminders(deduped);
       setError(null);
     } catch (error) {
       console.error('Erreur:', error);
@@ -145,9 +187,43 @@ export default function RemindersPage() {
     }
   };
 
+  const fetchUsersMap = async () => {
+    try {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      const idToken = await currentUser.getIdToken();
+      const response = await fetch('/api/greg/users', {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      if (!response.ok) return;
+      const raw = await response.json();
+      let list: Array<{ user_id: string; name: string }> = [];
+      if (Array.isArray(raw?.data)) {
+        list = raw.data as Array<{ user_id: string; name: string }>;
+      } else if (Array.isArray(raw)) {
+        list = raw as Array<{ user_id: string; name: string }>;
+      }
+      const map: Record<string, string> = {};
+      for (const u of list) {
+        if (u?.user_id && u?.name) {
+          map[u.user_id] = u.name;
+        }
+      }
+      setUserNamesMap(map);
+    } catch (err) {
+      // Silencieux: absence de noms n'est pas bloquante
+      console.warn('Unable to fetch users map', err);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchReminders();
+      fetchUsersMap();
     } else {
       setIsLoading(false);
     }
@@ -192,11 +268,15 @@ export default function RemindersPage() {
   };
 
   // Filter reminders based on search
+  const safeSpaces: GregSpace[] = Array.isArray(spacesData?.data)
+    ? ((spacesData?.data ?? []) as GregSpace[])
+    : ([] as GregSpace[]);
   const filteredReminders = reminders.filter(reminder => {
+    const spacesArray: GregSpace[] = safeSpaces;
     const sourceSpace = reminder.source_space_id
-      ? spacesData?.data?.find(s => s.space_id === reminder.source_space_id)
+      ? (spacesArray.find(s => s.space_id === reminder.source_space_id) ?? null)
       : null;
-    const targetSpace = spacesData?.data?.find(
+    const targetSpace = spacesArray.find(
       s => s.space_id === reminder.target_space_id
     );
 
@@ -206,8 +286,8 @@ export default function RemindersPage() {
         reminder.message.toLowerCase().includes(query) ||
         reminder.id.toLowerCase().includes(query) ||
         reminder.user_id.toLowerCase().includes(query) ||
-        (sourceSpace?.space_name?.toLowerCase().includes(query) ?? false) ||
-        (targetSpace?.space_name?.toLowerCase().includes(query) ?? false)
+        Boolean(sourceSpace?.space_name?.toLowerCase().includes(query)) ||
+        Boolean(targetSpace?.space_name?.toLowerCase().includes(query))
       );
     }
 
@@ -226,7 +306,7 @@ export default function RemindersPage() {
 
     if (filteredReminders.length === 0) {
       return (
-        <div className="text-center py-8">
+        <div className="py-8 text-center">
           <p className="text-muted-foreground mb-4">
             {searchQuery || hasActiveFilters
               ? 'Aucun rappel trouvé avec ces critères'
@@ -249,6 +329,7 @@ export default function RemindersPage() {
       <RemindersTable
         reminders={filteredReminders}
         spaces={spacesData?.data ?? []}
+        userNames={userNamesMap}
         onRowClick={handleRowClick}
         onEdit={handleEdit}
         onDelete={handleDelete}
@@ -263,7 +344,7 @@ export default function RemindersPage() {
           <Card>
             <CardHeader>
               <Skeleton className="h-8 w-32" />
-              <Skeleton className="h-4 w-64 mt-2" />
+              <Skeleton className="mt-2 h-4 w-64" />
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -304,9 +385,9 @@ export default function RemindersPage() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Bell className="h-8 w-8 text-primary" />
+              <Bell className="text-primary h-8 w-8" />
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-navy">
+                <h1 className="text-navy text-3xl font-bold tracking-tight">
                   Rappels
                 </h1>
                 <p className="text-muted-foreground">
@@ -317,9 +398,9 @@ export default function RemindersPage() {
           </div>
 
           {/* Search and Filters Bar */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
               <Input
                 placeholder="Rechercher par message, ID ou espace..."
                 value={searchQuery}
@@ -331,7 +412,7 @@ export default function RemindersPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="gap-2 cursor-pointer"
+                className="cursor-pointer gap-2"
               >
                 <Filter className="h-4 w-4" />
                 Filtres
@@ -351,7 +432,7 @@ export default function RemindersPage() {
                   onClick={handleClearFilters}
                   className="cursor-pointer"
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="mr-2 h-4 w-4" />
                   Réinitialiser
                 </Button>
               )}
@@ -362,7 +443,7 @@ export default function RemindersPage() {
                 className="cursor-pointer"
               >
                 <RefreshCw
-                  className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+                  className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
                 />
                 Actualiser
               </Button>
@@ -395,9 +476,9 @@ export default function RemindersPage() {
             <Button
               onClick={() => setShowCreateModal(true)}
               size="sm"
-              className="cursor-pointer bg-[#0d1b3c] hover:bg-[#0d1b3c]/90 text-white"
+              className="cursor-pointer bg-[#0d1b3c] text-white hover:bg-[#0d1b3c]/90"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Nouveau rappel
             </Button>
           </CardHeader>

@@ -47,3 +47,9 @@ swagger.json
 docker-compose.yml
 
 .kilocode/
+
+# Todo2 - AI-powered task management directories
+.cursor/rules/todo2-overview.mdc
+.cursor/rules/todo2.mdc
+.cursor/mcp.json
+.todo2/

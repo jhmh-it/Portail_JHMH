@@ -277,7 +277,8 @@ Un bon message de commit répond à : "Si j'applique ce commit, il va..."
 
 ### 2. Atomicité
 
-Un commit = un changement logique. Si vous devez utiliser "et" dans la description, faites deux commits.
+Un commit = un changement logique. Si vous devez utiliser "et" dans la
+description, faites deux commits.
 
 ### 3. Contexte dans le body
 
@@ -336,4 +337,5 @@ Fixes #12
 
 ---
 
-**Note** : Ce guide est appliqué automatiquement via Husky. Les commits non conformes seront rejetés avec un message d'aide.
+**Note** : Ce guide est appliqué automatiquement via Husky. Les commits non
+conformes seront rejetés avec un message d'aide.

@@ -5,18 +5,19 @@ import {
   createDashboardErrorResponse,
   logDashboardEvent,
   measureExecutionTime,
-} from '@/lib/dashboard-utils';
+} from '@/app/home/accounting/dashboard/lib/dashboard-utils';
+import { fetchDashboardMetrics } from '@/app/home/accounting/dashboard/services';
 import {
   extractSearchParams,
   validateDashboardMetricsQuery,
-} from '@/lib/validation';
-import { fetchDashboardMetrics } from '@/services/dashboard.service';
+} from '@/app/home/accounting/dashboard/validation';
+import { logApiCall } from '@/lib/api-logger';
 
 // Re-export types pour compatibilité
 export type {
   DashboardMetricsResponse,
-  DashboardMetricsAttributes,
-} from '@/types/dashboard';
+  DashboardMetrics as DashboardMetricsAttributes,
+} from '@/app/home/accounting/dashboard/types';
 
 /**
  * GET /api/dashboard/metrics
@@ -24,13 +25,26 @@ export type {
  */
 
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+
   return measureExecutionTime(async () => {
     try {
       // Extraire et valider les paramètres
-      const searchParams = extractSearchParams(request.url);
+      const searchParams = extractSearchParams(request);
       const validation = validateDashboardMetricsQuery(searchParams);
 
-      if (!validation.success) {
+      if (!validation.valid) {
+        const duration = Date.now() - startTime;
+        logApiCall({
+          endpoint: '/api/dashboard/metrics',
+          method: 'GET',
+          success: false,
+          statusCode: 400,
+          duration,
+          error: 'Invalid parameters',
+          requestParams: Object.fromEntries(searchParams.entries()),
+        });
+
         logDashboardEvent(
           'metrics_error',
           undefined,
@@ -40,46 +54,109 @@ export async function GET(request: NextRequest) {
         return createDashboardErrorResponse(
           'Invalid parameters',
           'Paramètres de requête invalides',
-          validation.errors.errors
+          validation.error
         );
       }
 
-      const { date, actif } = validation.data;
+      const { date, actif } = validation.data as {
+        date: string;
+        actif: string;
+      };
 
       logDashboardEvent('metrics_request', actif, date);
 
       // Déléguer la logique au service
-      const result = await fetchDashboardMetrics(date, actif);
+      const result = await fetchDashboardMetrics({ date, actif });
 
       if (!result.success) {
-        logDashboardEvent('metrics_error', actif, date, result.error.error);
+        const duration = Date.now() - startTime;
+        const status = 500;
 
-        const status = result.error.error === 'Asset not found' ? 404 : 500;
+        logApiCall({
+          endpoint: '/api/dashboard/metrics',
+          method: 'GET',
+          success: false,
+          statusCode: status,
+          duration,
+          error: 'Failed to fetch metrics',
+          requestParams: { date, actif },
+        });
+
+        logDashboardEvent(
+          'metrics_error',
+          actif,
+          date,
+          'Failed to fetch metrics'
+        );
+
         return createDashboardErrorResponse(
-          result.error.error,
-          result.error.message,
-          result.error.details,
+          'FETCH_ERROR',
+          'Failed to fetch dashboard metrics',
+          undefined,
           status
         );
       }
+
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: '/api/dashboard/metrics',
+        method: 'GET',
+        success: true,
+        statusCode: 200,
+        duration,
+        requestParams: { date, actif },
+        responseSize: JSON.stringify(result.data).length,
+      });
 
       logDashboardEvent('metrics_success', actif, date);
 
       // Retourner la réponse avec cache
       return createCachedDashboardResponse(result.data);
     } catch (error) {
-      console.error('Error in dashboard metrics API:', error);
+      const duration = Date.now() - startTime;
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
+      // Extraire les paramètres même en cas d'erreur pour les logs
+      let requestParams: Record<string, unknown> | undefined = undefined;
+      try {
+        const searchParams = extractSearchParams(request);
+        const validation = validateDashboardMetricsQuery(searchParams);
+        requestParams = validation.valid
+          ? validation.data
+          : Object.fromEntries(searchParams.entries());
+      } catch {
+        requestParams = undefined;
+      }
+
+      logApiCall({
+        endpoint: '/api/dashboard/metrics',
+        method: 'GET',
+        success: false,
+        statusCode: 500,
+        duration,
+        error: errorMessage,
+        requestParams,
+      });
+
+      console.error('Error in dashboard metrics API:', {
+        error: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString(),
+      });
+
+      const rp = requestParams as { actif?: string; date?: string } | undefined;
       logDashboardEvent(
         'metrics_error',
-        undefined,
-        undefined,
+        rp?.actif,
+        rp?.date,
         'Unexpected error'
       );
 
       return createDashboardErrorResponse(
         'Internal server error',
         'Une erreur inattendue est survenue',
-        error instanceof Error ? error.message : 'Unknown error',
+        errorMessage,
         500
       );
     }

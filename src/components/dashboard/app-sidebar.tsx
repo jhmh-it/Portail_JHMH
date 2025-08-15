@@ -16,6 +16,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 
+import { useAccountingTools } from '@/app/home/accounting/hooks';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -41,8 +42,8 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { useAccountingTools } from '@/hooks/useAccountingTools';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigation } from '@/hooks/useNavigation';
 import { useUser } from '@/hooks/useUser';
 import { useLoadingStore } from '@/stores/loading-store';
 
@@ -88,7 +89,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: user, isLoading: isLoadingUser } = useUser();
   const { logout } = useAuth();
   const router = useRouter();
-  const { showLoading } = useLoadingStore();
+  const { navigateWithLoading } = useNavigation();
+  const { showLoading: _showLoading } = useLoadingStore();
   const { accountingTools, isLoading: isLoadingAccountingTools } =
     useAccountingTools();
   const [expandedAccountingTool, setExpandedAccountingTool] =
@@ -176,36 +178,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setGregClickTimeout(timeout);
   };
 
-  const handleGregSubPageClick = (path: string, title: string) => {
-    showLoading(
-      `Chargement de ${title}...`,
-      'Veuillez patienter pendant le chargement des données.'
-    );
-    router.push(path);
+  const handleGregSubPageClick = async (path: string, title: string) => {
+    await navigateWithLoading(path, {
+      loadingTitle: `Chargement de ${title}...`,
+      loadingDescription:
+        'Veuillez patienter pendant le chargement des données.',
+      delay: 0,
+    });
   };
 
-  const handleReservationsClick = () => {
-    showLoading(
-      'Chargement de Réservations...',
-      'Veuillez patienter pendant le chargement des données.'
-    );
-    router.push('/home/exploitation/reservations');
+  const handleReservationsClick = async () => {
+    await navigateWithLoading('/home/exploitation/reservations', {
+      loadingTitle: 'Chargement de Réservations...',
+      loadingDescription:
+        'Veuillez patienter pendant le chargement des données.',
+      delay: 0,
+    });
   };
 
-  const handleActifsClick = () => {
-    showLoading(
-      'Chargement des Actifs...',
-      'Veuillez patienter pendant le chargement des données.'
-    );
-    router.push('/home/exploitation/actifs');
+  const handleActifsClick = async () => {
+    await navigateWithLoading('/home/exploitation/actifs', {
+      loadingTitle: 'Chargement des Actifs...',
+      loadingDescription:
+        'Veuillez patienter pendant le chargement des données.',
+      delay: 0,
+    });
   };
 
-  const handleGuestsClick = () => {
-    showLoading(
-      'Chargement des Guests...',
-      'Veuillez patienter pendant le chargement des données.'
-    );
-    router.push('/home/exploitation/guests');
+  const handleGuestsClick = async () => {
+    await navigateWithLoading('/home/exploitation/guests', {
+      loadingTitle: 'Chargement des Guests...',
+      loadingDescription:
+        'Veuillez patienter pendant le chargement des données.',
+      delay: 0,
+    });
   };
 
   // Nettoyer les timeouts au démontage du composant
@@ -246,7 +252,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent className="overflow-x-hidden">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-black font-semibold">
+          <SidebarGroupLabel className="font-semibold text-black">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -256,7 +262,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuButton tooltip={item.title} asChild>
                     <a
                       href={item.url}
-                      className="text-black hover:text-black/80 cursor-pointer"
+                      className="cursor-pointer text-black hover:text-black/80"
                     >
                       <item.icon />
                       <span>{item.title}</span>
@@ -271,7 +277,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-black font-semibold">
+          <SidebarGroupLabel className="font-semibold text-black">
             Outils internes
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -281,7 +287,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuButton
                   tooltip="Accounting Tool"
                   onClick={handleAccountingToolClick}
-                  className="text-black hover:text-black/80 cursor-pointer"
+                  className="cursor-pointer text-black hover:text-black/80"
                 >
                   <Calculator />
                   <span>Accounting Tool</span>
@@ -298,9 +304,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <SidebarMenuSubItem key={tool.id}>
                         <SidebarMenuSubButton
                           asChild
-                          className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                          className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                         >
-                          <a href={tool.url}>
+                          <a href={tool.href}>
                             <span>{tool.title}</span>
                           </a>
                         </SidebarMenuSubButton>
@@ -315,7 +321,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuButton
                   tooltip="Exploitation Information"
                   onClick={handleExploitationToolClick}
-                  className="text-black hover:text-black/80 cursor-pointer"
+                  className="cursor-pointer text-black hover:text-black/80"
                 >
                   <BookOpen />
                   <span>Exploitation Information</span>
@@ -331,7 +337,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton
                         onClick={handleReservationsClick}
-                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                       >
                         <span>Réservations</span>
                       </SidebarMenuSubButton>
@@ -339,7 +345,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton
                         onClick={handleActifsClick}
-                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                       >
                         <span>Actifs</span>
                       </SidebarMenuSubButton>
@@ -347,7 +353,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton
                         onClick={handleGuestsClick}
-                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                       >
                         <span>Guests</span>
                       </SidebarMenuSubButton>
@@ -361,7 +367,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuButton
                   tooltip="Greg"
                   onClick={handleGregToolClick}
-                  className="text-black hover:text-black/80 cursor-pointer"
+                  className="cursor-pointer text-black hover:text-black/80"
                 >
                   <Bot />
                   <span>Greg</span>
@@ -379,7 +385,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         onClick={() =>
                           handleGregSubPageClick('/home/greg/spaces', 'Espaces')
                         }
-                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                       >
                         <span>Espaces</span>
                       </SidebarMenuSubButton>
@@ -392,7 +398,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             'Documents'
                           )
                         }
-                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                       >
                         <span>Documents</span>
                       </SidebarMenuSubButton>
@@ -405,7 +411,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             'Gestion des accès'
                           )
                         }
-                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                       >
                         <span>Gestion des accès</span>
                       </SidebarMenuSubButton>
@@ -418,7 +424,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             'Utilisateurs'
                           )
                         }
-                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                       >
                         <span>Utilisateurs</span>
                       </SidebarMenuSubButton>
@@ -428,7 +434,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         onClick={() =>
                           handleGregSubPageClick('/home/greg/shifts', 'Shifts')
                         }
-                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                       >
                         <span>Shifts</span>
                       </SidebarMenuSubButton>
@@ -441,7 +447,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             'Rappels'
                           )
                         }
-                        className="text-black/70 hover:text-black hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="hover:bg-muted/50 cursor-pointer text-black/70 transition-colors hover:text-black"
                       >
                         <span>Rappels</span>
                       </SidebarMenuSubButton>
@@ -463,7 +469,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuButton tooltip={item.title} asChild>
                       <a
                         href={item.url}
-                        className="text-black hover:text-black/80 cursor-pointer"
+                        className="cursor-pointer text-black hover:text-black/80"
                       >
                         <item.icon />
                         <span>{item.title}</span>
@@ -485,7 +491,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuButton tooltip={item.title} asChild>
                     <a
                       href={item.url}
-                      className="text-black hover:text-black/80 cursor-pointer"
+                      className="cursor-pointer text-black hover:text-black/80"
                     >
                       <item.icon />
                       <span>{item.title}</span>
@@ -510,10 +516,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 >
                   {isLoadingUser ? (
                     <>
-                      <div className="h-8 w-8 rounded-lg bg-gray-200 animate-pulse" />
+                      <div className="h-8 w-8 animate-pulse rounded-lg bg-gray-200" />
                       <div className="grid flex-1 text-left text-sm leading-tight">
-                        <div className="h-4 bg-gray-200 rounded animate-pulse mb-1" />
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4" />
+                        <div className="mb-1 h-4 animate-pulse rounded bg-gray-200" />
+                        <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
                       </div>
                       <ChevronUp className="ml-auto size-4" />
                     </>
@@ -536,7 +542,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <span className="truncate font-semibold text-black">
                           {user?.displayName ?? 'Utilisateur'}
                         </span>
-                        <span className="truncate text-xs text-muted-foreground">
+                        <span className="text-muted-foreground truncate text-xs">
                           {user?.email}
                         </span>
                       </div>

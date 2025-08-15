@@ -4,26 +4,18 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:turbo": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "test": "npm run lint && npm run type-check",
-    "test:build": "npm run test && npm run build",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch",
     "pre-commit": "lint-staged",
     "prepare": "husky",
-    "validate": "npm run test:build && npm audit --audit-level=moderate",
+    "validate": "npm run test && npm run build && npm audit --audit-level=moderate",
     "clean": "rm -rf .next out node_modules/.cache",
-    "clean:all": "npm run clean && rm -rf node_modules && npm install",
-    "analyze": "ANALYZE=true next build",
-    "check:deps": "npx npm-check-updates",
-    "check:deps:update": "npx npm-check-updates -u",
-    "imports:check": "npx unimported"
+    "clean:all": "rm -rf .next out node_modules/.cache node_modules"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -69,7 +61,6 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -79,7 +70,6 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
     "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-import-x": "^4.16.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-prettier": "^5.5.1",
@@ -90,14 +80,13 @@
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "tailwindcss": "^4",
-    "tw-animate-css": "^1.3.4",
+    "tw-animate-css": "^1.3.6",
     "typescript": "^5"
   },
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
   },
-  "packageManager": "npm@10.0.0",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",

@@ -80,6 +80,8 @@ export enum AuthErrorCode {
   EMAIL_REQUIRED = 'EMAIL_REQUIRED',
   /** Domaine email non autorisé */
   DOMAIN_NOT_ALLOWED = 'DOMAIN_NOT_ALLOWED',
+  /** Email non présent dans la liste d'autorisation temporaire */
+  NOT_IN_ALLOWLIST = 'NOT_IN_ALLOWLIST',
   /** API externe non disponible */
   API_UNAVAILABLE = 'API_UNAVAILABLE',
   /** Service d'authentification non disponible */
@@ -167,6 +169,19 @@ export const ALLOWED_EMAIL_DOMAINS = ['jhmh.com'] as const;
  * Type pour les domaines autorisés
  */
 export type AllowedEmailDomain = (typeof ALLOWED_EMAIL_DOMAINS)[number];
+
+/**
+ * Liste temporaire d'emails explicitement autorisés à se connecter/créer un compte
+ * Tant que le site est instable, seules ces adresses sont acceptées.
+ */
+export const ALLOWED_EMAILS: readonly string[] = [
+  'michael@jhmh.com',
+  'jonathan@jhmh.com',
+  'rene@jhmh.com',
+  'ethan@jhmh.com',
+  'dan@jhmh.com',
+  'matt@jhmh.com',
+] as const;
 
 // Types de compatibilité pour les hooks existants
 /** @deprecated Utiliser AuthResponse à la place */

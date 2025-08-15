@@ -18,7 +18,9 @@
 
 ### Score Global : **7.3/10** ⭐
 
-Le Portail JHMH présente une architecture solide avec des bases techniques excellentes, mais nécessite des améliorations critiques pour atteindre son plein potentiel.
+Le Portail JHMH présente une architecture solide avec des bases techniques
+excellentes, mais nécessite des améliorations critiques pour atteindre son plein
+potentiel.
 
 #### 🎯 Points Forts
 
@@ -1005,7 +1007,8 @@ export async function getCachedData<T>(
 - **Qualité**: -70% bugs en production
 - **Maintenance**: -60% effort de maintenance
 
-Ce plan d'amélioration permettra au Portail JHMH de passer d'un **score de 7.3/10 à 9.2/10**, avec un ROI de **336%** en première année.
+Ce plan d'amélioration permettra au Portail JHMH de passer d'un **score de
+7.3/10 à 9.2/10**, avec un ROI de **336%** en première année.
 
 ---
 

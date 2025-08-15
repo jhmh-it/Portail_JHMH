@@ -1,261 +1,473 @@
-import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
-import { z } from 'zod';
 
+import {
+  createGregErrorResponse,
+  createGregSuccessResponse,
+  createGregService,
+} from '@/app/home/greg/services/greg.service';
+import { updateReminderSchema } from '@/app/home/greg/validation';
+import { logGregApiError, logApiCall } from '@/lib/api-logger';
 import { adminAuth } from '@/lib/firebase-admin';
 
-// Schema validation
-const updateReminderSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  type: z.string().optional(),
-  status: z.string().optional(),
-  priority: z.string().optional(),
-  due_date: z.string().optional(),
-  assigned_to: z.string().optional(),
-  notes: z.string().optional(),
-});
+async function verifyAuthentication() {
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  const sessionCookie = (await cookieStore).get('session');
 
-// GET /api/greg/reminders/{reminder_id}
+  if (!sessionCookie?.value) {
+    return { error: 'Non autorisé', status: 401 };
+  }
+
+  if (!adminAuth) {
+    return { error: 'Service temporairement indisponible', status: 503 };
+  }
+
+  try {
+    await adminAuth.verifyIdToken(sessionCookie.value);
+    return { success: true };
+  } catch {
+    return { error: 'Session invalide', status: 401 };
+  }
+}
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ reminderId: string }> }
 ) {
+  const startTime = Date.now();
+
   try {
-    // Await params before using
     const { reminderId } = await params;
 
-    // Vérifier l'authentification via le cookie de session
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+    // Vérifier l'authentification
+    const authResult = await verifyAuthentication();
+    if ('error' in authResult) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'GET',
+        success: false,
+        statusCode: authResult.status,
+        duration,
+        error: authResult.error,
+      });
 
-    if (!sessionCookie) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        createGregErrorResponse(
+          authResult.error ?? "Erreur d'authentification",
+          'ACCESS_DENIED'
+        ),
+        { status: authResult.status }
+      );
     }
 
-    // Vérifier si adminAuth est disponible (not build time)
-    if (!adminAuth) {
+    // Obtenir le service Greg
+    const gregService = createGregService();
+    if (!gregService) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'GET',
+        success: false,
+        statusCode: 503,
+        duration,
+        error: 'Service Greg indisponible',
+      });
+
       return NextResponse.json(
-        { error: 'Service temporarily unavailable' },
+        createGregErrorResponse(
+          'Service Greg indisponible',
+          'API_CONFIG_MISSING'
+        ),
         { status: 503 }
       );
     }
 
-    try {
-      await adminAuth.verifyIdToken(sessionCookie.value);
-    } catch {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
+    if (!reminderId) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'GET',
+        success: false,
+        statusCode: 400,
+        duration,
+        error: 'ID du rappel requis',
+      });
 
-    // Configuration API
-    const apiBaseUrl = process.env.JHMH_API_BASE_URL;
-    const apiKey = process.env.JHMH_API_KEY;
-
-    if (!apiBaseUrl || !apiKey) {
-      console.error('[API] Configuration API manquante');
       return NextResponse.json(
-        { error: 'Configuration API manquante' },
-        { status: 500 }
-      );
-    }
-
-    // Forward the request to the JHMH API
-    const response = await fetch(
-      `${apiBaseUrl}/api/greg/reminders/${reminderId}`,
-      {
-        headers: {
-          'x-api-key': apiKey,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return NextResponse.json(
-          { error: 'Reminder not found' },
-          { status: 404 }
-        );
-      }
-      return NextResponse.json(
-        { error: 'Failed to fetch reminder' },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Error fetching reminder:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT /api/greg/reminders/{reminder_id}
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ reminderId: string }> }
-) {
-  try {
-    // Await params before using
-    const { reminderId } = await params;
-
-    // Vérifier l'authentification via le cookie de session
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
-
-    if (!sessionCookie) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Vérifier si adminAuth est disponible (not build time)
-    if (!adminAuth) {
-      return NextResponse.json(
-        { error: 'Service temporarily unavailable' },
-        { status: 503 }
-      );
-    }
-
-    try {
-      await adminAuth.verifyIdToken(sessionCookie.value);
-    } catch {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const validatedData = updateReminderSchema.parse(body);
-
-    // Configuration API
-    const apiBaseUrl = process.env.JHMH_API_BASE_URL;
-    const apiKey = process.env.JHMH_API_KEY;
-
-    if (!apiBaseUrl || !apiKey) {
-      console.error('[API] Configuration API manquante');
-      return NextResponse.json(
-        { error: 'Configuration API manquante' },
-        { status: 500 }
-      );
-    }
-
-    // Forward the request to the JHMH API
-    const response = await fetch(
-      `${apiBaseUrl}/api/greg/reminders/${reminderId}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-        },
-        body: JSON.stringify(validatedData),
-      }
-    );
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return NextResponse.json(
-          { error: 'Reminder not found' },
-          { status: 404 }
-        );
-      }
-      const errorData = await response.text();
-      return NextResponse.json(
-        { error: errorData || 'Failed to update reminder' },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid data', details: error.errors },
+        createGregErrorResponse("L'ID du rappel est requis", 'INVALID_REQUEST'),
         { status: 400 }
       );
     }
 
-    console.error('Error updating reminder:', error);
+    // Récupérer le reminder
+    const result = await gregService.getReminder(reminderId);
+
+    if (!result.success) {
+      const duration = Date.now() - startTime;
+      const errorMsg = result.error ?? 'Impossible de récupérer le rappel';
+      const status = result.error === 'Reminder not found' ? 404 : 500;
+
+      logGregApiError('getReminder', `/reminders/${reminderId}`, errorMsg);
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'GET',
+        success: false,
+        statusCode: status,
+        duration,
+        error: errorMsg,
+        requestParams: { reminderId },
+      });
+
+      return NextResponse.json(
+        createGregErrorResponse(
+          errorMsg,
+          status === 404 ? 'REMINDER_NOT_FOUND' : 'EXTERNAL_API_ERROR'
+        ),
+        { status }
+      );
+    }
+
+    const duration = Date.now() - startTime;
+    logApiCall({
+      endpoint: `/api/greg/reminders/${reminderId}`,
+      method: 'GET',
+      success: true,
+      statusCode: 200,
+      duration,
+      requestParams: { reminderId },
+      responseSize: JSON.stringify(result.data).length,
+    });
+
+    return NextResponse.json(createGregSuccessResponse(result.data), {
+      status: 200,
+    });
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur interne du serveur';
+
+    logGregApiError(
+      'getReminder',
+      `/reminders/${(await params).reminderId}`,
+      error
+    );
+    logApiCall({
+      endpoint: `/api/greg/reminders/${(await params).reminderId}`,
+      method: 'GET',
+      success: false,
+      statusCode: 500,
+      duration,
+      error: errorMessage,
+    });
+
+    console.error('[Greg Reminder GET] Erreur:', {
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      createGregErrorResponse('Erreur interne du serveur', 'UNKNOWN_ERROR'),
       { status: 500 }
     );
   }
 }
 
-// DELETE /api/greg/reminders/{reminder_id}
-export async function DELETE(
+export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ reminderId: string }> }
 ) {
+  const startTime = Date.now();
+
   try {
-    // Await params before using
     const { reminderId } = await params;
 
-    // Vérifier l'authentification via le cookie de session
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+    // Vérifier l'authentification
+    const authResult = await verifyAuthentication();
+    if ('error' in authResult) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'PUT',
+        success: false,
+        statusCode: authResult.status,
+        duration,
+        error: authResult.error,
+      });
 
-    if (!sessionCookie) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        createGregErrorResponse(
+          authResult.error ?? "Erreur d'authentification",
+          'ACCESS_DENIED'
+        ),
+        { status: authResult.status }
+      );
     }
 
-    // Vérifier si adminAuth est disponible (not build time)
-    if (!adminAuth) {
+    // Obtenir le service Greg
+    const gregService = createGregService();
+    if (!gregService) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'PUT',
+        success: false,
+        statusCode: 503,
+        duration,
+        error: 'Service Greg indisponible',
+      });
+
       return NextResponse.json(
-        { error: 'Service temporarily unavailable' },
+        createGregErrorResponse(
+          'Service Greg indisponible',
+          'API_CONFIG_MISSING'
+        ),
         { status: 503 }
       );
     }
 
-    try {
-      await adminAuth.verifyIdToken(sessionCookie.value);
-    } catch {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
+    if (!reminderId) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'PUT',
+        success: false,
+        statusCode: 400,
+        duration,
+        error: 'ID du rappel requis',
+      });
 
-    // Configuration API
-    const apiBaseUrl = process.env.JHMH_API_BASE_URL;
-    const apiKey = process.env.JHMH_API_KEY;
-
-    if (!apiBaseUrl || !apiKey) {
-      console.error('[API] Configuration API manquante');
       return NextResponse.json(
-        { error: 'Configuration API manquante' },
-        { status: 500 }
+        createGregErrorResponse("L'ID du rappel est requis", 'INVALID_REQUEST'),
+        { status: 400 }
       );
     }
 
-    // Forward the request to the JHMH API
-    const response = await fetch(
-      `${apiBaseUrl}/api/greg/reminders/${reminderId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'x-api-key': apiKey,
-        },
-      }
-    );
+    // Valider les données du body
+    const body = await request.json();
+    const validatedData = updateReminderSchema.parse(body);
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return NextResponse.json(
-          { error: 'Reminder not found' },
-          { status: 404 }
-        );
-      }
+    // Modifier le reminder
+    const result = await gregService.updateReminder(reminderId, validatedData);
+
+    if (!result.success) {
+      const duration = Date.now() - startTime;
+      const errorMsg = result.error ?? 'Impossible de modifier le rappel';
+      const status = result.error === 'Reminder not found' ? 404 : 500;
+
+      logGregApiError(
+        'updateReminder',
+        `/reminders/${reminderId}`,
+        errorMsg,
+        validatedData
+      );
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'PUT',
+        success: false,
+        statusCode: status,
+        duration,
+        error: errorMsg,
+        requestParams: { reminderId, ...validatedData },
+      });
+
       return NextResponse.json(
-        { error: 'Failed to delete reminder' },
-        { status: response.status }
+        createGregErrorResponse(
+          errorMsg,
+          status === 404 ? 'REMINDER_NOT_FOUND' : 'EXTERNAL_API_ERROR'
+        ),
+        { status }
       );
     }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting reminder:', error);
+    const duration = Date.now() - startTime;
+    logApiCall({
+      endpoint: `/api/greg/reminders/${reminderId}`,
+      method: 'PUT',
+      success: true,
+      statusCode: 200,
+      duration,
+      requestParams: { reminderId, ...validatedData },
+      responseSize: JSON.stringify(result.data).length,
+    });
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      createGregSuccessResponse(result.data, 'Rappel modifié avec succès'),
+      { status: 200 }
+    );
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur interne du serveur';
+
+    logGregApiError(
+      'updateReminder',
+      `/reminders/${(await params).reminderId}`,
+      error
+    );
+    logApiCall({
+      endpoint: `/api/greg/reminders/${(await params).reminderId}`,
+      method: 'PUT',
+      success: false,
+      statusCode: 500,
+      duration,
+      error: errorMessage,
+    });
+
+    console.error('[Greg Reminder PUT] Erreur:', {
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
+    return NextResponse.json(
+      createGregErrorResponse('Erreur interne du serveur', 'UNKNOWN_ERROR'),
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ reminderId: string }> }
+) {
+  const startTime = Date.now();
+
+  try {
+    const { reminderId } = await params;
+
+    // Vérifier l'authentification
+    const authResult = await verifyAuthentication();
+    if ('error' in authResult) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'DELETE',
+        success: false,
+        statusCode: authResult.status,
+        duration,
+        error: authResult.error,
+      });
+
+      return NextResponse.json(
+        createGregErrorResponse(
+          authResult.error ?? "Erreur d'authentification",
+          'ACCESS_DENIED'
+        ),
+        { status: authResult.status }
+      );
+    }
+
+    // Obtenir le service Greg
+    const gregService = createGregService();
+    if (!gregService) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'DELETE',
+        success: false,
+        statusCode: 503,
+        duration,
+        error: 'Service Greg indisponible',
+      });
+
+      return NextResponse.json(
+        createGregErrorResponse(
+          'Service Greg indisponible',
+          'API_CONFIG_MISSING'
+        ),
+        { status: 503 }
+      );
+    }
+
+    if (!reminderId) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'DELETE',
+        success: false,
+        statusCode: 400,
+        duration,
+        error: 'ID du rappel requis',
+      });
+
+      return NextResponse.json(
+        createGregErrorResponse("L'ID du rappel est requis", 'INVALID_REQUEST'),
+        { status: 400 }
+      );
+    }
+
+    // Supprimer le reminder
+    const result = await gregService.deleteReminder(reminderId);
+
+    if (!result.success) {
+      const duration = Date.now() - startTime;
+      const errorMsg = result.error ?? 'Impossible de supprimer le rappel';
+      const status = result.error === 'Reminder not found' ? 404 : 500;
+
+      logGregApiError('deleteReminder', `/reminders/${reminderId}`, errorMsg);
+      logApiCall({
+        endpoint: `/api/greg/reminders/${reminderId}`,
+        method: 'DELETE',
+        success: false,
+        statusCode: status,
+        duration,
+        error: errorMsg,
+        requestParams: { reminderId },
+      });
+
+      return NextResponse.json(
+        createGregErrorResponse(
+          errorMsg,
+          status === 404 ? 'REMINDER_NOT_FOUND' : 'EXTERNAL_API_ERROR'
+        ),
+        { status }
+      );
+    }
+
+    const duration = Date.now() - startTime;
+    logApiCall({
+      endpoint: `/api/greg/reminders/${reminderId}`,
+      method: 'DELETE',
+      success: true,
+      statusCode: 200,
+      duration,
+      requestParams: { reminderId },
+    });
+
+    return NextResponse.json(
+      createGregSuccessResponse(
+        { deleted: true },
+        'Rappel supprimé avec succès'
+      ),
+      { status: 200 }
+    );
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur interne du serveur';
+
+    logGregApiError(
+      'deleteReminder',
+      `/reminders/${(await params).reminderId}`,
+      error
+    );
+    logApiCall({
+      endpoint: `/api/greg/reminders/${(await params).reminderId}`,
+      method: 'DELETE',
+      success: false,
+      statusCode: 500,
+      duration,
+      error: errorMessage,
+    });
+
+    console.error('[Greg Reminder DELETE] Erreur:', {
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
+    return NextResponse.json(
+      createGregErrorResponse('Erreur interne du serveur', 'UNKNOWN_ERROR'),
       { status: 500 }
     );
   }

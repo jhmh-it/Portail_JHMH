@@ -69,7 +69,7 @@ export function DataGrid({
         <div>
           <CardTitle className="text-navy">{title}</CardTitle>
           {subtitle && (
-            <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+            <p className="text-muted-foreground mt-1 text-sm">{subtitle}</p>
           )}
         </div>
       </CardHeader>
@@ -78,7 +78,7 @@ export function DataGrid({
           {items.map((item, index) => (
             <div key={item.label || `item-${index}`} className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-muted-foreground">
+                <span className="text-muted-foreground text-sm font-medium">
                   {item.label}
                 </span>
                 {item.badge && (
@@ -91,12 +91,12 @@ export function DataGrid({
                 )}
               </div>
 
-              <div className="text-lg font-semibold text-navy">
+              <div className="text-navy text-lg font-semibold">
                 {formatValue(item.value, item.format)}
               </div>
 
               {item.subtitle && (
-                <p className="text-xs text-muted-foreground">{item.subtitle}</p>
+                <p className="text-muted-foreground text-xs">{item.subtitle}</p>
               )}
             </div>
           ))}

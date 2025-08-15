@@ -39,8 +39,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useGregSpaces } from '@/hooks/useGregApi';
 import { useUser } from '@/hooks/useUser';
+
+import { useGregSpaces } from '../../hooks';
+import type { GregSpace } from '../../types';
 
 import { DeleteHistoryAccessModal } from './DeleteHistoryAccessModal';
 import { EditHistoryAccessModal } from './EditHistoryAccessModal';
@@ -164,12 +166,14 @@ export function SpaceHistoryAccessList({
 
   // Filter access list based on search and filters
   const filteredAccessList = accessList.filter(access => {
-    const sourceSpace = spacesData?.data?.find(
-      s => s.space_id === access.space_id
-    );
-    const targetSpace = spacesData?.data?.find(
-      s => s.space_id === access.space_target_id
-    );
+    const sourceSpace = Array.isArray(spacesData?.data)
+      ? spacesData.data.find((s: GregSpace) => s.space_id === access.space_id)
+      : undefined;
+    const targetSpace = Array.isArray(spacesData?.data)
+      ? spacesData.data.find(
+          (s: GregSpace) => s.space_id === access.space_target_id
+        )
+      : undefined;
 
     // Search filter
     if (searchQuery) {
@@ -266,16 +270,16 @@ export function SpaceHistoryAccessList({
             <Button
               size="sm"
               onClick={onCreateNew}
-              className="cursor-pointer bg-[#0d1b3c] hover:bg-[#0d1b3c]/90 text-white"
+              className="cursor-pointer bg-[#0d1b3c] text-white hover:bg-[#0d1b3c]/90"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Nouvel accès
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {filteredAccessList.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="py-8 text-center">
               <p className="text-muted-foreground mb-4">
                 {searchQuery || Object.values(filters).some(v => v !== 'all')
                   ? 'Aucun accès trouvé avec ces critères'
@@ -303,12 +307,17 @@ export function SpaceHistoryAccessList({
                 </TableHeader>
                 <TableBody>
                   {filteredAccessList.map(access => {
-                    const sourceSpace = spacesData?.data?.find(
-                      s => s.space_id === access.space_id
-                    );
-                    const targetSpace = spacesData?.data?.find(
-                      s => s.space_id === access.space_target_id
-                    );
+                    const sourceSpace = Array.isArray(spacesData?.data)
+                      ? spacesData.data.find(
+                          (s: GregSpace) => s.space_id === access.space_id
+                        )
+                      : undefined;
+                    const targetSpace = Array.isArray(spacesData?.data)
+                      ? spacesData.data.find(
+                          (s: GregSpace) =>
+                            s.space_id === access.space_target_id
+                        )
+                      : undefined;
 
                     return (
                       <TableRow
@@ -322,7 +331,7 @@ export function SpaceHistoryAccessList({
                             {sourceSpace?.type && (
                               <Badge
                                 variant="outline"
-                                className="text-xs w-fit"
+                                className="w-fit text-xs"
                               >
                                 {sourceSpace.type === 'ROOM' ? 'Groupe' : 'DM'}
                               </Badge>
@@ -337,7 +346,7 @@ export function SpaceHistoryAccessList({
                             {targetSpace?.type && (
                               <Badge
                                 variant="outline"
-                                className="text-xs w-fit"
+                                className="w-fit text-xs"
                               >
                                 {targetSpace.type === 'ROOM' ? 'Groupe' : 'DM'}
                               </Badge>
@@ -346,9 +355,9 @@ export function SpaceHistoryAccessList({
                         </TableCell>
                         <TableCell>
                           {access.note ? (
-                            <div className="flex items-start gap-2 max-w-xs">
-                              <StickyNote className="h-3 w-3 text-muted-foreground mt-0.5" />
-                              <p className="text-sm text-muted-foreground line-clamp-2">
+                            <div className="flex max-w-xs items-start gap-2">
+                              <StickyNote className="text-muted-foreground mt-0.5 h-3 w-3" />
+                              <p className="text-muted-foreground line-clamp-2 text-sm">
                                 {access.note}
                               </p>
                             </div>
@@ -359,7 +368,7 @@ export function SpaceHistoryAccessList({
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="text-muted-foreground flex items-center gap-2 text-sm">
                             <Calendar className="h-3 w-3" />
                             {new Date(access.granted_at).toLocaleDateString(
                               'fr-FR'
@@ -384,7 +393,7 @@ export function SpaceHistoryAccessList({
                                 onClick={() => handleEdit(access)}
                                 className="cursor-pointer"
                               >
-                                <Edit className="h-4 w-4 mr-2" />
+                                <Edit className="mr-2 h-4 w-4" />
                                 Modifier la note
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
@@ -392,7 +401,7 @@ export function SpaceHistoryAccessList({
                                 className="text-destructive cursor-pointer"
                                 onClick={() => handleDelete(access)}
                               >
-                                <Trash2 className="h-4 w-4 mr-2" />
+                                <Trash2 className="mr-2 h-4 w-4" />
                                 Supprimer
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -422,14 +431,19 @@ export function SpaceHistoryAccessList({
             onOpenChange={setShowDeleteModal}
             access={selectedAccess}
             sourceSpaceName={
-              spacesData?.data?.find(
-                s => s.space_id === selectedAccess.space_id
-              )?.space_name ?? 'Inconnu'
+              Array.isArray(spacesData?.data)
+                ? (spacesData.data.find(
+                    (s: GregSpace) => s.space_id === selectedAccess.space_id
+                  )?.space_name ?? 'Inconnu')
+                : 'Inconnu'
             }
             targetSpaceName={
-              spacesData?.data?.find(
-                s => s.space_id === selectedAccess.space_target_id
-              )?.space_name ?? 'Inconnu'
+              Array.isArray(spacesData?.data)
+                ? (spacesData.data.find(
+                    (s: GregSpace) =>
+                      s.space_id === selectedAccess.space_target_id
+                  )?.space_name ?? 'Inconnu')
+                : 'Inconnu'
             }
             onSuccess={handleDeleteSuccess}
           />

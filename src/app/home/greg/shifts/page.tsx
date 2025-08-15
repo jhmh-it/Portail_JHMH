@@ -26,9 +26,11 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGregSpaces } from '@/hooks/useGregApi';
 import { useUser } from '@/hooks/useUser';
 import { useLoadingStore } from '@/stores/loading-store';
+
+import { useGregSpaces } from '../hooks';
+import type { GregSpace } from '../types';
 
 import { CreateShiftModal } from './components/CreateShiftModal';
 import { DeleteShiftModal } from './components/DeleteShiftModal';
@@ -175,7 +177,9 @@ export default function ShiftsPage() {
 
   // Filter shifts based on search
   const filteredShifts = shifts.filter(shift => {
-    const space = spacesData?.data?.find(s => s.space_id === shift.space_id);
+    const space = Array.isArray(spacesData?.data)
+      ? spacesData.data.find((s: GregSpace) => s.space_id === shift.space_id)
+      : undefined;
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -196,7 +200,7 @@ export default function ShiftsPage() {
           <Card>
             <CardHeader>
               <Skeleton className="h-8 w-32" />
-              <Skeleton className="h-4 w-64 mt-2" />
+              <Skeleton className="mt-2 h-4 w-64" />
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -242,7 +246,7 @@ export default function ShiftsPage() {
 
     if (filteredShifts.length === 0) {
       return (
-        <div className="text-center py-8">
+        <div className="py-8 text-center">
           <p className="text-muted-foreground mb-4">
             {searchQuery || hasActiveFilters
               ? 'Aucun shift trouvé avec ces critères'
@@ -279,9 +283,9 @@ export default function ShiftsPage() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Clock className="h-8 w-8 text-primary" />
+              <Clock className="text-primary h-8 w-8" />
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-navy">
+                <h1 className="text-navy text-3xl font-bold tracking-tight">
                   Shifts
                 </h1>
                 <p className="text-muted-foreground">
@@ -292,9 +296,9 @@ export default function ShiftsPage() {
           </div>
 
           {/* Search and Filters Bar */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
               <Input
                 placeholder="Rechercher par contenu, ID ou espace..."
                 value={searchQuery}
@@ -306,7 +310,7 @@ export default function ShiftsPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="gap-2 cursor-pointer"
+                className="cursor-pointer gap-2"
               >
                 <Filter className="h-4 w-4" />
                 Filtres
@@ -326,7 +330,7 @@ export default function ShiftsPage() {
                   onClick={handleClearFilters}
                   className="cursor-pointer"
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="mr-2 h-4 w-4" />
                   Réinitialiser
                 </Button>
               )}
@@ -337,7 +341,7 @@ export default function ShiftsPage() {
                 className="cursor-pointer"
               >
                 <RefreshCw
-                  className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+                  className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
                 />
                 Actualiser
               </Button>
@@ -371,9 +375,9 @@ export default function ShiftsPage() {
             <Button
               onClick={() => setShowCreateModal(true)}
               size="sm"
-              className="cursor-pointer bg-[#0d1b3c] hover:bg-[#0d1b3c]/90 text-white"
+              className="cursor-pointer bg-[#0d1b3c] text-white hover:bg-[#0d1b3c]/90"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Nouveau shift
             </Button>
           </CardHeader>
@@ -402,9 +406,11 @@ export default function ShiftsPage() {
               onOpenChange={setShowDeleteModal}
               shift={selectedShift}
               spaceName={
-                spacesData?.data?.find(
-                  s => s.space_id === selectedShift.space_id
-                )?.space_name ?? 'Inconnu'
+                Array.isArray(spacesData?.data)
+                  ? (spacesData.data.find(
+                      (s: GregSpace) => s.space_id === selectedShift.space_id
+                    )?.space_name ?? 'Inconnu')
+                  : 'Inconnu'
               }
               onSuccess={handleDeleteSuccess}
             />

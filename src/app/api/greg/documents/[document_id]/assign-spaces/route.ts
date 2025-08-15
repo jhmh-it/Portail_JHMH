@@ -1,7 +1,32 @@
-import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import {
+  createGregErrorResponse,
+  createGregSuccessResponse,
+  createGregService,
+} from '@/app/home/greg/services/greg.service';
+import { assignSpacesSchema } from '@/app/home/greg/validation';
 import { adminAuth } from '@/lib/firebase-admin';
+
+async function verifyAuthentication() {
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  const sessionCookie = (await cookieStore).get('session');
+
+  if (!sessionCookie?.value) {
+    return { error: 'Non autorisé', status: 401 };
+  }
+
+  if (!adminAuth) {
+    return { error: 'Service temporairement indisponible', status: 503 };
+  }
+
+  try {
+    await adminAuth.verifyIdToken(sessionCookie.value);
+    return { success: true };
+  } catch {
+    return { error: 'Session invalide', status: 401 };
+  }
+}
 
 export async function POST(
   request: NextRequest,
@@ -10,99 +35,58 @@ export async function POST(
   try {
     const { document_id } = await params;
 
-    // Check authentication
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
-
-    if (!sessionCookie?.value) {
+    // Vérifier l'authentification
+    const authResult = await verifyAuthentication();
+    if ('error' in authResult) {
       return NextResponse.json(
-        { success: false, error: 'Non autorisé' },
-        { status: 401 }
+        createGregErrorResponse(
+          authResult.error ?? "Erreur d'authentification",
+          'ACCESS_DENIED'
+        ),
+        { status: authResult.status }
       );
     }
 
-    // Vérifier que Firebase Admin est disponible
-    if (!adminAuth) {
+    // Obtenir le service Greg
+    const gregService = createGregService();
+    if (!gregService) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Service temporairement indisponible',
-          code: 'AUTH_UNAVAILABLE',
-        },
+        createGregErrorResponse(
+          'Service Greg indisponible',
+          'API_CONFIG_MISSING'
+        ),
         { status: 503 }
       );
     }
 
-    // Verify the session token
-    try {
-      await adminAuth.verifyIdToken(sessionCookie.value);
-    } catch {
-      return NextResponse.json(
-        { success: false, error: 'Session invalide' },
-        { status: 401 }
-      );
-    }
+    // Valider les données du body
+    const body = await request.json();
+    const validatedData = assignSpacesSchema.parse(body);
 
-    // Configuration API
-    const apiBaseUrl = process.env.JHMH_API_BASE_URL;
-    const apiKey = process.env.JHMH_API_KEY;
+    // Assigner les espaces au document
+    const result = await gregService.assignSpacesToDocument(
+      document_id,
+      validatedData
+    );
 
-    if (!apiBaseUrl || !apiKey) {
-      console.error('[API] Configuration API manquante');
+    if (!result.success) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Configuration API manquante',
-          code: 'API_CONFIG_MISSING',
-        },
+        createGregErrorResponse(
+          result.error ?? "Impossible d'assigner les espaces au document",
+          'EXTERNAL_API_ERROR'
+        ),
         { status: 500 }
       );
     }
 
-    // Récupérer les données du body
-    const body = await request.json();
-
-    // Appel à l'API externe pour assigner les espaces
-    const apiUrl = `${apiBaseUrl}/api/greg/documents/${document_id}/assign-spaces`;
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': apiKey,
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        "[API] Erreur lors de l'assignation des espaces:",
-        errorText
-      );
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Impossible d'assigner les espaces au document",
-          details: errorText,
-        },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-
-    return NextResponse.json({
-      success: true,
-      data,
-    });
-  } catch (error) {
-    console.error("Erreur lors de l'assignation des espaces:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Erreur lors de l'assignation des espaces",
-      },
+      createGregSuccessResponse(result.data, 'Espaces assignés avec succès'),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('[Greg Document Assign Spaces] Erreur:', error);
+    return NextResponse.json(
+      createGregErrorResponse('Erreur interne du serveur', 'UNKNOWN_ERROR'),
       { status: 500 }
     );
   }

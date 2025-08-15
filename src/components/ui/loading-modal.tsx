@@ -43,11 +43,11 @@ export function LoadingModal({
       />
 
       {/* Loading card */}
-      <div className="relative bg-background border border-border rounded-lg shadow-lg p-8 mx-4 min-w-[300px] max-w-sm">
-        <div className="flex flex-col items-center text-center space-y-4">
+      <div className="bg-background border-border relative mx-4 max-w-sm min-w-[300px] rounded-lg border p-8 shadow-lg">
+        <div className="flex flex-col items-center space-y-4 text-center">
           {/* Spinner animation */}
           <div
-            className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"
+            className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
             role="status"
             aria-label="Chargement en cours"
           />
@@ -56,13 +56,13 @@ export function LoadingModal({
           <div className="space-y-2">
             <h3
               id="loading-modal-title"
-              className="font-medium text-foreground"
+              className="text-foreground font-medium"
             >
               {title}
             </h3>
             <p
               id="loading-modal-description"
-              className="text-sm text-muted-foreground"
+              className="text-muted-foreground text-sm"
             >
               {description}
             </p>

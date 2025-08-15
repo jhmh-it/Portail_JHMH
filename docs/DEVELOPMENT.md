@@ -46,49 +46,41 @@ git push origin feat/nom-de-la-feature
 ### Phase 1 : Analyse et Design
 
 ```markdown
-□ Comprendre le besoin utilisateur
-□ Définir les user stories
-□ Créer les maquettes/wireframes si nécessaire
-□ Identifier les composants à créer/modifier
+□ Comprendre le besoin utilisateur □ Définir les user stories □ Créer les
+maquettes/wireframes si nécessaire □ Identifier les composants à créer/modifier
 □ Planifier la structure des données
 ```
 
 ### Phase 2 : Implementation
 
 ```markdown
-□ Créer la branche Git
-□ Implémenter en suivant l'ordre :
+□ Créer la branche Git □ Implémenter en suivant l'ordre :
 
 1. Types/Interfaces TypeScript
 2. Composants UI (mobile-first)
 3. Logique métier (hooks/stores)
 4. Intégration API
-5. Tests manuels
-   □ Commiter régulièrement (commits atomiques)
+5. Tests manuels □ Commiter régulièrement (commits atomiques)
 ```
 
 ### Phase 3 : Qualité et Tests
 
 ```markdown
-□ Vérifier le responsive (mobile, tablet, desktop)
-□ Tester les cas d'erreur
-□ Vérifier l'accessibilité (keyboard nav, screen reader)
-□ Lancer les commandes de qualité :
+□ Vérifier le responsive (mobile, tablet, desktop) □ Tester les cas d'erreur □
+Vérifier l'accessibilité (keyboard nav, screen reader) □ Lancer les commandes de
+qualité :
 
 - npm run lint:fix
 - npm run type-check
-- npm run build
-  □ Revoir son propre code
+- npm run build □ Revoir son propre code
 ```
 
 ### Phase 4 : Review et Merge
 
 ```markdown
-□ Créer la Pull Request avec description détaillée
-□ S'assurer que la CI passe (GitHub Actions)
-□ Demander une review
-□ Corriger les feedbacks
-□ Merger une fois approuvé
+□ Créer la Pull Request avec description détaillée □ S'assurer que la CI passe
+(GitHub Actions) □ Demander une review □ Corriger les feedbacks □ Merger une
+fois approuvé
 ```
 
 ## 🛠️ Commandes essentielles

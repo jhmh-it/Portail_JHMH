@@ -2,7 +2,9 @@
 
 ## Vue d'ensemble
 
-Le Portail JHMH est une application web moderne construite avec Next.js 15, utilisant l'App Router pour une meilleure performance et une architecture plus claire.
+Le Portail JHMH est une application web moderne construite avec Next.js 15,
+utilisant l'App Router pour une meilleure performance et une architecture plus
+claire.
 
 ## 🔧 Stack Technique
 

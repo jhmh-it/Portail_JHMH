@@ -1,226 +1,263 @@
-import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import {
+  createGregErrorResponse,
+  createGregSuccessResponse,
+  createGregService,
+} from '@/app/home/greg/services/greg.service';
+import { createCategorySchema } from '@/app/home/greg/validation';
+import { logGregApiError, logApiCall } from '@/lib/api-logger';
 import { adminAuth } from '@/lib/firebase-admin';
 
-export async function GET() {
-  try {
-    // Check authentication
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+async function verifyAuthentication() {
+  const cookieStore = await import('next/headers').then(m => m.cookies());
+  const sessionCookie = (await cookieStore).get('session');
 
-    if (!sessionCookie?.value) {
+  if (!sessionCookie?.value) {
+    return { error: 'Non autorisé', status: 401 };
+  }
+
+  if (!adminAuth) {
+    return { error: 'Service temporairement indisponible', status: 503 };
+  }
+
+  try {
+    await adminAuth.verifyIdToken(sessionCookie.value);
+    return { success: true };
+  } catch {
+    return { error: 'Session invalide', status: 401 };
+  }
+}
+
+export async function GET() {
+  const startTime = Date.now();
+
+  try {
+    // Vérifier l'authentification
+    const authResult = await verifyAuthentication();
+    if ('error' in authResult) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: '/api/greg/categories',
+        method: 'GET',
+        success: false,
+        statusCode: authResult.status,
+        duration,
+        error: authResult.error ?? "Erreur d'authentification",
+      });
+
       return NextResponse.json(
-        { success: false, error: 'Non autorisé' },
-        { status: 401 }
+        createGregErrorResponse(
+          authResult.error ?? "Erreur d'authentification",
+          'ACCESS_DENIED'
+        ),
+        { status: authResult.status }
       );
     }
 
-    // Vérifier que Firebase Admin est disponible
-    if (!adminAuth) {
+    // Obtenir le service Greg
+    const gregService = createGregService();
+    if (!gregService) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: '/api/greg/categories',
+        method: 'GET',
+        success: false,
+        statusCode: 503,
+        duration,
+        error: 'Service Greg indisponible',
+      });
+
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Service temporairement indisponible',
-          code: 'AUTH_UNAVAILABLE',
-        },
+        createGregErrorResponse(
+          'Service Greg indisponible',
+          'API_CONFIG_MISSING'
+        ),
         { status: 503 }
       );
     }
 
-    // Verify the session token
-    try {
-      await adminAuth.verifyIdToken(sessionCookie.value);
-    } catch {
-      return NextResponse.json(
-        { success: false, error: 'Session invalide' },
-        { status: 401 }
-      );
-    }
+    const result = await gregService.getCategories();
 
-    // Configuration API
-    const apiBaseUrl = process.env.JHMH_API_BASE_URL;
-    const apiKey = process.env.JHMH_API_KEY;
+    if (!result.success) {
+      const duration = Date.now() - startTime;
+      const errorMsg = result.error ?? 'Impossible de récupérer les catégories';
 
-    if (!apiBaseUrl || !apiKey) {
-      console.error('[API] Configuration API manquante');
+      logGregApiError('getCategories', '/categories', errorMsg);
+      logApiCall({
+        endpoint: '/api/greg/categories',
+        method: 'GET',
+        success: false,
+        statusCode: 500,
+        duration,
+        error: errorMsg,
+      });
+
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Configuration API manquante',
-          code: 'API_CONFIG_MISSING',
-        },
+        createGregErrorResponse(errorMsg, 'EXTERNAL_API_ERROR'),
         { status: 500 }
       );
     }
 
-    // Appel à l'API externe pour récupérer les catégories
-    const apiUrl = `${apiBaseUrl}/api/greg/categories`;
+    const categories = Array.isArray(result.data)
+      ? result.data
+      : ((result.data as { categories?: unknown[] } | undefined)?.categories ??
+        []);
 
-    const response = await fetch(apiUrl, {
+    const duration = Date.now() - startTime;
+    logApiCall({
+      endpoint: '/api/greg/categories',
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': apiKey,
-      },
+      success: true,
+      statusCode: 200,
+      duration,
+      responseSize: JSON.stringify(categories).length,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        '[API] Erreur lors de la récupération des catégories:',
-        errorText
-      );
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Impossible de récupérer les catégories',
-          details: errorText,
-        },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-
-    return NextResponse.json({
-      success: true,
-      data: Array.isArray(data) ? data : (data.categories ?? []),
+    return NextResponse.json(createGregSuccessResponse(categories), {
+      status: 200,
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération des catégories:', error);
+    const duration = Date.now() - startTime;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur interne du serveur';
+
+    logGregApiError('getCategories', '/categories', error);
+    logApiCall({
+      endpoint: '/api/greg/categories',
+      method: 'GET',
+      success: false,
+      statusCode: 500,
+      duration,
+      error: errorMessage,
+    });
+
+    console.error('[Greg Categories GET] Erreur:', {
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
 
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Erreur lors de la récupération des catégories',
-      },
+      createGregErrorResponse('Erreur interne du serveur', 'UNKNOWN_ERROR'),
       { status: 500 }
     );
   }
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    // Check authentication
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+  const startTime = Date.now();
 
-    if (!sessionCookie?.value) {
+  try {
+    // Vérifier l'authentification
+    const authResult = await verifyAuthentication();
+    if ('error' in authResult) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: '/api/greg/categories',
+        method: 'POST',
+        success: false,
+        statusCode: authResult.status,
+        duration,
+        error: authResult.error ?? "Erreur d'authentification",
+      });
+
       return NextResponse.json(
-        { success: false, error: 'Non autorisé' },
-        { status: 401 }
+        createGregErrorResponse(
+          authResult.error ?? "Erreur d'authentification",
+          'ACCESS_DENIED'
+        ),
+        { status: authResult.status }
       );
     }
 
-    // Vérifier que Firebase Admin est disponible
-    if (!adminAuth) {
+    // Obtenir le service Greg
+    const gregService = createGregService();
+    if (!gregService) {
+      const duration = Date.now() - startTime;
+      logApiCall({
+        endpoint: '/api/greg/categories',
+        method: 'POST',
+        success: false,
+        statusCode: 503,
+        duration,
+        error: 'Service Greg indisponible',
+      });
+
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Service temporairement indisponible',
-          code: 'AUTH_UNAVAILABLE',
-        },
+        createGregErrorResponse(
+          'Service Greg indisponible',
+          'API_CONFIG_MISSING'
+        ),
         { status: 503 }
       );
     }
 
-    // Verify the session token
-    try {
-      await adminAuth.verifyIdToken(sessionCookie.value);
-    } catch {
-      return NextResponse.json(
-        { success: false, error: 'Session invalide' },
-        { status: 401 }
-      );
-    }
+    // Valider les données du body
+    const body = await request.json();
+    const validatedData = createCategorySchema.parse(body);
 
-    // Configuration API
-    const apiBaseUrl = process.env.JHMH_API_BASE_URL;
-    const apiKey = process.env.JHMH_API_KEY;
+    const result = await gregService.createCategory(validatedData);
 
-    if (!apiBaseUrl || !apiKey) {
-      console.error('[API] Configuration API manquante');
+    if (!result.success) {
+      const duration = Date.now() - startTime;
+      const errorMsg = result.error ?? 'Impossible de créer la catégorie';
+
+      logGregApiError('createCategory', '/categories', errorMsg, validatedData);
+      logApiCall({
+        endpoint: '/api/greg/categories',
+        method: 'POST',
+        success: false,
+        statusCode: 500,
+        duration,
+        error: errorMsg,
+        requestParams: validatedData,
+      });
+
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Configuration API manquante',
-          code: 'API_CONFIG_MISSING',
-        },
+        createGregErrorResponse(errorMsg, 'EXTERNAL_API_ERROR'),
         { status: 500 }
       );
     }
 
-    // Récupérer les données du body
-    const body = await request.json();
-    const { name, description } = body;
-
-    if (!name || typeof name !== 'string') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Le nom de la catégorie est requis',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!description || typeof description !== 'string') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'La description de la catégorie est requise',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Appel à l'API externe pour créer la catégorie
-    const apiUrl = `${apiBaseUrl}/api/greg/categories`;
-    const response = await fetch(apiUrl, {
+    const duration = Date.now() - startTime;
+    logApiCall({
+      endpoint: '/api/greg/categories',
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': apiKey,
-      },
-      body: JSON.stringify({
-        name: name.trim(),
-        description: description.trim(),
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        '[API] Erreur lors de la création de la catégorie:',
-        errorText
-      );
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Impossible de créer la catégorie',
-          details: errorText,
-        },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-
-    return NextResponse.json({
       success: true,
-      data,
+      statusCode: 201,
+      duration,
+      requestParams: validatedData,
+      responseSize: JSON.stringify(result.data).length,
     });
-  } catch (error) {
-    console.error('Erreur lors de la création de la catégorie:', error);
 
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Erreur lors de la création de la catégorie',
-      },
+      createGregSuccessResponse(result.data, 'Catégorie créée avec succès'),
+      { status: 201 }
+    );
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erreur interne du serveur';
+
+    logGregApiError('createCategory', '/categories', error);
+    logApiCall({
+      endpoint: '/api/greg/categories',
+      method: 'POST',
+      success: false,
+      statusCode: 500,
+      duration,
+      error: errorMessage,
+    });
+
+    console.error('[Greg Categories POST] Erreur:', {
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
+    return NextResponse.json(
+      createGregErrorResponse('Erreur interne du serveur', 'UNKNOWN_ERROR'),
       { status: 500 }
     );
   }

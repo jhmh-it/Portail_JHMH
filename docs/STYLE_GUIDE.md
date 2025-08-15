@@ -511,4 +511,5 @@ npm run format
 
 ---
 
-**Note** : Ce guide évolue avec le projet. Proposez des améliorations via PR si nécessaire.
+**Note** : Ce guide évolue avec le projet. Proposez des améliorations via PR si
+nécessaire.

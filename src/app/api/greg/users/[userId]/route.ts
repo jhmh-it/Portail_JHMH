@@ -24,6 +24,9 @@ export async function GET(
   try {
     // Await params before using
     const { userId } = await params;
+    // The upstream Greg API expects IDs in the form "users/{id}".
+    // Our route param cannot contain slashes, so we normalize here.
+    const upstreamId = userId.startsWith('users/') ? userId : `users/${userId}`;
 
     // Vérifier l'authentification via le cookie de session
     const cookieStore = await cookies();
@@ -60,7 +63,7 @@ export async function GET(
     }
 
     // Forward the request to the JHMH API
-    const response = await fetch(`${apiBaseUrl}/api/greg/users/${userId}`, {
+    const response = await fetch(`${apiBaseUrl}/api/greg/users/${upstreamId}`, {
       headers: {
         'x-api-key': apiKey,
       },
@@ -95,6 +98,8 @@ export async function PUT(
   try {
     // Await params before using
     const { userId } = await params;
+    // Normalize for upstream API
+    const upstreamId = userId.startsWith('users/') ? userId : `users/${userId}`;
 
     // Vérifier l'authentification via le cookie de session
     const cookieStore = await cookies();
@@ -134,7 +139,7 @@ export async function PUT(
     }
 
     // Forward the request to the JHMH API
-    const response = await fetch(`${apiBaseUrl}/api/greg/users/${userId}`, {
+    const response = await fetch(`${apiBaseUrl}/api/greg/users/${upstreamId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -180,6 +185,8 @@ export async function DELETE(
   try {
     // Await params before using
     const { userId } = await params;
+    // Normalize for upstream API
+    const upstreamId = userId.startsWith('users/') ? userId : `users/${userId}`;
 
     // Vérifier l'authentification via le cookie de session
     const cookieStore = await cookies();
@@ -216,7 +223,7 @@ export async function DELETE(
     }
 
     // Forward the request to the JHMH API
-    const response = await fetch(`${apiBaseUrl}/api/greg/users/${userId}`, {
+    const response = await fetch(`${apiBaseUrl}/api/greg/users/${upstreamId}`, {
       method: 'DELETE',
       headers: {
         'x-api-key': apiKey,

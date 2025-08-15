@@ -18,8 +18,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGregSpaces } from '@/hooks/useGregApi';
-import type { GregSpace } from '@/types/greg';
+
+import { useGregSpaces } from '../../../hooks';
+import type { GregSpace } from '../../../types';
 
 interface HistoryAccessAssignmentProps {
   spaceId: string;
@@ -40,8 +41,11 @@ export function HistoryAccessAssignment({
   });
 
   // Filter out the current space from the list
-  const availableSpaces =
-    data?.data.filter(space => space.space_id !== spaceId) ?? [];
+  const availableSpaces = Array.isArray(data?.data)
+    ? (data?.data as GregSpace[]).filter(
+        (space: GregSpace) => space.space_id && space.space_id !== spaceId
+      )
+    : [];
 
   const handleSelectSpace = (targetSpaceId: string) => {
     setSelectedSpaces(prev => {
@@ -57,7 +61,11 @@ export function HistoryAccessAssignment({
       if (selectedSpaces.length === availableSpaces.length) {
         setSelectedSpaces([]);
       } else {
-        setSelectedSpaces(availableSpaces.map(space => space.space_id));
+        setSelectedSpaces(
+          availableSpaces
+            .map(space => space.space_id)
+            .filter((id): id is string => Boolean(id))
+        );
       }
     }
   };
@@ -124,20 +132,20 @@ export function HistoryAccessAssignment({
     }
   };
 
-  const formatSpaceType = (type: string): string => {
-    switch (type) {
-      case 'ROOM':
-        return 'Groupe';
-      case 'DM':
-        return 'DM';
-      default:
-        return type;
-    }
-  };
+  // const formatSpaceType = (type: string): string => {
+  //   switch (type) {
+  //     case 'ROOM':
+  //       return 'Groupe';
+  //     case 'DM':
+  //       return 'DM';
+  //     default:
+  //       return type;
+  //   }
+  // };
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="h-full">
+      <Card className="flex h-full flex-col">
         <CardHeader>
           <CardTitle className="text-lg">
             Assigner l&apos;accès à l&apos;historique
@@ -147,10 +155,10 @@ export function HistoryAccessAssignment({
             l&apos;historique
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="flex flex-1 flex-col space-y-4 overflow-hidden">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
             <Input
               placeholder="Rechercher des espaces..."
               value={searchQuery}
@@ -166,7 +174,7 @@ export function HistoryAccessAssignment({
                 variant="outline"
                 size="sm"
                 onClick={handleSelectAll}
-                disabled={!availableSpaces.length}
+                disabled={!availableSpaces || availableSpaces.length === 0}
               >
                 {selectedSpaces.length === availableSpaces.length &&
                 availableSpaces.length > 0
@@ -186,12 +194,12 @@ export function HistoryAccessAssignment({
             >
               {isAssigning ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Assignation...
                 </>
               ) : (
                 <>
-                  <History className="h-4 w-4 mr-2" />
+                  <History className="mr-2 h-4 w-4" />
                   Assigner l&apos;accès
                 </>
               )}
@@ -204,7 +212,7 @@ export function HistoryAccessAssignment({
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 p-3 border rounded-lg"
+                  className="flex items-center gap-3 rounded-lg border p-3"
                 >
                   <Skeleton className="h-5 w-5" />
                   <Skeleton className="h-4 w-full" />
@@ -219,42 +227,49 @@ export function HistoryAccessAssignment({
               </AlertDescription>
             </Alert>
           )}
-          {!isLoading && !error && !availableSpaces.length && (
-            <div className="text-center py-8 text-muted-foreground">
-              Aucun autre espace disponible
-            </div>
-          )}
-          {!isLoading && !error && availableSpaces.length && (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {availableSpaces.map((space: GregSpace) => (
-                <div
-                  key={space.space_id}
-                  className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
-                  onClick={() => handleSelectSpace(space.space_id)}
-                >
-                  <Checkbox
-                    checked={selectedSpaces.includes(space.space_id)}
-                    onCheckedChange={() => handleSelectSpace(space.space_id)}
-                    onClick={e => e.stopPropagation()}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium truncate">
-                        {space.space_name}
-                      </span>
-                      <Badge variant="secondary" className="text-xs">
-                        {formatSpaceType(space.type)}
-                      </Badge>
+          {!isLoading &&
+            !error &&
+            (!availableSpaces || availableSpaces.length === 0) && (
+              <div className="text-muted-foreground py-8 text-center">
+                Aucun autre espace disponible
+              </div>
+            )}
+          {!isLoading &&
+            !error &&
+            availableSpaces &&
+            availableSpaces.length > 0 && (
+              <div className="flex-1 space-y-2 overflow-y-auto">
+                {availableSpaces.map((space: GregSpace) => (
+                  <div
+                    key={space.space_id}
+                    className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 rounded-lg border p-3"
+                    onClick={() =>
+                      space.space_id && handleSelectSpace(space.space_id)
+                    }
+                  >
+                    <Checkbox
+                      checked={
+                        space.space_id
+                          ? selectedSpaces.includes(space.space_id)
+                          : false
+                      }
+                      onCheckedChange={() =>
+                        space.space_id && handleSelectSpace(space.space_id)
+                      }
+                      onClick={e => e.stopPropagation()}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="text-muted-foreground h-4 w-4" />
+                        <span className="font-medium break-words">
+                          {space.space_name}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate font-mono">
-                      {space.space_id}
-                    </p>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
         </CardContent>
       </Card>
     </div>

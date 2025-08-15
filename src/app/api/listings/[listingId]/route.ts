@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { fetchJhmhListingById } from '@/lib/external-api';
+import { fetchJhmhListingDetailsById } from '@/app/home/exploitation/actifs/services/listings.service';
 
 /**
  * GET /api/listings/[listingId]
@@ -23,8 +23,8 @@ export async function GET(
       );
     }
 
-    // Appeler l'API externe JHMH
-    const response = await fetchJhmhListingById(listingId);
+    // Appeler l'API externe JHMH pour récupérer les détails complets
+    const response = await fetchJhmhListingDetailsById(listingId);
 
     if (!response.success) {
       return NextResponse.json(

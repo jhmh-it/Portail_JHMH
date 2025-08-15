@@ -24,9 +24,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="w-full max-w-md">
+        <div className="rounded-2xl bg-white p-8 shadow-xl">
           {/* Header */}
           <div className="text-center">
             <div className="mx-auto mb-6">
@@ -36,7 +36,7 @@ export default function LoginPage() {
                 width={150}
                 height={150}
                 priority
-                className="rounded mx-auto"
+                className="mx-auto rounded"
               />
             </div>
             <p className="text-muted-foreground">
@@ -51,12 +51,12 @@ export default function LoginPage() {
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex justify-center items-center px-4 py-3 border border-input rounded-lg shadow-sm bg-background text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="border-input bg-background text-foreground hover:bg-accent focus:ring-primary flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm font-medium shadow-sm transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
                 <div className="flex items-center">
                   <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary"
+                    className="text-primary mr-3 -ml-1 h-5 w-5 animate-spin"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -79,7 +79,7 @@ export default function LoginPage() {
                 </div>
               ) : (
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                  <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
                     <path
                       fill="#4285F4"
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -105,7 +105,7 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               En vous connectant, vous acceptez nos{' '}
               <a
                 href="/conditions-utilisation"

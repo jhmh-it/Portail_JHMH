@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import '../styles/loading-animations.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -143,5 +144,38 @@
   }
   .text-navy-light {
     color: #1a2951;
+  }
+}
+
+/* Disable page transition animations globally (keep spinners/loading states) */
+@layer utilities {
+  /* Custom animation classes */
+  .animate-fade-in-up,
+  .animate-slide-in-left,
+  .animate-slide-in-right {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* tw-animate-css classes sometimes used on pages */
+  .animate-in,
+  .slide-in-from-top-2,
+  .slide-in-from-bottom-2,
+  .slide-in-from-left-2,
+  .slide-in-from-right-2 {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Neutralize stagger delays on page containers */
+  .delay-100,
+  .delay-200,
+  .delay-300,
+  .delay-400,
+  .delay-500,
+  .delay-600,
+  .delay-700,
+  .delay-800 {
+    animation-delay: 0s !important;
   }
 }

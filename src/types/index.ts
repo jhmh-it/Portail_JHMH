@@ -1,24 +1,17 @@
 /**
- * Barrel export pour tous les types du projet
- * Permet d'importer facilement : import { AccountingTool } from '@/types'
+ * Types globaux uniquement
+ * Les types feature-based sont dans src/app/home/[feature]/types/
  */
 
-// Types existants
-export * from './auth';
-export * from './dashboard';
-export * from './guest';
-export * from './listing';
-export * from './reservation';
-export * from './reservation-details';
-export * from './reservation-fields';
-export * from './greg';
-// Note: actifs types conflicts with dashboard types, import directly from './actifs' if needed
-
-// Nouveaux types accounting
-export * from './accounting';
-
-// Types auth
+// Types d'authentification globaux
 export * from './auth';
 
-// Types dashboard
-export * from './dashboard';
+// Types des composants d'état globaux
+export * from './states';
+
+// Type utilitaire pour les API responses
+export type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+};

@@ -91,31 +91,16 @@ export function DeleteDocumentModal({
               <AlertTriangle className="h-5 w-5 text-red-600" />
               <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             </div>
-            <div className="text-xs text-muted-foreground font-mono">
-              ID: {documentData.id}
-            </div>
           </div>
-          <AlertDialogDescription className="mt-4 space-y-4">
-            Êtes-vous sûr de vouloir supprimer le document{' '}
-            <span className="font-semibold">
-              &quot;{documentData.spreadsheet_name}&quot;
-            </span>{' '}
-            ?
+          <AlertDialogDescription>
+            Supprimer le document « {documentData.spreadsheet_name} » ?
           </AlertDialogDescription>
-
-          <div className="mt-4">
-            <div className="rounded-md bg-red-50 border border-red-200 p-3">
-              <p className="text-sm text-red-800 font-medium">
-                ⚠️ Cette action est définitive et ne peut pas être annulée.
-              </p>
-            </div>
-          </div>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex-row-reverse gap-2">
+        <AlertDialogFooter>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-red-600 hover:bg-red-700 focus:ring-red-600 cursor-pointer"
+            className="bg-destructive hover:bg-destructive/90 cursor-pointer"
           >
             {isDeleting ? (
               <>

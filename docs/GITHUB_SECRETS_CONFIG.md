@@ -1,16 +1,19 @@
 # 🔑 Configuration des Secrets GitHub pour Vercel
 
-Ce guide détaille la configuration des secrets GitHub nécessaires pour le CI/CD et le déploiement sur Vercel.
+Ce guide détaille la configuration des secrets GitHub nécessaires pour le CI/CD
+et le déploiement sur Vercel.
 
 ## 📋 Vue d'ensemble
 
 ### Secrets requis pour le CI/CD
 
-Les secrets suivants doivent être configurés dans les paramètres du repository GitHub pour que les workflows CI/CD fonctionnent correctement :
+Les secrets suivants doivent être configurés dans les paramètres du repository
+GitHub pour que les workflows CI/CD fonctionnent correctement :
 
 #### 🔥 Variables Firebase Client (Public)
 
-Ces variables sont utilisées côté client pour l'authentification et les services Firebase.
+Ces variables sont utilisées côté client pour l'authentification et les services
+Firebase.
 
 | Secret                                     | Description                | Exemple                        |
 | ------------------------------------------ | -------------------------- | ------------------------------ |
@@ -37,8 +40,10 @@ Ces variables sont utilisées côté serveur uniquement (Firebase Admin SDK).
 
 1. Allez dans la [Console Firebase](https://console.firebase.google.com)
 2. Sélectionnez votre projet
-3. **Pour les variables client** : Paramètres du projet > Général > Vos applications > Configuration SDK
-4. **Pour les variables serveur** : Paramètres du projet > Comptes de service > Générer une nouvelle clé privée
+3. **Pour les variables client** : Paramètres du projet > Général > Vos
+   applications > Configuration SDK
+4. **Pour les variables serveur** : Paramètres du projet > Comptes de service >
+   Générer une nouvelle clé privée
 
 ### 2. Ajouter les secrets dans GitHub
 
@@ -66,7 +71,8 @@ env:
 
 ## 📝 Variables Vercel
 
-Ces mêmes variables doivent aussi être configurées dans le dashboard Vercel pour le déploiement :
+Ces mêmes variables doivent aussi être configurées dans le dashboard Vercel pour
+le déploiement :
 
 1. Allez dans les paramètres du projet Vercel
 2. Environment Variables

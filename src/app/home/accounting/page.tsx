@@ -1,137 +1,56 @@
+/**
+ * Accounting Page - Using unified tool system
+ * Professional dashboard with consistent components
+ */
+
 'use client';
 
-import { ArrowRight, Calculator, BarChart3 } from 'lucide-react';
-import Link from 'next/link';
+// External imports
+import { DashboardLayout, PageHeader } from '@/components/dashboard';
+import { ErrorVariants } from '@/components/states';
+import { ToolGrid, useToolNavigation } from '@/components/tools';
 
-import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useAccountingTools } from '@/hooks/useAccountingTools';
+// Internal imports - configuration only
+import { PAGE_CONFIGS, BREADCRUMBS } from './config';
+import { useAccountingTools } from './hooks';
 
-// Icônes pour chaque outil - typé avec les icônes supportées
-const toolIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  dashboard: BarChart3,
-  BarChart3: BarChart3,
-  Calculator: Calculator,
-} as const;
-
+/**
+ * Page principale des outils accounting
+ * Affiche la liste des outils disponibles avec gestion des états
+ */
 export default function AccountingPage() {
-  const { accountingTools, isLoading, error } = useAccountingTools();
-
-  const breadcrumbs = [
-    { label: 'Accueil', href: '/home' },
-    { label: 'Accounting Tool' },
-  ];
-
-  if (error) {
-    return (
-      <DashboardLayout breadcrumbs={breadcrumbs}>
-        <div className="flex flex-col gap-6 py-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-navy">
-              Accounting Tool
-            </h1>
-            <p className="text-muted-foreground">
-              Outils de gestion comptable et financière.
-            </p>
-          </div>
-
-          <Card className="border-red-200">
-            <CardContent className="flex items-center justify-center py-8">
-              <p className="text-red-600">
-                Erreur lors du chargement des outils : {error}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const { accountingTools, isLoading, error, refetch } = useAccountingTools();
+  const { handleToolClick, isAnyToolLoading } = useToolNavigation();
 
   return (
-    <DashboardLayout breadcrumbs={breadcrumbs}>
+    <DashboardLayout breadcrumbs={[...BREADCRUMBS.ACCOUNTING]}>
       <div className="flex flex-col gap-6 py-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">
-            Accounting Tool
-          </h1>
-          <p className="text-muted-foreground">
-            Outils de gestion comptable et financière pour optimiser vos
-            processus.
-          </p>
-        </div>
+        {/* En-tête */}
+        <PageHeader
+          title={PAGE_CONFIGS.ACCOUNTING.title}
+          description={
+            error
+              ? PAGE_CONFIGS.ACCOUNTING.errorDescription
+              : PAGE_CONFIGS.ACCOUNTING.description
+          }
+        />
 
-        {/* Grille des outils */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isLoading
-            ? // Skeleton loading
-              Array.from(
-                { length: 1 },
-                (_, index) => `tool-skeleton-${index}`
-              ).map(skeletonId => (
-                <Card
-                  key={skeletonId}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="h-8 w-8 rounded" />
-                      <Skeleton className="h-6 w-32" />
-                    </div>
-                    <Skeleton className="h-4 w-full" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-10 w-full" />
-                  </CardContent>
-                </Card>
-              ))
-            : // Outils réels
-              accountingTools.map(tool => {
-                const IconComponent = toolIcons[tool.id] || Calculator;
-
-                return (
-                  <Card
-                    key={tool.id}
-                    className="group hover:shadow-lg transition-all duration-200 hover:border-navy/20"
-                  >
-                    <CardHeader>
-                      <div className="flex items-center gap-1">
-                        <div className="p-2 bg-navy/10 rounded-lg group-hover:bg-navy/20 transition-colors">
-                          <IconComponent className="h-6 w-6 text-navy" />
-                        </div>
-                        <CardTitle className="text-navy group-hover:text-navy/80 transition-colors">
-                          {tool.title}
-                        </CardTitle>
-                      </div>
-                      <CardDescription className="text-sm">
-                        {tool.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button
-                        asChild
-                        className="w-full bg-navy text-white hover:bg-navy/90 group-hover:bg-navy/80 transition-colors"
-                      >
-                        <Link
-                          href={tool.url}
-                          className="flex items-center justify-center gap-2"
-                        >
-                          Accéder
-                          <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-        </div>
+        {/* Contenu principal - Using unified ToolGrid */}
+        <main>
+          {error ? (
+            <ErrorVariants.Card
+              error={error}
+              onRetry={refetch}
+              title="Erreur de chargement des outils"
+            />
+          ) : (
+            <ToolGrid
+              tools={accountingTools}
+              onToolClick={handleToolClick}
+              isLoading={isLoading || isAnyToolLoading()}
+            />
+          )}
+        </main>
       </div>
     </DashboardLayout>
   );

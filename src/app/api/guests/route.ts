@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { fetchJhmhGuests } from '@/lib/external-api';
+import type { ExternalGuestsResponse } from '@/app/home/exploitation/guests/types';
+import { jhmhApiClient, ERROR_MESSAGES } from '@/lib/jhmh-api';
 
 /**
  * GET /api/guests
@@ -33,24 +34,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Appeler l'API externe JHMH
-    const response = await fetchJhmhGuests({
-      page,
-      page_size,
-      q,
-      guest_id,
-      confirmation_code,
-    });
+    // Construire les paramètres de la requête
+    const queryParams = new URLSearchParams();
+    if (page) queryParams.append('page', page.toString());
+    if (page_size) queryParams.append('page_size', page_size.toString());
+    if (q) queryParams.append('q', q);
+    if (guest_id) queryParams.append('guest_id', guest_id);
+    if (confirmation_code)
+      queryParams.append('confirmation_code', confirmation_code);
 
-    if (!response.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: response.error ?? 'Erreur lors de la récupération des guests',
-        },
-        { status: 500 }
-      );
-    }
+    // Appeler l'API externe JHMH directement
+    const queryString = queryParams.toString();
+    const url = `/api/guestymirror/guests${queryString ? `?${queryString}` : ''}`;
+
+    const response = await jhmhApiClient.get<ExternalGuestsResponse>(url);
 
     return NextResponse.json({
       success: true,
@@ -62,7 +59,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Erreur interne du serveur',
+        error: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN,
       },
       { status: 500 }
     );

@@ -7,12 +7,22 @@ import {
   FileText,
   Pencil,
   Trash2,
+  MoreVertical,
+  Eye,
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Pagination,
   PaginationContent,
@@ -38,7 +48,8 @@ import {
 } from '@/components/ui/tooltip';
 import { useNavigation } from '@/hooks/useNavigation';
 import { cn } from '@/lib/utils';
-import type { GregDocument } from '@/types/greg';
+
+import type { GregDocument } from '../../types';
 
 // Composant pour le nom du document avec tooltip et copie
 function CopyableDocumentName({ document }: { document: GregDocument }) {
@@ -70,14 +81,14 @@ function CopyableDocumentName({ document }: { document: GregDocument }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="font-medium text-foreground group-hover:text-primary transition-colors cursor-pointer flex items-center gap-2"
+          className="text-foreground group-hover:text-primary flex cursor-pointer items-center gap-2 font-medium transition-colors"
           onClick={handleCopy}
         >
-          <span>{document.spreadsheet_name}</span>
+          <span>{document.title ?? document.spreadsheet_name}</span>
           {copied ? (
             <Check className="h-3 w-3 text-green-600" />
           ) : (
-            <Copy className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+            <Copy className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-50" />
           )}
         </div>
       </TooltipTrigger>
@@ -103,17 +114,16 @@ function DocumentCategories({ categories }: { categories?: string }) {
   if (categoryList.length === 0) return null;
 
   return (
-    <div className="flex gap-1 flex-wrap">
-      {categoryList.slice(0, 3).map((category, index) => (
-        <Badge key={index} variant="secondary" className="text-xs">
+    <div className="flex flex-wrap items-center gap-1">
+      {categoryList.map((category, index) => (
+        <Badge
+          key={`${category}-${index}`}
+          variant="outline"
+          className="rounded-full px-2 py-0.5 text-[11px]"
+        >
           {category}
         </Badge>
       ))}
-      {categoryList.length > 3 && (
-        <Badge variant="outline" className="text-xs">
-          +{categoryList.length - 3}
-        </Badge>
-      )}
     </div>
   );
 }
@@ -152,7 +162,7 @@ export function DocumentsTable({
   const handleDocumentClick = async (document: GregDocument) => {
     await navigateWithLoading(`/home/greg/documents/${document.id}`, {
       loadingTitle: 'Chargement du document',
-      loadingDescription: `Récupération des détails pour ${document.spreadsheet_name}...`,
+      loadingDescription: `Récupération des détails pour ${document.title ?? document.spreadsheet_name}...`,
     });
   };
 
@@ -204,8 +214,8 @@ export function DocumentsTable({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Erreur de chargement</h3>
+        <AlertCircle className="text-destructive mb-4 h-12 w-12" />
+        <h3 className="mb-2 text-lg font-semibold">Erreur de chargement</h3>
         <p className="text-muted-foreground text-center">{error}</p>
       </div>
     );
@@ -215,7 +225,7 @@ export function DocumentsTable({
     return (
       <div className="space-y-4">
         {/* Loading skeleton pour la table */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className="overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -265,8 +275,8 @@ export function DocumentsTable({
   if (!data || data.data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Aucun document trouvé</h3>
+        <FileText className="text-muted-foreground mb-4 h-12 w-12" />
+        <h3 className="mb-2 text-lg font-semibold">Aucun document trouvé</h3>
         <p className="text-muted-foreground text-center">
           {filters.q
             ? 'Aucun document ne correspond à votre recherche.'
@@ -281,7 +291,7 @@ export function DocumentsTable({
       {/* Table */}
       <div
         className={cn(
-          'border rounded-lg overflow-hidden transition-opacity',
+          'overflow-hidden rounded-lg border transition-opacity',
           isFetching && 'opacity-50'
         )}
       >
@@ -292,72 +302,99 @@ export function DocumentsTable({
               <TableHead className="w-[20%]">Feuille</TableHead>
               <TableHead className="w-[100px]">Statut</TableHead>
               <TableHead className="w-[20%]">Catégories</TableHead>
-              <TableHead className="text-right w-[120px]">Actions</TableHead>
+              <TableHead className="w-[120px] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="relative">
-            {data.data.map((document: GregDocument) => (
-              <TableRow
-                key={document.id}
-                className="cursor-pointer relative transition-all duration-200 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/15 hover:border-primary/30 hover:z-10"
-                onClick={() => handleDocumentClick(document)}
-              >
-                <TableCell>
-                  <CopyableDocumentName document={document} />
-                </TableCell>
-                <TableCell className="text-sm">{document.sheet_name}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      document.pending_for_review ? 'secondary' : 'default'
-                    }
-                    className={cn(
-                      document.pending_for_review
-                        ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
-                        : 'bg-green-100 text-green-800 hover:bg-green-200'
-                    )}
+            {Array.isArray(data?.data)
+              ? data.data.map((document: GregDocument) => (
+                  <TableRow
+                    key={document.id}
+                    className="hover:bg-muted/50 hover:shadow-primary/15 hover:border-primary/30 relative cursor-pointer transition-all duration-200 hover:z-10 hover:shadow-lg"
+                    onClick={() => handleDocumentClick(document)}
                   >
-                    {document.pending_for_review ? 'En attente' : 'Validé'}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <DocumentCategories categories={document.categories} />
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={e => {
-                        e.stopPropagation();
-                        onEdit?.(document);
-                      }}
-                      className="h-8 w-8 p-0 hover:bg-blue-100"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={e => {
-                        e.stopPropagation();
-                        onDelete?.(document);
-                      }}
-                      className="h-8 w-8 p-0 hover:bg-red-100"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+                    <TableCell>
+                      <CopyableDocumentName document={document} />
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {document.sheet_name}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          document.pending_for_review ? 'secondary' : 'default'
+                        }
+                        className={cn(
+                          document.pending_for_review
+                            ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                            : 'bg-green-100 text-green-800 hover:bg-green-200'
+                        )}
+                      >
+                        {document.pending_for_review ? 'En attente' : 'Validé'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DocumentCategories categories={document.categories} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleDocumentClick(document);
+                            }}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Voir les détails
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={e => {
+                              e.stopPropagation();
+                              onEdit?.(document);
+                            }}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Modifier
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive cursor-pointer"
+                            onClick={e => {
+                              e.stopPropagation();
+                              onDelete?.(document);
+                            }}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              : []}
           </TableBody>
         </Table>
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex flex-col gap-4 items-center">
+        <div className="flex flex-col items-center gap-4">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
@@ -404,7 +441,7 @@ export function DocumentsTable({
             </PaginationContent>
           </Pagination>
 
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-sm">
             Page {currentPage} sur {totalPages} ({data?.total ?? 0} document
             {(data?.total ?? 0) > 1 ? 's' : ''})
           </div>

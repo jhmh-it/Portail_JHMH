@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { getAuth } from 'firebase/auth';
 import { CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -239,12 +240,12 @@ export function CreateShiftModal({
                         <Button
                           variant="outline"
                           className={cn(
-                            'w-full pl-3 text-left font-normal cursor-pointer',
+                            'w-full cursor-pointer pl-3 text-left font-normal',
                             !field.value && 'text-muted-foreground'
                           )}
                         >
                           {field.value ? (
-                            format(field.value, 'dd MMMM yyyy')
+                            format(field.value, 'dd MMMM yyyy', { locale: fr })
                           ) : (
                             <span>Sélectionner une date</span>
                           )}

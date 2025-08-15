@@ -138,7 +138,7 @@ export function EditSpaceModal({
                 disabled
                 className="text-muted-foreground"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 L&apos;ID ne peut pas être modifié
               </p>
             </div>

@@ -1,114 +1,96 @@
-import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import {
+  createGregErrorResponse,
+  createGregSuccessResponse,
+  createGregService,
+} from '@/app/home/greg/services/greg.service';
 import { adminAuth } from '@/lib/firebase-admin';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ categoryId: string }> }
+  context: { params: Promise<{ categoryId: string }> }
 ) {
   try {
     // Check authentication
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session');
+    const cookieStore = await import('next/headers').then(m => m.cookies());
+    const sessionCookie = (await cookieStore).get('session');
 
     if (!sessionCookie?.value) {
       return NextResponse.json(
-        { success: false, error: 'Non autorisé' },
+        createGregErrorResponse('Non autorisé', 'ACCESS_DENIED'),
         { status: 401 }
       );
     }
 
-    // Vérifier que Firebase Admin est disponible
+    // Verify Firebase session
     if (!adminAuth) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Service temporairement indisponible',
-          code: 'AUTH_UNAVAILABLE',
-        },
+        createGregErrorResponse(
+          'Service temporairement indisponible',
+          'AUTH_UNAVAILABLE'
+        ),
         { status: 503 }
       );
     }
 
-    // Verify the session token
     try {
       await adminAuth.verifyIdToken(sessionCookie.value);
     } catch {
       return NextResponse.json(
-        { success: false, error: 'Session invalide' },
+        createGregErrorResponse('Session invalide', 'ACCESS_DENIED'),
         { status: 401 }
       );
     }
 
-    // Configuration API
-    const apiBaseUrl = process.env.JHMH_API_BASE_URL;
-    const apiKey = process.env.JHMH_API_KEY;
-
-    if (!apiBaseUrl || !apiKey) {
-      console.error('[API] Configuration API manquante');
+    // Get Greg service
+    const gregService = createGregService();
+    if (!gregService) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Configuration API manquante',
-          code: 'API_CONFIG_MISSING',
-        },
-        { status: 500 }
+        createGregErrorResponse(
+          'Service Greg indisponible',
+          'API_CONFIG_MISSING'
+        ),
+        { status: 503 }
       );
     }
 
-    // Récupérer l'ID de la catégorie
-    const { categoryId } = await params;
+    // Extract params
+    const { categoryId } = await context.params;
 
     if (!categoryId) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "L'ID de la catégorie est requis",
-        },
+        createGregErrorResponse(
+          "L'ID de la catégorie est requis",
+          'INVALID_REQUEST'
+        ),
         { status: 400 }
       );
     }
 
-    // Appel à l'API externe pour supprimer la catégorie
-    const apiUrl = `${apiBaseUrl}/api/greg/categories/${categoryId}`;
-    const response = await fetch(apiUrl, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': apiKey,
-      },
-    });
+    const result = await gregService.deleteCategory(categoryId);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        '[API] Erreur lors de la suppression de la catégorie:',
-        errorText
-      );
-
+    if (!result.success) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Impossible de supprimer la catégorie',
-          details: errorText,
-        },
-        { status: response.status }
+        createGregErrorResponse(
+          result.error ?? 'Impossible de supprimer la catégorie',
+          'EXTERNAL_API_ERROR'
+        ),
+        { status: 500 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Catégorie supprimée avec succès',
-    });
-  } catch (error) {
-    console.error('Erreur lors de la suppression de la catégorie:', error);
-
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Erreur lors de la suppression de la catégorie',
-      },
+      createGregSuccessResponse(
+        { deleted: true },
+        'Catégorie supprimée avec succès'
+      ),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('[Greg Categories DELETE] Erreur:', error);
+    return NextResponse.json(
+      createGregErrorResponse('Erreur interne du serveur', 'UNKNOWN_ERROR'),
       { status: 500 }
     );
   }

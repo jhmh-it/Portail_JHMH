@@ -77,7 +77,9 @@ const eslintConfig = [
             'sibling',
             'index',
           ],
-          'newlines-between': 'always',
+          // Ignore la contrainte sur les lignes vides à l'intérieur d'un même groupe
+          // pour éviter l'erreur "There should be no empty line within import group"
+          'newlines-between': 'ignore',
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],

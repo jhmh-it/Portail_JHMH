@@ -56,11 +56,11 @@ export function UsersTable({ users, onRowClick, onEdit, onDelete }: Props) {
     if (verbose === undefined)
       return <Badge variant="outline">Non défini</Badge>;
     return verbose ? (
-      <Badge className="bg-green-100 text-green-800 border-green-200">
+      <Badge className="border-green-200 bg-green-100 text-green-800">
         Activé
       </Badge>
     ) : (
-      <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+      <Badge className="border-gray-200 bg-gray-100 text-gray-800">
         Désactivé
       </Badge>
     );
@@ -72,19 +72,19 @@ export function UsersTable({ users, onRowClick, onEdit, onDelete }: Props) {
     switch (source.toLowerCase()) {
       case 'web':
         return (
-          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+          <Badge className="border-blue-200 bg-blue-100 text-blue-800">
             Web
           </Badge>
         );
       case 'mobile':
         return (
-          <Badge className="bg-green-100 text-green-800 border-green-200">
+          <Badge className="border-green-200 bg-green-100 text-green-800">
             Mobile
           </Badge>
         );
       case 'api':
         return (
-          <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+          <Badge className="border-purple-200 bg-purple-100 text-purple-800">
             API
           </Badge>
         );
@@ -99,25 +99,25 @@ export function UsersTable({ users, onRowClick, onEdit, onDelete }: Props) {
 
     if (frequency >= 80) {
       return (
-        <Badge className="bg-green-100 text-green-800 border-green-200">
+        <Badge className="border-green-200 bg-green-100 text-green-800">
           Très actif ({frequency}%)
         </Badge>
       );
     } else if (frequency >= 60) {
       return (
-        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+        <Badge className="border-yellow-200 bg-yellow-100 text-yellow-800">
           Actif ({frequency}%)
         </Badge>
       );
     } else if (frequency >= 20) {
       return (
-        <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+        <Badge className="border-orange-200 bg-orange-100 text-orange-800">
           Modéré ({frequency}%)
         </Badge>
       );
     } else {
       return (
-        <Badge className="bg-red-100 text-red-800 border-red-200">
+        <Badge className="border-red-200 bg-red-100 text-red-800">
           Faible ({frequency}%)
         </Badge>
       );
@@ -141,36 +141,31 @@ export function UsersTable({ users, onRowClick, onEdit, onDelete }: Props) {
           {users.map(user => (
             <TableRow
               key={user.user_id}
-              className="cursor-pointer hover:bg-muted/50"
+              className="hover:bg-muted/50 hover:shadow-primary/15 hover:border-primary/30 relative cursor-pointer transition-all duration-200 hover:z-10 hover:shadow-lg"
               onClick={() => onRowClick(user)}
             >
               <TableCell>
                 <div className="flex items-start gap-2">
-                  <User className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground font-mono">
-                      {user.user_id}
-                    </p>
-                  </div>
+                  <User className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0" />
+                  <p className="font-medium">{user.name}</p>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Mail className="h-3 w-3 text-muted-foreground" />
+                  <Mail className="text-muted-foreground h-3 w-3" />
                   <span className="text-sm">{user.mail}</span>
                 </div>
               </TableCell>
               <TableCell>{getSourceBadge(user.source_prefere)}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Activity className="h-3 w-3 text-muted-foreground" />
+                  <Activity className="text-muted-foreground h-3 w-3" />
                   {getActivityBadge(user.frequence_utilisation)}
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Settings className="h-3 w-3 text-muted-foreground" />
+                  <Settings className="text-muted-foreground h-3 w-3" />
                   {getVerboseBadge(user.verbose)}
                 </div>
               </TableCell>
@@ -196,7 +191,7 @@ export function UsersTable({ users, onRowClick, onEdit, onDelete }: Props) {
                         onRowClick(user);
                       }}
                     >
-                      <Eye className="h-4 w-4 mr-2" />
+                      <Eye className="mr-2 h-4 w-4" />
                       Voir les détails
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -206,7 +201,7 @@ export function UsersTable({ users, onRowClick, onEdit, onDelete }: Props) {
                         onEdit(user);
                       }}
                     >
-                      <Edit className="h-4 w-4 mr-2" />
+                      <Edit className="mr-2 h-4 w-4" />
                       Modifier
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -217,7 +212,7 @@ export function UsersTable({ users, onRowClick, onEdit, onDelete }: Props) {
                         onDelete(user);
                       }}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="mr-2 h-4 w-4" />
                       Supprimer
                     </DropdownMenuItem>
                   </DropdownMenuContent>

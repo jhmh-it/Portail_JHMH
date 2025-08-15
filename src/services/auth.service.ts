@@ -1,3 +1,4 @@
+import { checkJhmhApiHealth } from '@/app/home/greg/services/health.service';
 import {
   validateEmail,
   createAuthUserFromToken,
@@ -7,7 +8,6 @@ import {
   deleteFirebaseUser,
   logAuthEvent,
 } from '@/lib/auth-utils';
-import { checkJhmhApiHealth } from '@/lib/external-api';
 import { adminAuth } from '@/lib/firebase-admin';
 import {
   AuthErrorCode,
@@ -124,13 +124,10 @@ export async function handleLogin(
       };
     }
 
-    // Validation du domaine email
+    // Validation stricte: domaine + allowlist temporaire
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
-      console.warn(
-        '[Auth] Tentative de connexion domaine non autorisé:',
-        email
-      );
+      console.warn('[Auth] Tentative de connexion refusée:', email);
       logAuthEvent('login_failure', email, uid, emailValidation.reason);
 
       // Cleanup
@@ -138,11 +135,16 @@ export async function handleLogin(
 
       return {
         success: false,
-        error: 'Accès refusé. Seuls les emails @jhmh.com sont autorisés.',
-        code: AuthErrorCode.DOMAIN_NOT_ALLOWED,
+        error:
+          'Accès temporairement restreint. Seules certaines adresses @jhmh.com sont autorisées.',
+        code:
+          emailValidation.reason === 'Email not in temporary allowlist'
+            ? AuthErrorCode.NOT_IN_ALLOWLIST
+            : AuthErrorCode.DOMAIN_NOT_ALLOWED,
         details: {
           attempted_email: email,
           allowed_domain: '@jhmh.com',
+          policy: 'allowlist-temporarie',
         },
       };
     }

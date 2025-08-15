@@ -85,7 +85,7 @@ export function DeleteDocumentModal({
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
+            <AlertTriangle className="text-destructive h-5 w-5" />
             <AlertDialogTitle>Supprimer ce document ?</AlertDialogTitle>
           </div>
           <AlertDialogDescription>
@@ -96,9 +96,6 @@ export function DeleteDocumentModal({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">
-            Annuler
-          </AlertDialogCancel>
           <Button
             variant="destructive"
             onClick={handleDelete}
@@ -107,6 +104,9 @@ export function DeleteDocumentModal({
           >
             {isDeleting ? 'Suppression...' : 'Supprimer'}
           </Button>
+          <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">
+            Annuler
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

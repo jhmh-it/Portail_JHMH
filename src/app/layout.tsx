@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import './globals.css';
-import { LoadingProvider } from '@/components/providers/loading-provider';
 import { Toaster } from '@/components/ui/sonner';
+import { LoadingProvider } from '@/providers/loading-provider';
 import QueryProvider from '@/providers/query-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 
@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Portail JHMH',
-  description: 'Portail JHMH - Authentification Google avec Firebase',
+  description: 'Portail JHMH - Plateforme virtuelle JHMH',
 };
 
 export default function RootLayout({

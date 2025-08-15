@@ -21,11 +21,11 @@ export default function Home() {
 
   // Page de chargement pendant la redirection
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="text-center">
-        <div className="mx-auto h-12 w-12 bg-indigo-600 rounded-xl flex items-center justify-center mb-4">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600">
           <svg
-            className="animate-spin h-6 w-6 text-white"
+            className="h-6 w-6 animate-spin text-white"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -45,7 +45,7 @@ export default function Home() {
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Portail JHMH</h1>
+        <h1 className="mb-2 text-2xl font-bold text-gray-900">Portail JHMH</h1>
         <p className="text-gray-600">Redirection en cours...</p>
       </div>
     </div>

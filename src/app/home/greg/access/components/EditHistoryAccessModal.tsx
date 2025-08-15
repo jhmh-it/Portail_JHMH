@@ -138,7 +138,7 @@ export function EditHistoryAccessModal({
                   <FormControl>
                     <Textarea
                       placeholder="Ajouter une note expliquant la raison de cet accès..."
-                      className="resize-none min-h-[100px]"
+                      className="min-h-[100px] resize-none"
                       {...field}
                     />
                   </FormControl>

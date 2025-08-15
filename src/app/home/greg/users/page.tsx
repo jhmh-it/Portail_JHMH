@@ -215,7 +215,7 @@ export default function UsersPage() {
 
     if (filteredUsers.length === 0) {
       return (
-        <div className="text-center py-8">
+        <div className="py-8 text-center">
           <p className="text-muted-foreground mb-4">
             {searchQuery || hasActiveFilters
               ? 'Aucun utilisateur trouvé avec ces critères'
@@ -251,7 +251,7 @@ export default function UsersPage() {
           <Card>
             <CardHeader>
               <Skeleton className="h-8 w-32" />
-              <Skeleton className="h-4 w-64 mt-2" />
+              <Skeleton className="mt-2 h-4 w-64" />
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -292,9 +292,9 @@ export default function UsersPage() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <User className="h-8 w-8 text-primary" />
+              <User className="text-primary h-8 w-8" />
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-navy">
+                <h1 className="text-navy text-3xl font-bold tracking-tight">
                   Utilisateurs
                 </h1>
                 <p className="text-muted-foreground">
@@ -305,9 +305,9 @@ export default function UsersPage() {
           </div>
 
           {/* Search and Filters Bar */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
               <Input
                 placeholder="Rechercher par nom, email ou ID..."
                 value={searchQuery}
@@ -319,7 +319,7 @@ export default function UsersPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="gap-2 cursor-pointer"
+                className="cursor-pointer gap-2"
               >
                 <Filter className="h-4 w-4" />
                 Filtres
@@ -339,7 +339,7 @@ export default function UsersPage() {
                   onClick={handleClearFilters}
                   className="cursor-pointer"
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="mr-2 h-4 w-4" />
                   Réinitialiser
                 </Button>
               )}
@@ -350,7 +350,7 @@ export default function UsersPage() {
                 className="cursor-pointer"
               >
                 <RefreshCw
-                  className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+                  className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
                 />
                 Actualiser
               </Button>
@@ -383,9 +383,9 @@ export default function UsersPage() {
             <Button
               onClick={() => setShowCreateModal(true)}
               size="sm"
-              className="cursor-pointer bg-[#0d1b3c] hover:bg-[#0d1b3c]/90 text-white"
+              className="cursor-pointer bg-[#0d1b3c] text-white hover:bg-[#0d1b3c]/90"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Nouvel utilisateur
             </Button>
           </CardHeader>

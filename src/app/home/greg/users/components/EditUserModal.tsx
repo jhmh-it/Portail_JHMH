@@ -188,7 +188,7 @@ export function EditUserModal({ open, onOpenChange, user, onSuccess }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Modifier l&apos;utilisateur</DialogTitle>
           <DialogDescription>

@@ -2,12 +2,22 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAuth } from 'firebase/auth';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import {
   Dialog,
   DialogContent,
@@ -26,12 +36,21 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+
+import { useGregCategories } from '../../hooks/useGregCategories';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
-  content: z.string().min(1, 'Le contenu est requis'),
+  categories: z.array(z.string()).optional(),
+  summary: z.string().optional(),
   is_pending_review: z.boolean(),
 });
 
@@ -45,12 +64,16 @@ interface Props {
 
 export function CreateDocumentModal({ open, onOpenChange, onSuccess }: Props) {
   const [isLoading, setIsLoading] = useState(false);
+  const [openCategoryPopover, setOpenCategoryPopover] = useState(false);
+
+  const { categories } = useGregCategories();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      content: '',
+      categories: [],
+      summary: '',
       is_pending_review: false,
     },
   });
@@ -75,7 +98,15 @@ export function CreateDocumentModal({ open, onOpenChange, onSuccess }: Props) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          sheet_name: data.title,
+          categories:
+            data.categories && data.categories.length > 0
+              ? data.categories
+              : undefined,
+          summary: data.summary ?? undefined,
+          sql_request: data.is_pending_review ? 'true' : 'false',
+        }),
       });
 
       if (!response.ok) {
@@ -130,19 +161,105 @@ export function CreateDocumentModal({ open, onOpenChange, onSuccess }: Props) {
 
             <FormField
               control={form.control}
-              name="content"
+              name="categories"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Catégories</FormLabel>
+                  <Popover
+                    open={openCategoryPopover}
+                    onOpenChange={setOpenCategoryPopover}
+                  >
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openCategoryPopover}
+                          className={cn(
+                            'w-full justify-between',
+                            !field.value?.length && 'text-muted-foreground'
+                          )}
+                          disabled={isLoading}
+                        >
+                          {field.value?.length
+                            ? `${field.value.length} catégorie${field.value.length > 1 ? 's' : ''} sélectionnée${field.value.length > 1 ? 's' : ''}`
+                            : 'Sélectionner des catégories'}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Rechercher une catégorie..." />
+                        <CommandList>
+                          <CommandEmpty>Aucune catégorie trouvée.</CommandEmpty>
+                          <CommandGroup>
+                            {categories.map(category => (
+                              <CommandItem
+                                key={category.name}
+                                value={category.name}
+                                onSelect={() => {
+                                  const currentValues = field.value ?? [];
+                                  const newValues = currentValues.includes(
+                                    category.name
+                                  )
+                                    ? currentValues.filter(
+                                        v => v !== category.name
+                                      )
+                                    : [...currentValues, category.name];
+                                  field.onChange(newValues);
+                                }}
+                                className="cursor-pointer"
+                              >
+                                <Check
+                                  className={cn(
+                                    'mr-2 h-4 w-4',
+                                    field.value?.includes(category.name)
+                                      ? 'opacity-100'
+                                      : 'opacity-0'
+                                  )}
+                                />
+                                {category.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  {field.value && field.value.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {field.value.map(cat => (
+                        <Badge key={cat} variant="secondary">
+                          {cat}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <FormDescription>
+                    Sélectionnez une ou plusieurs catégories pour ce document
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="summary"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contenu</FormLabel>
+                  <FormLabel>Résumé</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Contenu du document..."
-                      className="min-h-[200px]"
+                      placeholder="Résumé du document..."
+                      className="min-h-[80px] resize-y"
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormDescription>
-                    Le contenu principal de votre document
+                    Un bref résumé du contenu du document
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

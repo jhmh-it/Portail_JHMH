@@ -8,6 +8,7 @@ import {
   History,
   Edit,
   Trash2,
+  Copy,
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -15,16 +16,17 @@ import { toast } from 'sonner';
 
 import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+// Removed Card imports as the info card has been deleted
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useUser } from '@/hooks/useUser';
 import { useLoadingStore } from '@/stores/loading-store';
 
@@ -52,6 +54,16 @@ export default function SpaceDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleCopySpaceId = async () => {
+    try {
+      await navigator.clipboard.writeText(`spaces/${spaceId}`);
+      toast.success('ID copié dans le presse-papier', {
+        style: { color: 'green' },
+        icon: '✓',
+      });
+    } catch {}
+  };
 
   useEffect(() => {
     if (!spaceId || !user) return;
@@ -160,7 +172,7 @@ export default function SpaceDetailsPage() {
             variant="outline"
             onClick={() => router.push('/home/greg/spaces')}
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Retour aux espaces
           </Button>
         </div>
@@ -170,138 +182,121 @@ export default function SpaceDetailsPage() {
 
   return (
     <DashboardLayout breadcrumbs={breadcrumbs}>
-      <div className="flex flex-col gap-6 py-6">
+      <div className="flex h-[calc(100vh-120px)] flex-col py-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => router.push('/home/greg/spaces')}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-1 items-start gap-3">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
                 <MapPin className="h-5 w-5" />
               </div>
-              <div>
+              <div className="min-w-0">
                 {isLoading ? (
                   <>
-                    <Skeleton className="h-7 w-48 mb-1" />
-                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="mb-1 h-7 w-48" />
+                    <Skeleton className="h-4 w-64" />
                   </>
                 ) : (
                   <>
-                    <h1 className="text-2xl font-bold tracking-tight">
-                      {spaceDetails?.space_name}
-                    </h1>
-                    <p className="text-sm text-muted-foreground">
-                      {formatSpaceType(spaceDetails?.type ?? '')} • spaces/
-                      {spaceId}
-                    </p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <h1
+                            className="hover:text-primary/80 cursor-pointer text-2xl font-bold tracking-tight break-words transition-colors"
+                            onClick={handleCopySpaceId}
+                          >
+                            {spaceDetails?.space_name}
+                          </h1>
+                        </TooltipTrigger>
+                        <TooltipContent className="flex items-center gap-2">
+                          <Copy className="h-3 w-3" />
+                          <span>spaces/{spaceId}</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {formatSpaceType(spaceDetails?.type ?? '')}
+                      </Badge>
+                    </div>
                   </>
                 )}
               </div>
             </div>
           </div>
+          {!isLoading && (
+            <div className="flex shrink-0 items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEditModal(true)}
+                className="cursor-pointer"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Modifier
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="cursor-pointer text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Supprimer
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Details Card */}
-        {isLoading ? (
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-5 w-24 mb-2" />
-              <Skeleton className="h-4 w-48" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-20 w-full" />
-            </CardContent>
-          </Card>
-        ) : (
-          spaceDetails && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-base">Informations</CardTitle>
-                    <CardDescription>Détails de l&apos;espace</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowEditModal(true)}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Modifier
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => setShowDeleteModal(true)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Supprimer
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Type
-                    </p>
-                    <p className="text-sm mt-1">
-                      {formatSpaceType(spaceDetails.type)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      ID
-                    </p>
-                    <p className="text-sm font-mono mt-1">
-                      {spaceDetails.space_id}
-                    </p>
-                  </div>
-                </div>
-                {spaceDetails.notes && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Notes
-                    </p>
-                    <p className="text-sm mt-1">{spaceDetails.notes}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )
-        )}
+        {/* Informations encadrées supprimées car déjà présentes dans le header */}
 
         {/* Tabs for assignments */}
         {!isLoading && spaceDetails && (
-          <Tabs defaultValue="documents" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs defaultValue="documents" className="mt-6 flex h-full flex-col">
+            <TabsList className="grid w-full grid-cols-2 gap-3 p-1">
               <TabsTrigger
                 value="documents"
-                className="flex items-center gap-2"
+                style={{
+                  cursor: 'pointer',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: 'white',
+                  color: '#374151',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                }}
+                className="flex items-center gap-2 hover:bg-gray-50 data-[state=active]:!border-[#0d1b3c] data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white"
               >
                 <FileText className="h-4 w-4" />
                 Documents
               </TabsTrigger>
-              <TabsTrigger value="history" className="flex items-center gap-2">
+              <TabsTrigger
+                value="history"
+                style={{
+                  cursor: 'pointer',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: 'white',
+                  color: '#374151',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                }}
+                className="flex items-center gap-2 hover:bg-gray-50 data-[state=active]:!border-[#0d1b3c] data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white"
+              >
                 <History className="h-4 w-4" />
                 Accès Historique
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="documents" className="mt-6">
+            <TabsContent
+              value="documents"
+              className="mt-6 flex-1 overflow-y-auto"
+            >
               <DocumentsAssignment spaceId={`spaces/${spaceId}`} />
             </TabsContent>
 
-            <TabsContent value="history" className="mt-6">
+            <TabsContent
+              value="history"
+              className="mt-6 flex-1 overflow-y-auto"
+            >
               <HistoryAccessAssignment spaceId={`spaces/${spaceId}`} />
             </TabsContent>
           </Tabs>

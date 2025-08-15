@@ -2,7 +2,9 @@
 
 ## 🎯 Objectif de ce guide
 
-Ce document fournit le contexte essentiel pour permettre aux agents IA de comprendre rapidement le projet et de générer du code de qualité conforme aux standards établis.
+Ce document fournit le contexte essentiel pour permettre aux agents IA de
+comprendre rapidement le projet et de générer du code de qualité conforme aux
+standards établis.
 
 ## 📋 Contexte du projet
 
@@ -10,8 +12,10 @@ Ce document fournit le contexte essentiel pour permettre aux agents IA de compre
 
 - **Nom** : Portail JHMH
 - **Type** : Application web Next.js 15 avec authentification Firebase
-- **Stack principal** : Next.js 15 (App Router), TypeScript, TailwindCSS, Firebase Auth, TanStack Query v5
-- **Objectif** : Portail d'entreprise avec authentification sécurisée et gestion des rôles
+- **Stack principal** : Next.js 15 (App Router), TypeScript, TailwindCSS,
+  Firebase Auth, TanStack Query v5
+- **Objectif** : Portail d'entreprise avec authentification sécurisée et gestion
+  des rôles
 
 ### Architecture technique
 
@@ -73,11 +77,13 @@ src/
 ### Avant de créer un nouveau composant/feature :
 
 1. **Vérifier l'existant** : Un composant similaire existe-t-il déjà ?
-2. **Respecter les patterns** : Suivre les exemples existants (ex: `useAuth`, `useUser`)
+2. **Respecter les patterns** : Suivre les exemples existants (ex: `useAuth`,
+   `useUser`)
 3. **Types stricts** : Toujours définir les types TypeScript
 4. **Validation** : Utiliser Zod pour toute donnée externe
 5. **Error boundaries** : Gérer les erreurs gracieusement avec null safety
-6. **Null safety** : Vérifier systématiquement les valeurs null/undefined avant utilisation
+6. **Null safety** : Vérifier systématiquement les valeurs null/undefined avant
+   utilisation
 
 ### Commandes à connaître :
 

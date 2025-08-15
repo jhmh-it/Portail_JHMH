@@ -2,7 +2,8 @@
 
 ## Vue d'ensemble
 
-Le Portail JHMH est maintenant déployé automatiquement sur **Vercel** avec plusieurs environnements :
+Le Portail JHMH est maintenant déployé automatiquement sur **Vercel** avec
+plusieurs environnements :
 
 ## 🔄 Workflow de déploiement
 
@@ -30,7 +31,8 @@ Le Portail JHMH est maintenant déployé automatiquement sur **Vercel** avec plu
 
 ### Variables d'environnement sur Vercel
 
-Les variables suivantes doivent être configurées dans les paramètres du projet Vercel :
+Les variables suivantes doivent être configurées dans les paramètres du projet
+Vercel :
 
 #### Variables publiques (Client-side)
 
@@ -55,7 +57,8 @@ Les variables suivantes doivent être configurées dans les paramètres du proje
 
 ### Configuration par environnement
 
-Dans Vercel, vous pouvez configurer des valeurs différentes pour chaque environnement :
+Dans Vercel, vous pouvez configurer des valeurs différentes pour chaque
+environnement :
 
 1. **Production** : Valeurs de production
 2. **Preview** : Peut utiliser les mêmes valeurs ou des valeurs de test
@@ -86,11 +89,13 @@ git push origin feat/ma-nouvelle-feature
 
 ## 🔧 Configuration locale
 
-Pour le développement local, créez un fichier `.env.local` à la racine du projet avec toutes les variables ci-dessus.
+Pour le développement local, créez un fichier `.env.local` à la racine du projet
+avec toutes les variables ci-dessus.
 
 ## 🚨 Restriction de domaine
 
-L'authentification est restreinte aux emails `@jhmh.com` uniquement. Cette vérification est effectuée dans l'API Next.js `/api/auth/login`.
+L'authentification est restreinte aux emails `@jhmh.com` uniquement. Cette
+vérification est effectuée dans l'API Next.js `/api/auth/login`.
 
 ## 📝 Commandes utiles
 
@@ -130,7 +135,8 @@ Sur la branche `develop`, un workflow dédié :
 - Exécute tous les tests de qualité
 - Notifie du déploiement sur Vercel
 
-Le déploiement sur Vercel se fait automatiquement après la réussite des checks CI.
+Le déploiement sur Vercel se fait automatiquement après la réussite des checks
+CI.
 
 ## 📊 Monitoring
 

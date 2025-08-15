@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase-admin';
 import {
   ALLOWED_EMAIL_DOMAINS,
+  ALLOWED_EMAILS,
   AuthErrorCode,
   type AuthUser,
   type EmailValidationResult,
@@ -80,6 +81,17 @@ export function validateEmail(email: string): EmailValidationResult {
       isValid: false,
       normalizedEmail,
       reason: `Domain ${domain} is not allowed`,
+    };
+  }
+
+  // Étape 2: Liste blanche stricte tant que le site est instable
+  // Seules certaines adresses sont autorisées à se connecter/créer un compte
+  const isInAllowList = ALLOWED_EMAILS.includes(normalizedEmail);
+  if (!isInAllowList) {
+    return {
+      isValid: false,
+      normalizedEmail,
+      reason: 'Email not in temporary allowlist',
     };
   }
 

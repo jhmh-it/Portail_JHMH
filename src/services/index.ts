@@ -1,13 +1,7 @@
 /**
- * Barrel export pour tous les services du projet
- * Permet d'importer facilement : import { fetchAccountingTools } from '@/services'
+ * Export barrel pour les services globaux uniquement
+ * Les services feature-based sont dans src/app/home/[feature]/services/
  */
 
-// Services existants
-export * from './reservation-details.service';
-
-// Nouveaux services
-export * from './accounting.service';
-export * from './actifs.service';
+// Services globaux (authentification, utilitaires globaux)
 export * from './auth.service';
-export * from './dashboard.service';

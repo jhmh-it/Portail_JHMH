@@ -18,8 +18,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGregDocuments } from '@/hooks/useGregApi';
-import type { GregDocument } from '@/types/greg';
+
+import { useGregDocuments } from '../../../hooks';
+import type { GregDocument } from '../../../types';
 
 interface DocumentsAssignmentProps {
   spaceId: string;
@@ -32,8 +33,7 @@ export function DocumentsAssignment({ spaceId }: DocumentsAssignmentProps) {
 
   // Fetch all documents
   const { data, isLoading, error } = useGregDocuments({
-    page: 1,
-    page_size: 100, // Get more documents for assignment
+    // Pas de pagination côté API: on ne passe aucun paramètre non supporté
     q: searchQuery || undefined,
   });
 
@@ -48,10 +48,14 @@ export function DocumentsAssignment({ spaceId }: DocumentsAssignmentProps) {
 
   const handleSelectAll = () => {
     if (data?.data) {
-      if (selectedDocuments.length === data.data.length) {
+      if (selectedDocuments.length === (data.data as unknown[]).length) {
         setSelectedDocuments([]);
       } else {
-        setSelectedDocuments(data.data.map(doc => doc.id));
+        setSelectedDocuments(
+          (data.data as unknown as GregDocument[]).map(
+            (doc: GregDocument) => doc.id
+          )
+        );
       }
     }
   };
@@ -118,18 +122,18 @@ export function DocumentsAssignment({ spaceId }: DocumentsAssignmentProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="h-full">
+      <Card className="flex h-full flex-col">
         <CardHeader>
           <CardTitle className="text-lg">Assigner des documents</CardTitle>
           <CardDescription>
             Sélectionnez les documents à associer à cet espace
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="flex flex-1 flex-col space-y-4 overflow-hidden">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
             <Input
               placeholder="Rechercher des documents..."
               value={searchQuery}
@@ -145,10 +149,10 @@ export function DocumentsAssignment({ spaceId }: DocumentsAssignmentProps) {
                 variant="outline"
                 size="sm"
                 onClick={handleSelectAll}
-                disabled={!data?.data.length}
+                disabled={!data?.data || data.data.length === 0}
               >
-                {selectedDocuments.length === data?.data.length &&
-                data?.data.length > 0
+                {selectedDocuments.length === data?.data?.length &&
+                data?.data?.length > 0
                   ? 'Tout désélectionner'
                   : 'Tout sélectionner'}
               </Button>
@@ -165,12 +169,12 @@ export function DocumentsAssignment({ spaceId }: DocumentsAssignmentProps) {
             >
               {isAssigning ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Assignation...
                 </>
               ) : (
                 <>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="mr-2 h-4 w-4" />
                   Assigner les documents
                 </>
               )}
@@ -183,7 +187,7 @@ export function DocumentsAssignment({ spaceId }: DocumentsAssignmentProps) {
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 p-3 border rounded-lg"
+                  className="flex items-center gap-3 rounded-lg border p-3"
                 >
                   <Skeleton className="h-5 w-5" />
                   <Skeleton className="h-4 w-full" />
@@ -198,46 +202,48 @@ export function DocumentsAssignment({ spaceId }: DocumentsAssignmentProps) {
               </AlertDescription>
             </Alert>
           )}
-          {!isLoading && !error && !data?.data.length && (
-            <div className="text-center py-8 text-muted-foreground">
+          {!isLoading && !error && (!data?.data || data.data.length === 0) && (
+            <div className="text-muted-foreground py-8 text-center">
               Aucun document disponible
             </div>
           )}
-          {!isLoading && !error && data?.data.length && (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {data.data.map((document: GregDocument) => (
-                <div
-                  key={document.id}
-                  className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
-                  onClick={() => handleSelectDocument(document.id)}
-                >
-                  <Checkbox
-                    checked={selectedDocuments.includes(document.id)}
-                    onCheckedChange={() => handleSelectDocument(document.id)}
-                    onClick={e => e.stopPropagation()}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium truncate">
-                        {document.spreadsheet_name}
-                      </span>
-                      {document.pending_for_review && (
-                        <Badge
-                          variant="outline"
-                          className="text-orange-600 border-orange-200 text-xs"
-                        >
-                          En attente
-                        </Badge>
-                      )}
+          {!isLoading && !error && data?.data && data.data.length > 0 && (
+            <div className="flex-1 space-y-2 overflow-y-auto">
+              {(data?.data as unknown as GregDocument[]).map(
+                (document: GregDocument) => (
+                  <div
+                    key={document.id}
+                    className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 rounded-lg border p-3"
+                    onClick={() => handleSelectDocument(document.id)}
+                  >
+                    <Checkbox
+                      checked={selectedDocuments.includes(document.id)}
+                      onCheckedChange={() => handleSelectDocument(document.id)}
+                      onClick={e => e.stopPropagation()}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <FileText className="text-muted-foreground h-4 w-4" />
+                        <span className="font-medium break-words">
+                          {document.spreadsheet_name}
+                        </span>
+                        {document.pending_for_review && (
+                          <Badge
+                            variant="outline"
+                            className="border-orange-200 text-xs text-orange-600"
+                          >
+                            En attente
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-muted-foreground text-sm break-words">
+                        {document.sheet_name}
+                        {document.summary && ` • ${document.summary}`}
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {document.sheet_name}
-                      {document.summary && ` • ${document.summary}`}
-                    </p>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           )}
         </CardContent>

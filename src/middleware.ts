@@ -1,17 +1,21 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import {
-  PROTECTED_ROUTES,
-  PUBLIC_ROUTES,
-  REDIRECT_URLS,
-  SESSION_COOKIE_NAME,
-  DEBUG_MODE,
-} from '@/lib/middleware/constants';
-
 /**
  * Middleware d'authentification et de redirection
  * Gère la protection des routes et les redirections selon l'état d'authentification
  */
+
+/**
+ * Configuration des routes et constantes du middleware
+ */
+const PROTECTED_ROUTES: readonly string[] = ['/home'] as const;
+const PUBLIC_ROUTES: readonly string[] = ['/login', '/auth'] as const;
+const REDIRECT_URLS = {
+  login: '/login',
+  home: '/home',
+} as const;
+const SESSION_COOKIE_NAME = 'session';
+const DEBUG_MODE = process.env.NODE_ENV === 'development';
 
 /**
  * Vérifie si l'utilisateur est authentifié
@@ -25,14 +29,14 @@ function isAuthenticated(request: NextRequest): boolean {
  * Vérifie si une route est protégée
  */
 function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_ROUTES.some(route => pathname.startsWith(route));
+  return PROTECTED_ROUTES.some((route: string) => pathname.startsWith(route));
 }
 
 /**
  * Vérifie si une route est publique
  */
 function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+  return PUBLIC_ROUTES.some((route: string) => pathname.startsWith(route));
 }
 
 /**

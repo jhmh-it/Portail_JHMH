@@ -16,13 +16,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { useGregDocuments } from '@/hooks/useGregApi';
 import { useLoadingStore } from '@/stores/loading-store';
-import type { GregDocumentsFilters } from '@/types/greg';
+
+import { useGregDocuments } from '../hooks';
+import type { GregDocument } from '../types';
+import type { GregDocumentsFilters } from '../types/greg';
 
 import {
   DocumentsTable,
   CreateDocumentModal,
+  EditDocumentModal,
   DeleteDocumentModal,
   CategoryFilter,
 } from './components';
@@ -46,16 +49,12 @@ export default function GregDocumentsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [editingDocument, setEditingDocument] = useState<{
-    id: string;
-    spreadsheet_name: string;
-    sheet_name: string;
-    summary?: string;
-    categories?: string;
-  } | null>(null);
+  const [editingDocument, setEditingDocument] = useState<GregDocument | null>(
+    null
+  );
   const [deletingDocument, setDeletingDocument] = useState<{
     id: string;
-    spreadsheet_name: string;
+    spreadsheet_name?: string;
   } | null>(null);
   const { hideLoading } = useLoadingStore();
 
@@ -81,7 +80,7 @@ export default function GregDocumentsPage() {
   ];
 
   const handleSearch = () => {
-    setFilters(prev => ({
+    setFilters((prev: GregDocumentsFilters) => ({
       ...prev,
       q: searchQuery || undefined,
       page: 1, // Reset to first page on new search
@@ -89,11 +88,11 @@ export default function GregDocumentsPage() {
   };
 
   const handlePageChange = (page: number) => {
-    setFilters(prev => ({ ...prev, page }));
+    setFilters((prev: GregDocumentsFilters) => ({ ...prev, page }));
   };
 
   const handlePageSizeChange = (page_size: string) => {
-    setFilters(prev => ({
+    setFilters((prev: GregDocumentsFilters) => ({
       ...prev,
       page_size: parseInt(page_size),
       page: 1,
@@ -115,17 +114,8 @@ export default function GregDocumentsPage() {
     refetch();
   };
 
-  const handleEdit = (document: {
-    id: string;
-    spreadsheet_name: string;
-    sheet_name: string;
-    summary?: string;
-    categories?: string;
-    pending_for_review?: boolean;
-  }) => {
-    // On ne passe pas pending_for_review à la modale d'édition
-    const { pending_for_review: _pending_for_review, ...editData } = document;
-    setEditingDocument(editData);
+  const handleEdit = (document: GregDocument) => {
+    setEditingDocument(document);
     setShowEditModal(true);
   };
 
@@ -135,7 +125,7 @@ export default function GregDocumentsPage() {
     setEditingDocument(null);
   };
 
-  const handleDelete = (document: { id: string; spreadsheet_name: string }) => {
+  const handleDelete = (document: GregDocument) => {
     setDeletingDocument(document);
     setShowDeleteModal(true);
   };
@@ -157,9 +147,9 @@ export default function GregDocumentsPage() {
         {/* Header */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <FileText className="h-8 w-8 text-primary" />
+            <FileText className="text-primary h-8 w-8" />
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-navy">
+              <h1 className="text-navy text-3xl font-bold tracking-tight">
                 Documents
               </h1>
               <p className="text-muted-foreground">
@@ -173,7 +163,7 @@ export default function GregDocumentsPage() {
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-medium flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base font-medium">
                 <Filter className="h-4 w-4" />
                 Filtres de recherche
               </CardTitle>
@@ -193,18 +183,18 @@ export default function GregDocumentsPage() {
               {/* Search Bar */}
               <div className="mb-6">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                   <Input
                     placeholder="Rechercher par nom, feuille, catégories..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                    className="pl-10 pr-28 h-11 bg-muted/50 border-muted-foreground/20 focus:bg-background"
+                    className="bg-muted/50 border-muted-foreground/20 focus:bg-background h-11 pr-28 pl-10"
                   />
                   <Button
                     onClick={handleSearch}
                     size="sm"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8"
+                    className="absolute top-1/2 right-2 h-8 -translate-y-1/2 transform"
                   >
                     Rechercher
                   </Button>
@@ -212,15 +202,18 @@ export default function GregDocumentsPage() {
               </div>
 
               {/* Filters Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-6">
+              <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-1">
                 {/* Category Filter */}
-                <div className="flex flex-col gap-2 col-span-1">
+                <div className="col-span-1 flex flex-col gap-2">
                   <Label>Catégories</Label>
                   <CategoryFilter
                     value={selectedCategories}
-                    onChange={categories => {
+                    onChange={(categories: string[]) => {
                       setSelectedCategories(categories);
-                      setFilters(prev => ({ ...prev, page: 1 }));
+                      setFilters((prev: GregDocumentsFilters) => ({
+                        ...prev,
+                        page: 1,
+                      }));
                     }}
                   />
                 </div>
@@ -229,9 +222,12 @@ export default function GregDocumentsPage() {
                   <Switch
                     id="pending-only"
                     checked={pendingOnly}
-                    onCheckedChange={checked => {
+                    onCheckedChange={(checked: boolean) => {
                       setPendingOnly(checked);
-                      setFilters(prev => ({ ...prev, page: 1 }));
+                      setFilters((prev: GregDocumentsFilters) => ({
+                        ...prev,
+                        page: 1,
+                      }));
                     }}
                   />
                   <Label htmlFor="pending-only">
@@ -241,7 +237,7 @@ export default function GregDocumentsPage() {
               </div>
 
               {/* Controls row */}
-              <div className="flex items-end justify-between gap-4 pt-2 border-t">
+              <div className="flex items-end justify-between gap-4 border-t pt-2">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">
                     Résultats par page
@@ -250,7 +246,7 @@ export default function GregDocumentsPage() {
                     value={filters.page_size?.toString() ?? '20'}
                     onValueChange={handlePageSizeChange}
                   >
-                    <SelectTrigger className="w-[140px] h-10">
+                    <SelectTrigger className="h-10 w-[140px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -271,7 +267,7 @@ export default function GregDocumentsPage() {
                       onClick={handleClearFilters}
                       className="h-10"
                     >
-                      <X className="h-4 w-4 mr-2" />
+                      <X className="mr-2 h-4 w-4" />
                       Réinitialiser
                     </Button>
                   )}
@@ -282,7 +278,7 @@ export default function GregDocumentsPage() {
                     className="h-10"
                   >
                     <RefreshCw
-                      className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`}
+                      className={`mr-2 h-4 w-4 ${isFetching ? 'animate-spin' : ''}`}
                     />
                     {isFetching ? 'Actualisation...' : 'Actualiser'}
                   </Button>
@@ -293,24 +289,34 @@ export default function GregDocumentsPage() {
         </Card>
 
         {/* Results */}
-        <Card className="shadow-sm overflow-visible">
-          <CardHeader className="pb-4 flex flex-row items-center justify-between">
+        <Card className="overflow-visible shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
             <CardTitle className="text-base font-medium">
               Résultats
               {isSuccess && data && (
-                <span className="text-sm font-normal text-muted-foreground ml-2">
+                <span className="text-muted-foreground ml-2 text-sm font-normal">
                   ({data.total} document{data.total > 1 ? 's' : ''})
                 </span>
               )}
             </CardTitle>
             <Button onClick={() => setShowCreateModal(true)} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Nouveau Document
             </Button>
           </CardHeader>
-          <CardContent className="pt-0 px-6 pb-8 overflow-visible">
+          <CardContent className="overflow-visible px-6 pt-0 pb-8">
             <DocumentsTable
-              data={data}
+              data={
+                data as unknown as
+                  | {
+                      data: GregDocument[];
+                      total: number;
+                      page: number;
+                      page_size: number;
+                      total_pages: number;
+                    }
+                  | undefined
+              }
               isLoading={isLoading}
               isFetching={isFetching}
               error={error?.message ?? null}
@@ -335,9 +341,17 @@ export default function GregDocumentsPage() {
 
         {/* Modale d'édition de document */}
         {editingDocument && (
-          <CreateDocumentModal
+          <EditDocumentModal
             open={showEditModal}
             onOpenChange={setShowEditModal}
+            document={{
+              document_id: editingDocument.id,
+              sheet_name: editingDocument.sheet_name,
+              spreadsheet_name: editingDocument.spreadsheet_name,
+              categories: editingDocument.categories,
+              sql_request: editingDocument.pending_for_review,
+              summary: editingDocument.summary,
+            }}
             onSuccess={handleEditSuccess}
           />
         )}
@@ -347,7 +361,11 @@ export default function GregDocumentsPage() {
           <DeleteDocumentModal
             open={showDeleteModal}
             onOpenChange={setShowDeleteModal}
-            documentData={deletingDocument}
+            documentData={{
+              id: deletingDocument.id,
+              spreadsheet_name:
+                deletingDocument.spreadsheet_name ?? 'Nom inconnu',
+            }}
             onSuccess={handleDeleteSuccess}
           />
         )}

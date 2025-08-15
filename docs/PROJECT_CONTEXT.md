@@ -4,7 +4,10 @@
 
 ### Description
 
-Le **Portail JHMH** est une application web d'entreprise moderne conçue pour centraliser l'accès aux différents services et outils internes de la société JHMH. Il sert de point d'entrée unique pour les employés, avec une authentification sécurisée et une gestion des rôles granulaire.
+Le **Portail JHMH** est une application web d'entreprise moderne conçue pour
+centraliser l'accès aux différents services et outils internes de la société
+JHMH. Il sert de point d'entrée unique pour les employés, avec une
+authentification sécurisée et une gestion des rôles granulaire.
 
 ### Objectifs métier
 
@@ -48,23 +51,23 @@ Le **Portail JHMH** est une application web d'entreprise moderne conçue pour ce
 
 ### 1. Next.js App Router
 
-**Pourquoi** : Performance optimale, Server Components, meilleur SEO
-**Impact** : Structure des fichiers différente, composants serveur/client
+**Pourquoi** : Performance optimale, Server Components, meilleur SEO **Impact**
+: Structure des fichiers différente, composants serveur/client
 
 ### 2. Firebase Authentication
 
-**Pourquoi** : Solution robuste, OAuth intégré, scalable
-**Impact** : Cookies httpOnly, middleware custom, gestion des sessions
+**Pourquoi** : Solution robuste, OAuth intégré, scalable **Impact** : Cookies
+httpOnly, middleware custom, gestion des sessions
 
 ### 3. TanStack Query + Zustand
 
-**Pourquoi** : Séparation claire entre server state et UI state
-**Impact** : Patterns spécifiques pour data fetching et gestion d'état
+**Pourquoi** : Séparation claire entre server state et UI state **Impact** :
+Patterns spécifiques pour data fetching et gestion d'état
 
 ### 4. TailwindCSS + Shadcn UI
 
-**Pourquoi** : Développement rapide, composants accessibles, personnalisation facile
-**Impact** : Pas de CSS custom, utilisation des primitives Radix
+**Pourquoi** : Développement rapide, composants accessibles, personnalisation
+facile **Impact** : Pas de CSS custom, utilisation des primitives Radix
 
 ## 📊 Architecture des données
 
@@ -266,4 +269,6 @@ Exécution → Mise à jour UI → Notification succès/erreur
 
 ---
 
-**Note pour les agents IA** : Ce document contient le contexte essentiel du projet. Référez-vous y pour comprendre les décisions, contraintes et objectifs avant toute implémentation.
+**Note pour les agents IA** : Ce document contient le contexte essentiel du
+projet. Référez-vous y pour comprendre les décisions, contraintes et objectifs
+avant toute implémentation.

@@ -35,7 +35,8 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { useGregDocuments, useGregSpaces } from '@/hooks/useGregApi';
+
+import { useGregDocuments, useGregSpaces } from '../../hooks';
 
 interface Props {
   open: boolean;
@@ -62,8 +63,15 @@ export function CreateAccessModal({ open, onOpenChange, accessType }: Props) {
   const [currentTab, setCurrentTab] = useState(accessType);
 
   // Fetch documents and spaces
-  const { data: documentsData } = useGregDocuments({ page: 1, page_size: 100 });
+  const { data: documentsData } = useGregDocuments({});
   const { data: spacesData } = useGregSpaces({ page: 1, page_size: 100 });
+
+  const safeDocuments =
+    documentsData && Array.isArray(documentsData.data)
+      ? documentsData.data
+      : [];
+  const safeSpaces =
+    spacesData && Array.isArray(spacesData.data) ? spacesData.data : [];
 
   const documentForm = useForm<DocumentAccessFormData>({
     resolver: zodResolver(documentAccessSchema),
@@ -181,10 +189,10 @@ export function CreateAccessModal({ open, onOpenChange, accessType }: Props) {
         </DialogHeader>
 
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="mt-4">
-          <TabsList className="grid w-full grid-cols-2 gap-3 mb-6 bg-gray-100 p-1">
+          <TabsList className="mb-6 grid w-full grid-cols-2 gap-3 bg-gray-100 p-1">
             <TabsTrigger
               value="document-access"
-              className="gap-2 hover:bg-gray-50 data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white data-[state=active]:!border-[#0d1b3c]"
+              className="gap-2 hover:bg-gray-50 data-[state=active]:!border-[#0d1b3c] data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white"
               style={{
                 cursor: 'pointer',
                 border: '1px solid #d1d5db',
@@ -199,7 +207,7 @@ export function CreateAccessModal({ open, onOpenChange, accessType }: Props) {
             </TabsTrigger>
             <TabsTrigger
               value="history-access"
-              className="gap-2 hover:bg-gray-50 data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white data-[state=active]:!border-[#0d1b3c]"
+              className="gap-2 hover:bg-gray-50 data-[state=active]:!border-[#0d1b3c] data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white"
               style={{
                 cursor: 'pointer',
                 border: '1px solid #d1d5db',
@@ -236,7 +244,7 @@ export function CreateAccessModal({ open, onOpenChange, accessType }: Props) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {documentsData?.data?.map(doc => (
+                          {safeDocuments.map(doc => (
                             <SelectItem key={doc.id} value={doc.id}>
                               {doc.spreadsheet_name}
                             </SelectItem>
@@ -267,7 +275,7 @@ export function CreateAccessModal({ open, onOpenChange, accessType }: Props) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {spacesData?.data?.map(space => (
+                          {safeSpaces.map(space => (
                             <SelectItem
                               key={space.space_id}
                               value={space.space_id}
@@ -329,7 +337,7 @@ export function CreateAccessModal({ open, onOpenChange, accessType }: Props) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {spacesData?.data?.map(space => (
+                          {safeSpaces.map(space => (
                             <SelectItem
                               key={space.space_id}
                               value={space.space_id}
@@ -364,8 +372,8 @@ export function CreateAccessModal({ open, onOpenChange, accessType }: Props) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {spacesData?.data
-                            ?.filter(
+                          {safeSpaces
+                            .filter(
                               space =>
                                 space.space_id !== historyForm.watch('space_id')
                             )
@@ -423,7 +431,7 @@ export function CreateAccessModal({ open, onOpenChange, accessType }: Props) {
                     disabled={isSubmitting}
                     className="cursor-pointer"
                   >
-                    {isSubmitting ? 'Création...' : 'Créer l&apos;accès'}
+                    {isSubmitting ? 'Création...' : "Créer l'accès"}
                   </Button>
                 </DialogFooter>
               </form>

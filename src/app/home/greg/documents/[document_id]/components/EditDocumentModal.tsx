@@ -175,7 +175,7 @@ export function EditDocumentModal({
                     <FormLabel className="text-base">
                       En attente de révision
                     </FormLabel>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       Ce document nécessite une révision humaine
                     </div>
                   </div>

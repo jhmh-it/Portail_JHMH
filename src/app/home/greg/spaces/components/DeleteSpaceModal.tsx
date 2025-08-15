@@ -100,11 +100,11 @@ export function DeleteSpaceModal({
             ?
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex-row-reverse gap-2">
+        <AlertDialogFooter>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-red-600 hover:bg-red-700 focus:ring-red-600 cursor-pointer"
+            className="bg-destructive hover:bg-destructive/90 cursor-pointer"
           >
             {isDeleting ? (
               <>

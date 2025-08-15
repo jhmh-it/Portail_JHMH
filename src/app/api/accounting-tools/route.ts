@@ -4,7 +4,7 @@ import type {
   AccountingToolAPIResponse,
   AccountingToolsApiResponse,
   AccountingToolsApiError,
-} from '@/types/accounting';
+} from '@/app/home/accounting/types';
 
 /**
  * Données mock pour les outils comptables

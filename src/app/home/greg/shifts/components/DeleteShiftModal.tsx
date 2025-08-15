@@ -1,7 +1,7 @@
 'use client';
 
 import { getAuth } from 'firebase/auth';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -15,7 +15,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 
 interface Shift {
   id: string;
@@ -83,51 +82,45 @@ export function DeleteShiftModal({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md">
-        <div className="absolute top-4 right-4">
-          <Badge variant="outline" className="text-xs font-mono">
-            {shift.id}
-          </Badge>
-        </div>
-
+      <AlertDialogContent className="sm:max-w-lg">
         <AlertDialogHeader>
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-            <div className="space-y-2">
-              <AlertDialogTitle>Supprimer ce shift ?</AlertDialogTitle>
-              <AlertDialogDescription className="space-y-3">
-                <p>
-                  Vous êtes sur le point de supprimer le shift{' '}
-                  <span className="font-semibold text-foreground">
-                    &quot;{shift.content}&quot;
-                  </span>{' '}
-                  dans l&apos;espace{' '}
-                  <span className="font-semibold text-foreground">
-                    {spaceName}
-                  </span>
-                  .
-                </p>
-                <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
-                  <p className="text-sm text-destructive font-medium">
-                    Cette action est définitive et ne peut pas être annulée.
-                  </p>
-                </div>
-              </AlertDialogDescription>
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             </div>
           </div>
+          <AlertDialogDescription className="mt-4 space-y-2">
+            Êtes-vous sûr de vouloir supprimer le shift{' '}
+            <span className="font-semibold">&quot;{shift.content}&quot;</span>
+            {spaceName ? (
+              <>
+                {' '}
+                dans l&apos;espace{' '}
+                <span className="font-semibold">{spaceName}</span>
+              </>
+            ) : null}
+            ? Cette action est définitive et ne peut pas être annulée.
+          </AlertDialogDescription>
         </AlertDialogHeader>
-
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">
-            Annuler
-          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
             className="bg-destructive hover:bg-destructive/90 cursor-pointer"
           >
-            {isDeleting ? 'Suppression...' : 'Supprimer'}
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Suppression...
+              </>
+            ) : (
+              'Supprimer'
+            )}
           </AlertDialogAction>
+          <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">
+            Annuler
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

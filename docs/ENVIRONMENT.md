@@ -2,7 +2,8 @@
 
 ## 📋 Vue d'ensemble
 
-Le projet utilise des variables d'environnement pour gérer les configurations sensibles et spécifiques à chaque environnement (dev, staging, prod).
+Le projet utilise des variables d'environnement pour gérer les configurations
+sensibles et spécifiques à chaque environnement (dev, staging, prod).
 
 ## 🔐 Fichiers de configuration
 
@@ -301,4 +302,6 @@ FIREBASE_PRIVATE_KEY=[Format: "-----BEGIN PRIVATE KEY-----\n[Your-Key-Content]\n
 
 ---
 
-**⚠️ IMPORTANT** : Ne jamais partager ou commiter des variables d'environnement contenant des données sensibles. En cas de doute, demandez à l'équipe de sécurité.
+**⚠️ IMPORTANT** : Ne jamais partager ou commiter des variables d'environnement
+contenant des données sensibles. En cas de doute, demandez à l'équipe de
+sécurité.

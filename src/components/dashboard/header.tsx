@@ -70,7 +70,7 @@ export function Header({ breadcrumbs = [] }: HeaderProps) {
       {/* Search Bar */}
       <div className="flex flex-1 items-center gap-2 px-3">
         <div className="relative w-full max-w-lg">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
           <Input
             type="search"
             placeholder="Rechercher..."
@@ -90,7 +90,7 @@ export function Header({ breadcrumbs = [] }: HeaderProps) {
               <Bell className="h-4 w-4" />
               <Badge
                 variant="destructive"
-                className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs"
               >
                 3
               </Badge>
@@ -101,21 +101,21 @@ export function Header({ breadcrumbs = [] }: HeaderProps) {
             <DropdownMenuLabel>Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <div className="p-2">
-              <div className="rounded-lg border p-3 text-sm mb-2">
+              <div className="mb-2 rounded-lg border p-3 text-sm">
                 <div className="font-medium">Nouvel utilisateur</div>
                 <div className="text-muted-foreground">
                   Un nouvel utilisateur s&apos;est inscrit
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
+                <div className="text-muted-foreground mt-1 text-xs">
                   Il y a 5 minutes
                 </div>
               </div>
-              <div className="rounded-lg border p-3 text-sm mb-2">
+              <div className="mb-2 rounded-lg border p-3 text-sm">
                 <div className="font-medium">Rapport mensuel</div>
                 <div className="text-muted-foreground">
                   Le rapport mensuel est disponible
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
+                <div className="text-muted-foreground mt-1 text-xs">
                   Il y a 1 heure
                 </div>
               </div>
@@ -124,7 +124,7 @@ export function Header({ breadcrumbs = [] }: HeaderProps) {
                 <div className="text-muted-foreground">
                   Maintenance prévue demain à 2h00
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
+                <div className="text-muted-foreground mt-1 text-xs">
                   Il y a 2 heures
                 </div>
               </div>

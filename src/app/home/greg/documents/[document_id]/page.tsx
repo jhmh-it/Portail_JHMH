@@ -1,7 +1,7 @@
 'use client';
 
 import { getAuth } from 'firebase/auth';
-import { ArrowLeft, FileText, Edit, Trash2 } from 'lucide-react';
+import { FileText, Edit, Trash2, Copy } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -10,15 +10,15 @@ import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useUser } from '@/hooks/useUser';
 import { cn } from '@/lib/utils';
 import { useLoadingStore } from '@/stores/loading-store';
@@ -29,11 +29,14 @@ import { SpacesAssignment } from './components/SpacesAssignment';
 
 interface DocumentDetails {
   id: string;
-  spreadsheet_name: string;
-  sheet_name: string;
+  title?: string;
+  content?: string;
+  spreadsheet_name?: string;
+  sheet_name?: string;
   summary?: string;
   categories?: string;
-  pending_for_review?: boolean;
+  is_pending_review?: boolean;
+  pending_for_review?: boolean; // Deprecated alias
 }
 
 export default function DocumentDetailsPage() {
@@ -49,6 +52,7 @@ export default function DocumentDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [_copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchDocumentDetails = async () => {
@@ -133,6 +137,18 @@ export default function DocumentDetailsPage() {
     router.push('/home/greg/documents');
   };
 
+  const handleCopyId = async () => {
+    if (!documentDetails?.id) return;
+    try {
+      await navigator.clipboard.writeText(documentDetails.id);
+      setCopied(true);
+      toast.success('ID copié dans le presse-papier');
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error('Erreur lors de la copie');
+    }
+  };
+
   const handleSpacesUpdate = () => {
     // Re-fetch document details after spaces are updated
     const fetchUpdatedDetails = async () => {
@@ -165,41 +181,91 @@ export default function DocumentDetailsPage() {
 
   return (
     <DashboardLayout breadcrumbs={breadcrumbs}>
-      <div className="flex flex-col gap-6 py-6">
-        {/* Header avec bouton retour */}
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/home/greg/documents')}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour aux documents
-          </Button>
-        </div>
-
-        {/* Titre et description */}
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-green-100 rounded-lg">
-            <FileText className="h-8 w-8 text-green-700" />
+      <div className="flex h-[calc(100vh-120px)] flex-col gap-6 py-6">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-green-100 p-2">
+              <FileText className="h-8 w-8 text-green-700" />
+            </div>
+            <div className="flex-1">
+              {isLoading ? (
+                <>
+                  <Skeleton className="mb-2 h-8 w-64" />
+                  <Skeleton className="h-4 w-48" />
+                </>
+              ) : (
+                <>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <h1
+                          className="hover:text-primary/80 cursor-pointer text-2xl font-bold tracking-tight transition-colors"
+                          onClick={handleCopyId}
+                        >
+                          {documentDetails?.spreadsheet_name}
+                        </h1>
+                      </TooltipTrigger>
+                      <TooltipContent className="flex items-center gap-2">
+                        <Copy className="h-3 w-3" />
+                        <span className="font-mono text-xs">
+                          {documentDetails?.id}
+                        </span>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <div className="flex items-center gap-3">
+                    <p className="text-muted-foreground text-sm">
+                      {documentDetails?.sheet_name}
+                    </p>
+                    {documentDetails && (
+                      <Badge
+                        variant={
+                          (documentDetails.is_pending_review ??
+                          documentDetails.pending_for_review)
+                            ? 'secondary'
+                            : 'default'
+                        }
+                        className={cn(
+                          'text-xs',
+                          (documentDetails.is_pending_review ??
+                            documentDetails.pending_for_review)
+                            ? 'bg-orange-100 text-orange-800'
+                            : 'bg-green-100 text-green-800'
+                        )}
+                      >
+                        {(documentDetails.is_pending_review ??
+                        documentDetails.pending_for_review)
+                          ? 'En attente de révision'
+                          : 'Validé'}
+                      </Badge>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-          <div className="flex-1">
-            {isLoading ? (
-              <>
-                <Skeleton className="h-8 w-64 mb-2" />
-                <Skeleton className="h-4 w-48" />
-              </>
-            ) : (
-              <>
-                <h1 className="text-2xl font-bold tracking-tight">
-                  {documentDetails?.spreadsheet_name}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {documentDetails?.sheet_name}
-                </p>
-              </>
-            )}
-          </div>
+          {!isLoading && documentDetails && (
+            <div className="flex shrink-0 items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEditModal(true)}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Modifier
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Supprimer
+              </Button>
+            </div>
+          )}
         </div>
 
         {error ? (
@@ -207,13 +273,39 @@ export default function DocumentDetailsPage() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : (
-          <Tabs defaultValue="info" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
-              <TabsTrigger value="info">Informations</TabsTrigger>
-              <TabsTrigger value="spaces">Espaces</TabsTrigger>
+          <Tabs defaultValue="info" className="flex h-full flex-col space-y-4">
+            <TabsList className="grid w-full max-w-[400px] grid-cols-2 gap-3 p-1">
+              <TabsTrigger
+                value="info"
+                style={{
+                  cursor: 'pointer',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: 'white',
+                  color: '#374151',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                }}
+                className="flex items-center gap-2 hover:bg-gray-50 data-[state=active]:!border-[#0d1b3c] data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white"
+              >
+                Informations
+              </TabsTrigger>
+              <TabsTrigger
+                value="spaces"
+                style={{
+                  cursor: 'pointer',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: 'white',
+                  color: '#374151',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                }}
+                className="flex items-center gap-2 hover:bg-gray-50 data-[state=active]:!border-[#0d1b3c] data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white"
+              >
+                Espaces
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="info" className="space-y-4">
+            <TabsContent value="info" className="mt-6 space-y-4">
               {isLoading ? (
                 <Card>
                   <CardHeader>
@@ -226,117 +318,100 @@ export default function DocumentDetailsPage() {
                 </Card>
               ) : (
                 documentDetails && (
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">
+                  <div className="space-y-4">
+                    {/* Informations principales */}
+                    <Card>
+                      <CardHeader className="pb-4">
+                        <h3 className="text-base font-medium">
                           Informations du document
-                        </CardTitle>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowEditModal(true)}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Modifier
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => setShowDeleteModal(true)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Supprimer
-                          </Button>
-                        </div>
-                      </div>
-                      <CardDescription>Détails du document</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            ID
-                          </p>
-                          <p className="text-sm font-mono mt-1">
-                            {documentDetails.id}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Statut
-                          </p>
-                          <div className="mt-1">
-                            <Badge
-                              variant={
-                                documentDetails.pending_for_review
-                                  ? 'secondary'
-                                  : 'default'
-                              }
-                              className={cn(
-                                documentDetails.pending_for_review
-                                  ? 'bg-orange-100 text-orange-800'
-                                  : 'bg-green-100 text-green-800'
-                              )}
-                            >
-                              {documentDetails.pending_for_review
-                                ? 'En attente de révision'
-                                : 'Validé'}
-                            </Badge>
+                        </h3>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <p className="text-muted-foreground text-sm font-medium">
+                              Feuille de calcul
+                            </p>
+                            <p className="mt-1 text-sm">
+                              {documentDetails.spreadsheet_name}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground text-sm font-medium">
+                              Nom de la feuille
+                            </p>
+                            <p className="mt-1 text-sm">
+                              {documentDetails.sheet_name}
+                            </p>
                           </div>
                         </div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Nom de la feuille de calcul
-                        </p>
-                        <p className="text-sm mt-1">
-                          {documentDetails.spreadsheet_name}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Nom de la feuille
-                        </p>
-                        <p className="text-sm mt-1">
-                          {documentDetails.sheet_name}
-                        </p>
-                      </div>
-                      {documentDetails.summary && (
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Résumé
-                          </p>
-                          <p className="text-sm mt-1">
-                            {documentDetails.summary}
-                          </p>
-                        </div>
-                      )}
-                      {documentDetails.categories && (
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Catégories
-                          </p>
-                          <div className="flex flex-wrap gap-2 mt-1">
+
+                        {documentDetails.title && (
+                          <div>
+                            <p className="text-muted-foreground text-sm font-medium">
+                              Titre
+                            </p>
+                            <p className="mt-1 text-sm">
+                              {documentDetails.title}
+                            </p>
+                          </div>
+                        )}
+
+                        {documentDetails.summary && (
+                          <div>
+                            <p className="text-muted-foreground text-sm font-medium">
+                              Résumé
+                            </p>
+                            <p className="mt-1 text-sm">
+                              {documentDetails.summary}
+                            </p>
+                          </div>
+                        )}
+
+                        {documentDetails.content && (
+                          <div>
+                            <p className="text-muted-foreground mb-2 text-sm font-medium">
+                              Contenu
+                            </p>
+                            <div className="bg-muted/30 rounded-lg p-4">
+                              <p className="text-sm whitespace-pre-wrap">
+                                {documentDetails.content}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Catégories */}
+                    {documentDetails.categories && (
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <h3 className="text-base font-medium">Catégories</h3>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-2">
                             {documentDetails.categories
                               .split(',')
                               .map((category, index) => (
-                                <Badge key={index} variant="outline">
+                                <Badge
+                                  key={index}
+                                  variant="secondary"
+                                  className="rounded-full px-1 py-1"
+                                >
                                   {category.trim()}
                                 </Badge>
                               ))}
                           </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
                 )
               )}
             </TabsContent>
 
-            <TabsContent value="spaces" className="mt-6">
+            <TabsContent value="spaces" className="mt-6 flex-1 overflow-y-auto">
               {documentDetails && (
                 <SpacesAssignment
                   documentId={documentId}
@@ -356,9 +431,16 @@ export default function DocumentDetailsPage() {
               onOpenChange={setShowEditModal}
               document={{
                 id: documentDetails.id,
-                title: documentDetails.spreadsheet_name,
-                content: documentDetails.summary ?? '',
-                is_pending_review: false,
+                title:
+                  documentDetails.title ??
+                  documentDetails.spreadsheet_name ??
+                  '',
+                content:
+                  documentDetails.content ?? documentDetails.summary ?? '',
+                is_pending_review:
+                  documentDetails.is_pending_review ??
+                  documentDetails.pending_for_review ??
+                  false,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               }}
@@ -369,9 +451,16 @@ export default function DocumentDetailsPage() {
               onOpenChange={setShowDeleteModal}
               document={{
                 id: documentDetails.id,
-                title: documentDetails.spreadsheet_name,
-                content: documentDetails.summary ?? '',
-                is_pending_review: false,
+                title:
+                  documentDetails.title ??
+                  documentDetails.spreadsheet_name ??
+                  '',
+                content:
+                  documentDetails.content ?? documentDetails.summary ?? '',
+                is_pending_review:
+                  documentDetails.is_pending_review ??
+                  documentDetails.pending_for_review ??
+                  false,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               }}

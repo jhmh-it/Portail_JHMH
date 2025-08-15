@@ -19,14 +19,16 @@ export function useNavigation() {
     const {
       loadingTitle = 'Chargement...',
       loadingDescription = 'Veuillez patienter pendant le chargement de la page.',
-      delay = 800,
+      delay = 0,
     } = options;
 
     showLoading(loadingTitle, loadingDescription);
 
     try {
-      // Délai pour montrer la modale
-      await new Promise(resolve => setTimeout(resolve, delay));
+      // Délai optionnel (par défaut 0). Si >0, on attend avant la navigation.
+      if (delay && delay > 0) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
 
       // Navigation
       router.push(href);

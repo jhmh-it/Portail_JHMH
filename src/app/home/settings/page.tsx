@@ -69,7 +69,7 @@ export default function SettingsPage() {
     <DashboardLayout breadcrumbs={breadcrumbs}>
       <div className="flex flex-col gap-6 py-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">
+          <h1 className="text-navy text-3xl font-bold tracking-tight">
             Paramètres
           </h1>
           <p className="text-muted-foreground">
@@ -77,28 +77,28 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col gap-6 lg:flex-row">
           {/* Navigation latérale */}
-          <div className="lg:w-64 flex-shrink-0">
+          <div className="flex-shrink-0 lg:w-64">
             <Card>
               <CardContent className="px-4">
-                <nav className="flex flex-col gap-2 w-full">
+                <nav className="flex w-full flex-col gap-2">
                   {settingsNavigation.map(item => (
                     <Button
                       key={item.id}
                       variant={activeSection === item.id ? 'default' : 'ghost'}
-                      className={`justify-start gap-3 h-auto p-3 whitespace-normal ${
+                      className={`h-auto justify-start gap-3 p-3 whitespace-normal ${
                         activeSection === item.id
-                          ? 'bg-navy text-white hover:bg-navy/90'
+                          ? 'bg-navy hover:bg-navy/90 text-white'
                           : 'text-navy hover:text-navy/80 hover:bg-navy/10'
                       }`}
                       onClick={() => setActiveSection(item.id)}
                     >
-                      <item.icon className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                      <div className="flex flex-col items-start text-left w-full overflow-hidden">
-                        <span className="font-medium w-full">{item.label}</span>
+                      <item.icon className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                      <div className="flex w-full flex-col items-start overflow-hidden text-left">
+                        <span className="w-full font-medium">{item.label}</span>
                         <span
-                          className={`text-xs w-full leading-relaxed ${
+                          className={`w-full text-xs leading-relaxed ${
                             activeSection === item.id
                               ? 'text-white/70'
                               : 'text-muted-foreground'
@@ -142,7 +142,7 @@ function GeneralSettings({
         <CardContent className="flex flex-col gap-6">
           {/* Avatar */}
           <div className="flex items-center gap-4">
-            <div className="h-20 w-20 rounded-full bg-navy/10 flex items-center justify-center">
+            <div className="bg-navy/10 flex h-20 w-20 items-center justify-center rounded-full">
               {user?.photoURL ? (
                 <Image
                   src={user.photoURL}
@@ -152,14 +152,14 @@ function GeneralSettings({
                   className="h-20 w-20 rounded-full object-cover"
                 />
               ) : (
-                <User className="h-8 w-8 text-navy" />
+                <User className="text-navy h-8 w-8" />
               )}
             </div>
             <div className="flex flex-col gap-2">
               <Button variant="outline" size="sm">
                 Changer l&apos;avatar
               </Button>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 JPG, PNG ou GIF. Taille maximale de 2MB.
               </p>
             </div>
@@ -174,7 +174,7 @@ function GeneralSettings({
               onChange={e => setDisplayName(e.target.value)}
               placeholder="Votre nom d'affichage"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Ce nom sera affiché publiquement sur votre profil.
             </p>
           </div>
@@ -190,13 +190,13 @@ function GeneralSettings({
               placeholder="votre@email.com"
               disabled
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Votre adresse email ne peut pas être modifiée.
             </p>
           </div>
 
           <div className="flex justify-end">
-            <Button className="bg-navy text-white hover:bg-navy/90">
+            <Button className="bg-navy hover:bg-navy/90 text-white">
               Enregistrer les modifications
             </Button>
           </div>
@@ -225,7 +225,7 @@ function NotificationSettings() {
               <Label htmlFor="email-notifications">
                 Notifications par email
               </Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Recevez des notifications importantes par email
               </p>
             </div>
@@ -240,7 +240,7 @@ function NotificationSettings() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <Label htmlFor="push-notifications">Notifications push</Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Recevez des notifications push dans votre navigateur
               </p>
             </div>
@@ -252,7 +252,7 @@ function NotificationSettings() {
           </div>
 
           <div className="flex justify-end">
-            <Button className="bg-navy text-white hover:bg-navy/90">
+            <Button className="bg-navy hover:bg-navy/90 text-white">
               Enregistrer les préférences
             </Button>
           </div>
@@ -279,7 +279,7 @@ function SecuritySettings() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <Label htmlFor="two-factor">Activer la 2FA</Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Renforcez la sécurité de votre compte avec une authentification
                 à deux facteurs
               </p>
@@ -292,11 +292,11 @@ function SecuritySettings() {
           </div>
 
           {twoFactorEnabled && (
-            <div className="mt-4 p-4 bg-muted rounded-lg">
-              <p className="text-sm font-medium text-navy mb-2">
+            <div className="bg-muted mt-4 rounded-lg p-4">
+              <p className="text-navy mb-2 text-sm font-medium">
                 Configuration de la 2FA
               </p>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-muted-foreground mb-4 text-sm">
                 Scannez le code QR avec votre application
                 d&apos;authentification (Google Authenticator, Authy, etc.)
               </p>
@@ -322,7 +322,7 @@ function SecuritySettings() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <Label>Changer le mot de passe</Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Modifiez votre mot de passe pour renforcer la sécurité de votre
                 compte
               </p>
@@ -336,7 +336,7 @@ function SecuritySettings() {
           </div>
 
           {showPasswordChange && (
-            <div className="mt-4 p-4 bg-muted rounded-lg flex flex-col gap-4">
+            <div className="bg-muted mt-4 flex flex-col gap-4 rounded-lg p-4">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="current-password">Mot de passe actuel</Label>
                 <Input
@@ -370,7 +370,7 @@ function SecuritySettings() {
                 >
                   Annuler
                 </Button>
-                <Button className="bg-navy text-white hover:bg-navy/90">
+                <Button className="bg-navy hover:bg-navy/90 text-white">
                   Mettre à jour le mot de passe
                 </Button>
               </div>
@@ -385,18 +385,18 @@ function SecuritySettings() {
           <CardTitle className="text-navy">Sessions actives</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Gérez les appareils connectés à votre compte
           </p>
 
-          <div className="flex items-center justify-between p-3 border rounded-lg">
+          <div className="flex items-center justify-between rounded-lg border p-3">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 bg-navy/10 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-navy" />
+              <div className="bg-navy/10 flex h-8 w-8 items-center justify-center rounded-full">
+                <User className="text-navy h-4 w-4" />
               </div>
               <div>
                 <p className="text-sm font-medium">Session actuelle</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Navigateur • Dernière activité : maintenant
                 </p>
               </div>

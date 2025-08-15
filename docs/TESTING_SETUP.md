@@ -241,6 +241,7 @@ npm run lint:fix         # Fix automatique
 
 ---
 
-**📝 Statut** : Configuration basique prête, tests unitaires et E2E à implémenter  
+**📝 Statut** : Configuration basique prête, tests unitaires et E2E à
+implémenter  
 **🎯 Priorité** : Moyenne (après les features principales)  
 **⏱️ Estimation** : 2-3 jours pour configuration complète

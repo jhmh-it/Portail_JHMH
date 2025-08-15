@@ -69,7 +69,6 @@ export function ShiftsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
             <TableHead>Contenu</TableHead>
             <TableHead>Espace</TableHead>
             <TableHead>Date</TableHead>
@@ -81,30 +80,26 @@ export function ShiftsTable({
           {shifts.map(shift => (
             <TableRow
               key={shift.id}
-              className="cursor-pointer hover:bg-muted/50"
+              className="hover:bg-muted/50 hover:shadow-primary/15 hover:border-primary/30 relative cursor-pointer transition-all duration-200 hover:z-10 hover:shadow-lg"
               onClick={() => onRowClick(shift)}
             >
-              <TableCell className="font-mono text-xs">{shift.id}</TableCell>
               <TableCell>
                 <div className="font-medium">{shift.content}</div>
               </TableCell>
               <TableCell>
-                <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
                   <p className="font-medium">{getSpaceName(shift.space_id)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {shift.space_id}
-                  </p>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-3 w-3 text-muted-foreground" />
+                  <Calendar className="text-muted-foreground h-3 w-3" />
                   {formatDate(shift.start_time)}
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2 text-sm">
-                  <Clock className="h-3 w-3 text-muted-foreground" />
+                  <Clock className="text-muted-foreground h-3 w-3" />
                   {formatTime(shift.start_time)} - {formatTime(shift.end_time)}
                 </div>
               </TableCell>
@@ -130,7 +125,7 @@ export function ShiftsTable({
                         onRowClick(shift);
                       }}
                     >
-                      <Eye className="h-4 w-4 mr-2" />
+                      <Eye className="mr-2 h-4 w-4" />
                       Voir les détails
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -140,7 +135,7 @@ export function ShiftsTable({
                         onEdit(shift);
                       }}
                     >
-                      <Edit className="h-4 w-4 mr-2" />
+                      <Edit className="mr-2 h-4 w-4" />
                       Modifier
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -151,7 +146,7 @@ export function ShiftsTable({
                         onDelete(shift);
                       }}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="mr-2 h-4 w-4" />
                       Supprimer
                     </DropdownMenuItem>
                   </DropdownMenuContent>

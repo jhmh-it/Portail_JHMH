@@ -2,7 +2,10 @@
 
 ## 📊 Vue d'ensemble
 
-L'API Greg est un système de gestion d'espaces, de documents, d'utilisateurs et de workflows orienté vers la planification et la coordination d'équipes. Elle gère des **espaces de travail**, des **documents** associés, des **utilisateurs**, des **rappels** et des **équipes** (shifts).
+L'API Greg est un système de gestion d'espaces, de documents, d'utilisateurs et
+de workflows orienté vers la planification et la coordination d'équipes. Elle
+gère des **espaces de travail**, des **documents** associés, des
+**utilisateurs**, des **rappels** et des **équipes** (shifts).
 
 ## 🎯 Entités Principales
 
@@ -10,7 +13,8 @@ L'API Greg est un système de gestion d'espaces, de documents, d'utilisateurs et
 
 **Endpoint base :** `/api/greg/spaces`
 
-Les espaces représentent des lieux physiques ou logiques (bureaux, salles, zones).
+Les espaces représentent des lieux physiques ou logiques (bureaux, salles,
+zones).
 
 ```typescript
 interface Space {
@@ -79,7 +83,8 @@ interface User {
 
 **Opérations :**
 
-- `GET /api/greg/users` - Lister tous les utilisateurs (filtrage par `source_prefere`, `verbose`)
+- `GET /api/greg/users` - Lister tous les utilisateurs (filtrage par
+  `source_prefere`, `verbose`)
 - `POST /api/greg/users` - Créer un nouvel utilisateur
 - `GET /api/greg/users/{user_id}` - Détails d'un utilisateur
 - `PUT /api/greg/users/{user_id}` - Modifier un utilisateur
@@ -107,7 +112,8 @@ interface Reminder {
 
 **Opérations :**
 
-- `GET /api/greg/reminders` - Lister tous les rappels (filtrage par `status`, `user_id`)
+- `GET /api/greg/reminders` - Lister tous les rappels (filtrage par `status`,
+  `user_id`)
 - `POST /api/greg/reminders` - Créer un nouveau rappel
 - `GET /api/greg/reminders/{reminder_id}` - Détails d'un rappel
 - `PUT /api/greg/reminders/{reminder_id}` - Modifier un rappel
@@ -183,8 +189,10 @@ interface SpaceDocumentAccess {
 - `GET /api/greg/space-document-access` - Lister tous les accès
 - `POST /api/greg/space-document-access` - Créer un accès document-espace
 - `DELETE /api/greg/space-document-access` - Supprimer un accès
-- `GET /api/greg/space-document-access/document/{document_id}` - Espaces ayant accès à un document
-- `GET /api/greg/space-document-access/space/{space_id}` - Documents accessibles depuis un espace
+- `GET /api/greg/space-document-access/document/{document_id}` - Espaces ayant
+  accès à un document
+- `GET /api/greg/space-document-access/space/{space_id}` - Documents accessibles
+  depuis un espace
 
 ### 🔄 **Space-History Access**
 
@@ -206,7 +214,8 @@ interface SpaceHistoryAccess {
 - `GET /api/greg/space-history-access` - Lister tous les accès historiques
 - `POST /api/greg/space-history-access` - Créer un accès historique
 - `DELETE /api/greg/space-history-access` - Supprimer un accès historique
-- `GET /api/greg/space-history-access/{space_id}` - Accès historiques d'un espace
+- `GET /api/greg/space-history-access/{space_id}` - Accès historiques d'un
+  espace
 
 ### 🔧 **Actions d'Assignation**
 
@@ -522,9 +531,12 @@ const headers = {
 
 1. **Dates** : Toutes les dates sont au format ISO 8601 (UTC)
 2. **IDs** : Les identifiants sont des chaînes de caractères
-3. **Relations** : Les liens entre entités utilisent des tables de liaison explicites
-4. **Filtrage** : La plupart des endpoints GET supportent des paramètres de filtrage
-5. **Pagination** : Non implémentée dans la version actuelle mais recommandée pour les listes importantes
+3. **Relations** : Les liens entre entités utilisent des tables de liaison
+   explicites
+4. **Filtrage** : La plupart des endpoints GET supportent des paramètres de
+   filtrage
+5. **Pagination** : Non implémentée dans la version actuelle mais recommandée
+   pour les listes importantes
 
 ---
 
@@ -744,9 +756,11 @@ function SmartScheduler({ spaceId }: { spaceId: string }) {
 2. **Implémentez un système de toasts** pour les feedbacks utilisateur
 3. **Gérez les erreurs de façon centralisée** avec un ErrorBoundary
 4. **Optimisez les requêtes** en utilisant les filtres disponibles
-5. **Implémentez la recherche locale** pour améliorer l'UX sur les grandes listes
+5. **Implémentez la recherche locale** pour améliorer l'UX sur les grandes
+   listes
 6. **Utilisez des mutations optimistes** pour une meilleure UX
 7. **Cachée intelligemment** les relations entre entités
 8. **Implémentez la synchronisation temps réel** si nécessaire
 
-Cette API est conçue pour être flexible et permettre de construire des interfaces riches pour la gestion d'espaces collaboratifs ! 🚀
+Cette API est conçue pour être flexible et permettre de construire des
+interfaces riches pour la gestion d'espaces collaboratifs ! 🚀

@@ -18,9 +18,6 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  // Optimisations de performance
-  swcMinify: true,
-
   // Configuration des headers de sécurité
   async headers() {
     return [
@@ -79,8 +76,6 @@ const nextConfig: NextConfig = {
   // Configuration pour la production
   poweredByHeader: false,
   compress: true,
-
-
 
   // Variables d'environnement requises au build time
   env: {

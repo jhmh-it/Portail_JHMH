@@ -88,7 +88,7 @@ export function DeleteReminderModal({
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
+            <AlertTriangle className="text-destructive h-5 w-5" />
             <AlertDialogTitle>Supprimer ce rappel ?</AlertDialogTitle>
           </div>
           <AlertDialogDescription>
@@ -99,9 +99,6 @@ export function DeleteReminderModal({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">
-            Annuler
-          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
@@ -109,6 +106,9 @@ export function DeleteReminderModal({
           >
             {isDeleting ? 'Suppression...' : 'Supprimer'}
           </AlertDialogAction>
+          <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">
+            Annuler
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

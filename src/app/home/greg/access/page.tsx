@@ -87,9 +87,9 @@ export default function GregAccessPage() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Shield className="h-8 w-8 text-primary" />
+              <Shield className="text-primary h-8 w-8" />
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-navy">
+                <h1 className="text-navy text-3xl font-bold tracking-tight">
                   Gestion des accès
                 </h1>
                 <p className="text-muted-foreground">
@@ -100,9 +100,9 @@ export default function GregAccessPage() {
           </div>
 
           {/* Search and Filters Bar */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
               <Input
                 placeholder="Rechercher par espace, document ou utilisateur..."
                 value={searchQuery}
@@ -114,7 +114,7 @@ export default function GregAccessPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="gap-2 cursor-pointer"
+                className="cursor-pointer gap-2"
               >
                 <Filter className="h-4 w-4" />
                 Filtres
@@ -132,7 +132,7 @@ export default function GregAccessPage() {
                 variant="outline"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="gap-2 cursor-pointer"
+                className="cursor-pointer gap-2"
               >
                 <RefreshCw
                   className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
@@ -145,7 +145,7 @@ export default function GregAccessPage() {
                   onClick={handleClearFilters}
                   className="cursor-pointer"
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="mr-2 h-4 w-4" />
                   Réinitialiser
                 </Button>
               )}
@@ -170,10 +170,10 @@ export default function GregAccessPage() {
           onValueChange={setActiveTab}
           className="space-y-4"
         >
-          <TabsList className="grid w-full grid-cols-2 gap-3 mb-6 bg-gray-100 p-1 max-w-[600px]">
+          <TabsList className="mb-6 grid w-full max-w-[600px] grid-cols-2 gap-3 bg-gray-100 p-1">
             <TabsTrigger
               value="document-access"
-              className="gap-2 hover:bg-gray-50 data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white data-[state=active]:!border-[#0d1b3c]"
+              className="gap-2 hover:bg-gray-50 data-[state=active]:!border-[#0d1b3c] data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white"
               style={{
                 cursor: 'pointer',
                 border: '1px solid #d1d5db',
@@ -188,7 +188,7 @@ export default function GregAccessPage() {
             </TabsTrigger>
             <TabsTrigger
               value="history-access"
-              className="gap-2 hover:bg-gray-50 data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white data-[state=active]:!border-[#0d1b3c]"
+              className="gap-2 hover:bg-gray-50 data-[state=active]:!border-[#0d1b3c] data-[state=active]:!bg-[#0d1b3c] data-[state=active]:!text-white"
               style={{
                 cursor: 'pointer',
                 border: '1px solid #d1d5db',

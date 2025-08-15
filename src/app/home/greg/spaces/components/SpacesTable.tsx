@@ -1,8 +1,16 @@
 'use client';
 
-import { AlertCircle, Edit, Trash2 } from 'lucide-react';
+import { AlertCircle, Edit, Trash2, MoreVertical, Eye } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Pagination,
   PaginationContent,
@@ -23,11 +31,8 @@ import {
 } from '@/components/ui/table';
 import { useNavigation } from '@/hooks/useNavigation';
 import { cn } from '@/lib/utils';
-import type {
-  GregSpace,
-  GregSpacesFilters,
-  GregSpacesResponse,
-} from '@/types/greg';
+
+import type { GregSpace, GregSpacesFilters } from '../../types';
 
 // Fonction pour formater le type d'espace
 const formatSpaceType = (type: string): string => {
@@ -42,7 +47,15 @@ const formatSpaceType = (type: string): string => {
 };
 
 interface SpacesTableProps {
-  data: GregSpacesResponse | undefined;
+  data:
+    | {
+        data: GregSpace[];
+        total: number;
+        page: number;
+        page_size: number;
+        total_pages: number;
+      }
+    | undefined;
   isLoading: boolean;
   isFetching: boolean;
   error: Error | null;
@@ -68,7 +81,7 @@ export function SpacesTable({
 
   const handleSpaceClick = async (space: GregSpace) => {
     // Extraire l'ID sans le préfixe "spaces/"
-    const id = space.space_id.replace('spaces/', '');
+    const id = (space.space_id ?? '').replace('spaces/', '');
     await navigateWithLoading(`/home/greg/spaces/${id}`, {
       loadingTitle: "Chargement de l'espace",
       loadingDescription: `Récupération des détails pour ${space.space_name}...`,
@@ -123,8 +136,8 @@ export function SpacesTable({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Erreur de chargement</h3>
+        <AlertCircle className="text-destructive mb-4 h-12 w-12" />
+        <h3 className="mb-2 text-lg font-semibold">Erreur de chargement</h3>
         <p className="text-muted-foreground text-center">{error.message}</p>
       </div>
     );
@@ -134,7 +147,7 @@ export function SpacesTable({
     return (
       <div className="space-y-4">
         {/* Loading skeleton pour la table */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className="overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -174,11 +187,11 @@ export function SpacesTable({
     );
   }
 
-  if (!data || data.data.length === 0) {
+  if (!data?.data || data.data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Aucun espace trouvé</h3>
+        <AlertCircle className="text-muted-foreground mb-4 h-12 w-12" />
+        <h3 className="mb-2 text-lg font-semibold">Aucun espace trouvé</h3>
         <p className="text-muted-foreground text-center">
           Aucun espace ne correspond aux critères de recherche.
         </p>
@@ -191,7 +204,7 @@ export function SpacesTable({
       {/* Table */}
       <div
         className={cn(
-          'border rounded-lg overflow-hidden transition-opacity',
+          'overflow-hidden rounded-lg border transition-opacity',
           isFetching && 'opacity-50'
         )}
       >
@@ -202,7 +215,7 @@ export function SpacesTable({
               <TableHead className="w-[30%]">Nom</TableHead>
               <TableHead className="w-[100px]">Type</TableHead>
               <TableHead className="w-[15%]">Notes</TableHead>
-              <TableHead className="text-right -translate-x-4 w-[120px]">
+              <TableHead className="w-[120px] -translate-x-4 text-right">
                 Actions
               </TableHead>
             </TableRow>
@@ -212,51 +225,74 @@ export function SpacesTable({
               return (
                 <TableRow
                   key={space.space_id}
-                  className="cursor-pointer relative transition-all duration-200 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/15 hover:border-primary/30 hover:z-10"
+                  className="hover:bg-muted/50 hover:shadow-primary/15 hover:border-primary/30 relative cursor-pointer transition-all duration-200 hover:z-10 hover:shadow-lg"
                   onClick={() => handleSpaceClick(space)}
                 >
-                  <TableCell className="font-mono text-xs pr-2">
+                  <TableCell className="pr-2 font-mono text-xs">
                     {space.space_id}
                   </TableCell>
                   <TableCell className="font-medium">
                     {space.space_name}
                   </TableCell>
                   <TableCell className="text-sm">
-                    {formatSpaceType(space.type)}
+                    {formatSpaceType(space.type ?? 'UNKNOWN')}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-sm">
                     <span
-                      title={space.notes ?? 'Aucune note'}
-                      className="block truncate"
+                      title={space.description ?? 'Aucune description'}
+                      className="block break-words"
                     >
-                      {space.notes ?? '-'}
+                      {space.description ?? '-'}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={e => {
-                          e.stopPropagation();
-                          onEdit?.(space);
-                        }}
-                        className="h-8 w-8 p-0 hover:bg-blue-100"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={e => {
-                          e.stopPropagation();
-                          onDelete?.(space);
-                        }}
-                        className="h-8 w-8 p-0 hover:bg-red-100"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={e => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleSpaceClick(space);
+                          }}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Voir les détails
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={e => {
+                            e.stopPropagation();
+                            onEdit?.(space);
+                          }}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Modifier
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive cursor-pointer"
+                          onClick={e => {
+                            e.stopPropagation();
+                            onDelete?.(space);
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Supprimer
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               );
@@ -267,7 +303,7 @@ export function SpacesTable({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex flex-col gap-4 items-center">
+        <div className="flex flex-col items-center gap-4">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
@@ -314,7 +350,7 @@ export function SpacesTable({
             </PaginationContent>
           </Pagination>
 
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-sm">
             Page {currentPage} sur {totalPages} ({data?.total ?? 0} espace
             {(data?.total ?? 0) > 1 ? 's' : ''})
           </div>

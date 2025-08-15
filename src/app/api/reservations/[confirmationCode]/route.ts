@@ -1,9 +1,9 @@
 import { cookies } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
 
+import { fetchReservationDetails } from '@/app/home/exploitation/reservations/services/reservation-details.service';
+import type { ReservationDetailsQueryParams } from '@/app/home/exploitation/reservations/types/reservation-details';
 import { adminAuth } from '@/lib/firebase-admin';
-import { fetchReservationDetails } from '@/services/reservation-details.service';
-import type { ReservationDetailsQueryParams } from '@/types/reservation-details';
 
 export async function GET(
   request: NextRequest,

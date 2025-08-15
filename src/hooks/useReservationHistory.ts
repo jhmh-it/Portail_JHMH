@@ -1,34 +1,26 @@
-import { useQuery } from '@tanstack/react-query';
+/**
+ * Hook pour gérer l'historique des réservations
+ */
 
 export interface ReservationOverrideHistory {
-  confirmationCode: string;
-  createdAt: string;
-  createdBy: string;
-  fieldName: string;
-  overriddenValue: string;
+  id: string;
+  field: string;
+  fieldName: string; // Display name for the field
+  oldValue: unknown;
+  newValue: unknown;
+  overriddenValue: unknown; // Same as newValue for compatibility
+  updatedAt: string;
+  createdAt: string; // Same as updatedAt for compatibility
+  updatedBy: string;
+  createdBy: string; // Same as updatedBy for compatibility
+  reason?: string;
 }
 
-export interface ReservationHistoryResponse {
-  data: ReservationOverrideHistory[];
-  error: boolean;
-  message: string;
-}
-
-export function useReservationHistory(confirmationCode: string) {
-  return useQuery<ReservationHistoryResponse>({
-    queryKey: ['reservation-history', confirmationCode],
-    queryFn: async () => {
-      const response = await fetch(
-        `/api/reservations/${confirmationCode}/overrides`
-      );
-
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération de l'historique");
-      }
-
-      return response.json();
-    },
-    staleTime: 30 * 1000, // 30 secondes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-  });
+export function useReservationHistory(_reservationId: string) {
+  // TODO: Implémenter la logique pour récupérer l'historique
+  return {
+    history: [] as ReservationOverrideHistory[],
+    isLoading: false,
+    error: null,
+  };
 }

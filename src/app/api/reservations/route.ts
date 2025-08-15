@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { fetchJhmhReservations } from '@/lib/external-api';
+import { fetchJhmhReservations } from '@/app/home/exploitation/reservations/services/reservations.service';
 
 /**
  * GET /api/reservations
@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') ?? undefined;
     const ota = searchParams.get('ota') ?? undefined;
     const q = searchParams.get('q') ?? undefined;
+    const confirmationCode = searchParams.get('confirmation_code') ?? undefined;
 
     // Filtres numériques
     const amountMinParam = searchParams.get('amountMin');
@@ -63,6 +64,7 @@ export async function GET(request: NextRequest) {
           status,
           ota,
           q,
+          confirmationCode,
           amountMin,
           amountMax,
           nightsMin,
@@ -85,6 +87,7 @@ export async function GET(request: NextRequest) {
       status,
       ota,
       q,
+      confirmationCode,
       amountMin,
       amountMax,
       nightsMin,
@@ -120,10 +123,118 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Normalize external API payload to match frontend expectations
+    interface Financials {
+      subtotal_price?: number;
+      total?: number;
+      currency?: string;
+    }
+    interface GuestsCount {
+      total?: number;
+    }
+    interface ListingInfo {
+      nickname?: string;
+      full_address?: string;
+    }
+    interface RawReservation {
+      confirmationCode?: string;
+      confirmation_code?: string;
+      REF?: string;
+      id?: string;
+      guest_name?: string;
+      GUEST_NAME?: string;
+      listing_name?: string;
+      listing_info?: ListingInfo;
+      checkin_date?: string;
+      check_in?: string;
+      checkout_date?: string;
+      check_out?: string;
+      status?: string;
+      ota?: string;
+      source?: string;
+      total_ttc?: number | string;
+      TOTAL_TTC?: number;
+      currency?: string;
+      financials?: Financials;
+      nights?: number;
+      NUMBER_OF_NIGHTS?: number | string;
+      number_of_guests?: number | string;
+      NUMBER_OF_GUESTS?: number | string;
+      guests_count?: GuestsCount;
+      reportGenerationTimestamp?: string;
+      report_generation_timestamp?: string;
+    }
+    const normalizedReservations = (
+      response.data as unknown as RawReservation[]
+    ).map(raw => {
+      const financials: Financials = raw?.financials ?? {};
+      const guestsCount: GuestsCount = raw?.guests_count ?? {};
+      const listingInfo: ListingInfo = raw?.listing_info ?? {};
+
+      const confirmationCode =
+        raw?.confirmationCode ??
+        raw?.confirmation_code ??
+        raw?.REF ??
+        raw?.id ??
+        '';
+
+      let totalTtc: number | null = null;
+      if (typeof raw?.total_ttc === 'number') totalTtc = raw.total_ttc;
+      else if (typeof raw?.TOTAL_TTC === 'number') totalTtc = raw.TOTAL_TTC;
+      else if (typeof financials?.subtotal_price === 'number')
+        totalTtc = financials.subtotal_price;
+      else if (typeof financials?.total === 'number')
+        totalTtc = financials.total;
+      else if (raw?.total_ttc != null) totalTtc = Number(raw.total_ttc);
+
+      const currency = raw?.currency ?? financials?.currency ?? 'EUR';
+
+      // Estimation du nombre de nuits si non fourni
+      let nights: number | undefined =
+        typeof raw?.nights === 'number' ? raw.nights : undefined;
+      const ciStr = raw?.check_in ?? raw?.checkin_date ?? undefined;
+      const coStr = raw?.check_out ?? raw?.checkout_date ?? undefined;
+      if (!nights && ciStr && coStr) {
+        const ci = new Date(ciStr);
+        const co = new Date(coStr);
+        const diff = Math.round(
+          (co.getTime() - ci.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        nights = Number.isFinite(diff) ? diff : undefined;
+      }
+
+      return {
+        confirmationCode,
+        guest_name: raw?.guest_name ?? raw?.GUEST_NAME ?? null,
+        listing_name: raw?.listing_name ?? listingInfo?.nickname ?? null,
+        checkin_date: raw?.checkin_date ?? raw?.check_in ?? null,
+        checkout_date: raw?.checkout_date ?? raw?.check_out ?? null,
+        status: raw?.status ?? 'unknown',
+        ota: raw?.ota ?? raw?.source ?? 'manual',
+        total_ttc: totalTtc,
+        currency,
+        nights:
+          nights ??
+          (raw?.NUMBER_OF_NIGHTS ? Number(raw.NUMBER_OF_NIGHTS) : undefined),
+        number_of_guests:
+          raw?.number_of_guests ??
+          (guestsCount?.total !== undefined
+            ? Number(guestsCount.total)
+            : undefined) ??
+          (raw?.NUMBER_OF_GUESTS !== undefined
+            ? Number(raw.NUMBER_OF_GUESTS)
+            : null),
+        reportGenerationTimestamp:
+          raw?.reportGenerationTimestamp ??
+          raw?.report_generation_timestamp ??
+          null,
+      };
+    });
+
     return NextResponse.json({
       success: true,
       data: {
-        reservations: response.data,
+        reservations: normalizedReservations,
         total: response.total,
         page,
         page_size,
