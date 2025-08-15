@@ -108,3 +108,4 @@ majeur :
 2. Vérifiez la cohérence avec le code actuel
 3. Ajoutez des exemples si nécessaire
 4. Testez les changements localement avant de pousser
+
